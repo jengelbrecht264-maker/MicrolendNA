@@ -8749,7 +8749,7 @@ const EmptyState = ({ icon, title, message, action, actionLabel }) => (
 const Skeleton = ({ height = 40, width = "100%", radius = 8, style = {} }) => (
   <div className="shimmer" style={{ height, width, borderRadius: radius, ...style }} />
 );
-
+};
 export default function App() {
   const [user, setUser] = useState(null);
   const [screen, setScreen] = useState("home");
