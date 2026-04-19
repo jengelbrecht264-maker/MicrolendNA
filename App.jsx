@@ -1318,9 +1318,15 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
     : hasActiveLoan
       ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 12, color: DS.colors.warning }}>🔒 Locked — active loan</span>
-          <Btn variant="ghost" small disabled>Contact admin to edit</Btn>
+          <Btn 
+            variant="outline"
+            small
+            onClick={() => window.location.href = "mailto:admin@microlend.na?subject=Profile Edit Request&body=Hi Admin, I have an active loan and need help updating my profile."}
+          >
+            Contact admin to edit
+          </Btn
         </div>
-      : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
+        : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
 
   return (
     <div className="fade-in">
