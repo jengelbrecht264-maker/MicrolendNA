@@ -2823,7 +2823,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 const BorrowerStatus = ({ borrower, setView }) => {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("history");
+  const [tab, setTab] = useState("track");
 
   // Load applications from Supabase on mount
   useEffect(function() {
