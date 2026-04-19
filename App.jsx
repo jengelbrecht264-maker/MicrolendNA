@@ -8042,28 +8042,47 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
     if (!/[0-9]/.test(password)) { setError("Password must contain at least one number"); return; }
 
     setLoading(true);
-    SB.signUp(email, password, { name: name, role: role }).then(function(data) {
-      setLoading(false);
-      if (data.user && data.access_token) {
-        // Auto-logged in after signup
-        var user = { id: data.user.id, email: email, name: name, role: role, twoFAEnabled: false };
-        if (role === "borrower") {
-          onLogin(user);
-        } else {
-          setTab("login"); setEmail(""); setPassword(""); setName("");
-          setError("");
-        }
-      } else if (data.user && !data.access_token) {
-        // Email confirmation required
-        setTab("login"); setEmail(""); setPassword(""); setName("");
-        setError("Account created! Check your email to confirm, then log in.");
-      }
-    }).catch(function(err) {
-      setLoading(false);
-      setError(err.message || "Registration failed");
-    });
-  };
+    SB.signUp(email, password, {
+  name: name,
+  role: role,
+  approval_status: role === "borrower" ? "pending_admin_approval" : "approved"
+}).then(async function(data) {
+  setLoading(false);
 
+  if (data.user) {
+    try {
+      await SB.upsert("profiles", [{
+        id: data.user.id,
+        email: email,
+        name: name,
+        role: role,
+        two_fa_enabled: false,
+        approval_status: role === "borrower" ? "pending_admin_approval" : "approved"
+      }]);
+    } catch (e) {
+      console.log("Profile upsert error:", e.message);
+    }
+
+    if (role === "borrower") {
+      setTab("login");
+      setEmail("");
+      setPassword("");
+      setName("");
+      setError("Account created. Your profile is pending admin approval before you can log in.");
+      return;
+    }
+
+    setTab("login");
+    setEmail("");
+    setPassword("");
+    setName("");
+    setError("");
+  }
+}).catch(function(err) {
+  setLoading(false);
+  setError(err.message || "Registration failed");
+});
+      
   const handleKeyDown = (e, action) => { if (e.key === "Enter") action(); };
 
   return (
