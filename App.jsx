@@ -2823,6 +2823,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 const BorrowerStatus = ({ borrower, setView }) => {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("history");
 
   // Load applications from Supabase on mount
   useEffect(function() {
@@ -2856,7 +2857,13 @@ const BorrowerStatus = ({ borrower, setView }) => {
   };
 
   const stepIdx = { pending: 1, approved: 2, declined: 2 };
+  const historyApps = apps.filter(app =>
+  app.status === "approved" || app.status === "declined" || app.status === "rejected"
+  );
 
+const trackingApps = apps.filter(app =>
+  app.status === "pending"
+  );
   return (
     <div className="fade-in">
       <PageHeader
@@ -2864,7 +2871,10 @@ const BorrowerStatus = ({ borrower, setView }) => {
         subtitle="Track the status of all your loan applications in real time"
         actions={<Btn onClick={() => setView("borrower-apply")} icon="📝">New Application</Btn>}
       />
-
+<div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
+  <button onClick={() => setTab("history")}>Loan History</button>
+  <button onClick={() => setTab("track")}>Track Application</button>
+</div>
       {loading ? (
         <Card style={{ textAlign: "center", padding: 48 }}>
           <div className="spin" style={{ width: 40, height: 40, border: `3px solid ${DS.colors.border}`, borderTop: `3px solid ${DS.colors.accent}`, borderRadius: "50%", margin: "0 auto 16px" }} />
@@ -2880,7 +2890,7 @@ const BorrowerStatus = ({ borrower, setView }) => {
         />
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
-          {apps.map(app => {
+          {(tab === "history" ? historyApps : trackingApps).map(app => {
             const lender = DB.lenders.find(l => l.id === app.lenderId);
             const steps = statusSteps[app.status] || statusSteps.pending;
             const activeStep = stepIdx[app.status] ?? 1;
