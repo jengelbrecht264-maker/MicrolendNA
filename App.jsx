@@ -1314,19 +1314,22 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
   }, [user?.id]);
 
   const editActions = editMode
-    ? <div style={{ display:"flex", gap:8 }}><Btn variant="ghost" onClick={handleCancel}>Cancel</Btn><Btn onClick={handleSave} icon="💾">Save Changes</Btn></div>
-    : hasActiveLoan
-      ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 12, color: DS.colors.warning }}>🔒 Locked — active loan</span>
-          <Btn 
-            variant="outline"
-            small
-            onClick={() => window.location.href = "mailto:admin@microlend.na?subject=Profile Edit Request&body=Hi Admin, I have an active loan and need help updating my profile."}
-          >
-            Contact admin to edit
-          </Btn
-        </div>
-        : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
+  ? <div style={{ display:"flex", gap:8 }}>
+      <Btn variant="ghost" onClick={handleCancel}>Cancel</Btn>
+      <Btn onClick={handleSave} icon="💾">Save Changes</Btn>
+    </div>
+  : hasActiveLoan
+    ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 12, color: DS.colors.warning }}>🔒 Locked — active loan</span>
+        <Btn
+          variant="outline"
+          small
+          onClick={() => alert("Please contact admin to update your profile while your loan is active.")}
+        >
+          Contact admin to edit
+        </Btn>
+      </div>
+    : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
 
   return (
     <div className="fade-in">
