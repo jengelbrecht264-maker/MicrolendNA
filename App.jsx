@@ -2618,6 +2618,25 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         console.log("Submit error:", e);
         // Fallback: save locally
         DB.applications.push(appRecord);
+        LENDER_DB.applications.push({
+          id: appRecord.id,
+          borrowerId: borrower.id,
+          borrowerName: borrower.name,
+          tier: tier,
+          riskScore: riskScore,
+          amount: amt,
+          term: +form.term,
+          purpose: form.purpose,
+          status: "new_lead",
+          dti: borrower.dti ? (borrower.dti * 100).toFixed(1) + "%" : "—",
+          employer: borrower.employer,
+          salary: borrower.salary,
+          receivedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
+          lenderId: appRecord.lenderId || null,
+          borrowerUserId: user.id,
+          channel: "platform",
+        });
+        
         monthly = Math.round((amt * (1 + rate / 100 * (+form.term / 12))) / +form.term);
         setResult({
           tier: tier, maxLoan: maxLoan, amount: amt, term: +form.term,
