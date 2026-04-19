@@ -8003,33 +8003,29 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
   const [loading, setLoading] = useState(false);
   const [regConsent, setRegConsent] = useState({ kyc: false, aml: false, popia: false });
 
-  const handleLogin = () => {
-    setError("");
-    setLoading(true);
-    SB.signIn(email, password).then(function(data) {
-      setLoading(false);
-      // Fetch the user's profile from our profiles table
-      return SB.query("profiles", "id=eq." + data.user.id + "&select=*").then(function(profiles) {
-        var profile = profiles && profiles[0];
-        if (!profile) { setError("Account found but profile missing. Contact admin."); return; }
-        var user = { 
-          id: profile.id, 
-          email: profile.email, 
-          name: profile.name, 
-          role: profile.role, 
-          twoFAEnabled: profile.two_fa_enabled 
-        };
-        if (user.role === "borrower" && profile.approval_status !== "approved") {
-          setError("Your borrower account is pending admin approval.");
-          return;
-        }
-        onLogin(user);
-      });
-    }).catch(function(err) {
-      setLoading(false);
-      setError(err.message || "Invalid email or password");
+const handleLogin = () => {
+  setError("");
+  setLoading(true);
+  SB.signIn(email, password).then(function(data) {
+    setLoading(false);
+    return SB.query("profiles", "id=eq." + data.user.id + "&select=*").then(function(profiles) {
+      var profile = profiles && profiles[0];
+      if (!profile) { setError("Account found but profile missing. Contact admin."); return; }
+      var user = {
+        id: profile.id,
+        email: profile.email,
+        name: profile.name,
+        role: profile.role,
+        twoFAEnabled: profile.two_fa_enabled
+      };
+      if (user.twoFAEnabled) { _sbUser = data.user; setStep(2); return; }
+      onLogin(user);
     });
-  };
+  }).catch(function(err) {
+    setLoading(false);
+    setError(err.message || "Invalid email or password");
+  });
+};
 
   const handle2FA = () => {
     if (otp !== "123456") { setError("Invalid OTP. (Demo: use 123456)"); return; }
@@ -8042,55 +8038,40 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
     });
   };
 
-  const handleRegister = () => {
-    setError("");
-    if (!name.trim()) { setError("Please enter your full name"); return; }
-    if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address"); return; }
-    if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
-    if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter"); return; }
-    if (!/[0-9]/.test(password)) { setError("Password must contain at least one number"); return; }
+const handleRegister = () => {
+  setError("");
+  if (!name.trim()) { setError("Please enter your full name"); return; }
+  if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address"); return; }
+  if (password.length < 8) { setError("Password must be at least 8 characters"); return; }
+  if (!/[A-Z]/.test(password)) { setError("Password must contain at least one uppercase letter"); return; }
+  if (!/[0-9]/.test(password)) { setError("Password must contain at least one number"); return; }
 
-    setLoading(true);
-    SB.signUp(email, password, {
-  name: name,
-  role: role,
-  approval_status: role === "borrower" ? "pending_admin_approval" : "approved"
-}).then(async function(data) {
-  setLoading(false);
-
-  if (data.user) {
-    try {
-      await SB.upsert("profiles", [{
-        id: data.user.id,
-        email: email,
-        name: name,
-        role: role,
-        two_fa_enabled: false,
-        approval_status: role === "borrower" ? "pending_admin_approval" : "approved"
-      }]);
-    } catch (e) {
-      console.log("Profile upsert error:", e.message);
-    }
-
-    if (role === "borrower") {
+  setLoading(true);
+  SB.signUp(email, password, { name: name, role: role }).then(function(data) {
+    setLoading(false);
+    if (data.user && data.access_token) {
+      var user = { id: data.user.id, email: email, name: name, role: role, twoFAEnabled: false };
+      if (role === "borrower") {
+        onLogin(user);
+      } else {
+        setTab("login");
+        setEmail("");
+        setPassword("");
+        setName("");
+        setError("");
+      }
+    } else if (data.user && !data.access_token) {
       setTab("login");
       setEmail("");
       setPassword("");
       setName("");
-      setError("Account created. Your profile is pending admin approval before you can log in.");
-      return;
+      setError("Account created! Check your email to confirm, then log in.");
     }
-
-    setTab("login");
-    setEmail("");
-    setPassword("");
-    setName("");
-    setError("");
-  }
-}).catch(function(err) {
-  setLoading(false);
-  setError(err.message || "Registration failed");
-});
+  }).catch(function(err) {
+    setLoading(false);
+    setError(err.message || "Registration failed");
+  });
+};
       
   const handleKeyDown = (e, action) => { if (e.key === "Enter") action(); };
 
