@@ -1324,11 +1324,14 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
   }, [user?.id]);
 
   const editActions = editMode
-    ? <div style={{ display:"flex", gap:8 }}><Btn variant="ghost" onClick={handleCancel}>Cancel</Btn><Btn onClick={handleSave} icon="💾">Save Changes</Btn></div>
+    ? <div style={{ display:"flex", gap:8 }}>
+        <Btn variant="ghost" onClick={handleCancel}>Cancel</Btn>
+        <Btn onClick={handleSave} icon="💾">Save Changes</Btn>
+      </div>
     : hasActiveLoan
       ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontSize: 12, color: DS.colors.warning }}>🔒 Locked — active loan</span>
-          <Btn variant="ghost" small disabled>Contact admin to edit</Btn>
+          <button style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid " + DS.colors.border, background: DS.colors.surfaceAlt, color: DS.colors.textMuted, fontSize: 12, fontWeight: 500, cursor: "not-allowed", opacity: 0.5 }} disabled>Contact admin to edit</button>
         </div>
       : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
 
@@ -2491,7 +2494,50 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
     bankVerify: false,
     dataShare: false,
   });
+  const [borrowerApproved, setBorrowerApproved] = useState(false);
+  const [checkingApproval, setCheckingApproval] = useState(true);
   const allConsented = consent.creditCheck && consent.affordability && consent.employerVerify && consent.bankVerify && consent.dataShare;
+
+  // Check if borrower is admin-approved
+  useEffect(function() {
+    if (!user?.id) { setCheckingApproval(false); return; }
+    (async function() {
+      try {
+        var rows = await SB.query("borrower_profiles", "user_id=eq." + user.id + "&select=kyc_status");
+        if (rows && rows.length > 0 && rows[0].kyc_status === "verified") {
+          setBorrowerApproved(true);
+        }
+      } catch(e) {}
+      setCheckingApproval(false);
+    })();
+  }, [user?.id]);
+
+  // Show gate if not approved
+  if (checkingApproval) return (
+    <div className="fade-in">
+      <Card style={{ textAlign: "center", padding: 48 }}>
+        <div className="spin" style={{ width: 40, height: 40, border: "3px solid " + DS.colors.border, borderTop: "3px solid " + DS.colors.accent, borderRadius: "50%", margin: "0 auto 16px" }} />
+        <p style={{ color: DS.colors.textSecondary, fontSize: 13 }}>Checking eligibility...</p>
+      </Card>
+    </div>
+  );
+
+  if (!borrowerApproved) return (
+    <div className="fade-in">
+      <PageHeader title="Apply for a Loan" subtitle="Your account needs to be approved before you can apply" />
+      <Card style={{ textAlign: "center", padding: "48px 32px" }}>
+        <div style={{ fontSize: 52, marginBottom: 16, opacity: 0.7 }}>🔒</div>
+        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Account Pending Approval</h3>
+        <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6, maxWidth: 420, margin: "0 auto", marginBottom: 20 }}>
+          Your account is awaiting admin verification. Please make sure your profile is complete and your documents are uploaded. An admin will review and approve your account — you'll be notified once approved.
+        </p>
+        <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+          <Btn variant="outline" onClick={function() { setView("borrower-profile"); }}>Complete Profile</Btn>
+          <Btn variant="outline" onClick={function() { setView("borrower-docs"); }}>Upload Documents</Btn>
+        </div>
+      </Card>
+    </div>
+  );
 
   const purposes = [
     { value: "", label: "Select purpose..." },
@@ -2536,12 +2582,19 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
       matchedLender: null,
     };
 
-    // Try to find a matching lender from Supabase
+    // Try to find a matching lender from Supabase — subscription lenders prioritised
     (async function() {
       try {
         // Fetch active lenders with preferences from Supabase
         var lenders = await SB.query("lender_profiles", "status=eq.active&select=*");
         var matchedLender = null;
+
+        // Sort lenders: subscription first, then payasyougo
+        (lenders || []).sort(function(a, b) {
+          if (a.plan === "subscription" && b.plan !== "subscription") return -1;
+          if (b.plan === "subscription" && a.plan !== "subscription") return 1;
+          return 0;
+        });
 
         for (var i = 0; i < (lenders || []).length; i++) {
           var l = lenders[i];
@@ -2594,7 +2647,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         setStep(4);
         showToast("Application submitted successfully! ✓");
 
-        // Create notification in Supabase
+        // Create notification for borrower
         try {
           await SB.insert("notifications", {
             user_id: user.id,
@@ -2603,6 +2656,31 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
             type: "success",
           });
         } catch (ne) { console.log("Notification insert:", ne.message); }
+
+        // Notify admin (find admin user)
+        try {
+          var admins = await SB.query("profiles", "role=eq.admin&select=id");
+          for (var ai = 0; ai < (admins || []).length; ai++) {
+            await SB.insert("notifications", {
+              user_id: admins[ai].id,
+              title: "New Loan Application",
+              message: borrower.name + " submitted a loan application for N$" + amt.toLocaleString() + " (" + form.purpose + ") — Tier " + tier,
+              type: "info",
+            });
+          }
+        } catch (ne) { console.log("Admin notification:", ne.message); }
+
+        // Notify matched lender
+        if (matchedLender && matchedLender.user_id) {
+          try {
+            await SB.insert("notifications", {
+              user_id: matchedLender.user_id,
+              title: "New Application Assigned",
+              message: "A new Tier " + tier + " application from " + borrower.name + " for N$" + amt.toLocaleString() + " has been matched to you.",
+              type: "info",
+            });
+          } catch (ne) { console.log("Lender notification:", ne.message); }
+        }
 
       } catch (e) {
         console.log("Submit error:", e);
@@ -2830,42 +2908,45 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
   );
 };
 
-const BorrowerStatus = ({ borrower, setView }) => {
+const BorrowerStatus = ({ borrower, user, setView }) => {
   const [apps, setApps] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("track");
 
-  // Load applications from Supabase on mount
+  // Load applications from Supabase on mount — this is the source of truth
   useEffect(function() {
-    if (!borrower?.id && !borrower?.userId) { setLoading(false); return; }
-    var uid = borrower.userId || borrower.id;
+    var uid = user?.id || borrower?.userId || borrower?.id;
+    if (!uid) { setLoading(false); return; }
     setLoading(true);
     StorageService.getAllAppsForBorrower(uid).then(function(sbApps) {
-      // Also merge any in-memory apps from current session
-      var dbApps = DB.applications.filter(function(a) { return a.borrowerId === borrower?.id || a.borrowerUserId === uid; });
-      var allIds = {};
-      var merged = [];
-      // Supabase apps first (source of truth)
-      (sbApps || []).forEach(function(a) { allIds[a.id] = true; merged.push(a); });
-      // Then session-only apps
-      dbApps.forEach(function(a) { if (!allIds[a.id]) { allIds[a.id] = true; merged.push(a); } });
+      var merged = sbApps || [];
       merged.sort(function(a, b) { return (b.createdAt || "").localeCompare(a.createdAt || ""); });
       setApps(merged);
       setLoading(false);
     }).catch(function() {
-      // Fallback to DB mock data
-      var dbApps = DB.applications.filter(function(a) { return a.borrowerId === borrower?.id; });
-      setApps(dbApps);
+      setApps([]);
       setLoading(false);
     });
-  }, [borrower?.id]);
+  }, [user?.id, borrower?.id]);
+
+  // Split into history (decided) and tracking (pending)
+  const historyApps = apps.filter(function(a) { return a.status === "approved" || a.status === "declined" || a.status === "rejected" || a.status === "disbursed" || a.status === "completed"; });
+  const trackingApps = apps.filter(function(a) { return a.status === "pending" || a.status === "new_lead" || a.status === "under_review"; });
 
   const statusSteps = {
     pending: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
+    new_lead: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
+    under_review: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
     approved: ["Submitted ✓", "Under Review ✓", "Approved ✓", "Contact Lender"],
     declined: ["Submitted ✓", "Under Review ✓", "Declined", "—"],
+    rejected: ["Submitted ✓", "Under Review ✓", "Declined", "—"],
+    disbursed: ["Submitted ✓", "Approved ✓", "Disbursed ✓", "Repaying"],
+    completed: ["Submitted ✓", "Approved ✓", "Disbursed ✓", "Completed ✓"],
   };
 
-  const stepIdx = { pending: 1, approved: 2, declined: 2 };
+  const stepIdx = { pending: 1, new_lead: 0, under_review: 1, approved: 2, declined: 2, rejected: 2, disbursed: 3, completed: 3 };
+
+  const displayApps = tab === "history" ? historyApps : trackingApps;
 
   return (
     <div className="fade-in">
@@ -2875,48 +2956,59 @@ const BorrowerStatus = ({ borrower, setView }) => {
         actions={<Btn onClick={() => setView("borrower-apply")} icon="📝">New Application</Btn>}
       />
 
+      {/* Tab buttons — styled to match the site design */}
+      <div style={{ display: "flex", gap: 4, marginBottom: 24, background: DS.colors.surface, border: "1px solid " + DS.colors.border, borderRadius: 10, padding: 4, width: "fit-content" }}>
+        <button onClick={function() { setTab("track"); }} style={{
+          padding: "8px 20px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer",
+          background: tab === "track" ? DS.colors.accent : "transparent",
+          color: tab === "track" ? "#0A0F1E" : DS.colors.textSecondary,
+          transition: "all .2s",
+        }}>Track Application ({trackingApps.length})</button>
+        <button onClick={function() { setTab("history"); }} style={{
+          padding: "8px 20px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer",
+          background: tab === "history" ? DS.colors.accent : "transparent",
+          color: tab === "history" ? "#0A0F1E" : DS.colors.textSecondary,
+          transition: "all .2s",
+        }}>Loan History ({historyApps.length})</button>
+      </div>
+
       {loading ? (
         <Card style={{ textAlign: "center", padding: 48 }}>
-          <div className="spin" style={{ width: 40, height: 40, border: `3px solid ${DS.colors.border}`, borderTop: `3px solid ${DS.colors.accent}`, borderRadius: "50%", margin: "0 auto 16px" }} />
+          <div className="spin" style={{ width: 40, height: 40, border: "3px solid " + DS.colors.border, borderTop: "3px solid " + DS.colors.accent, borderRadius: "50%", margin: "0 auto 16px" }} />
           <p style={{ color: DS.colors.textSecondary, fontSize: 13 }}>Loading your applications...</p>
         </Card>
-      ) : apps.length === 0 ? (
+      ) : displayApps.length === 0 ? (
         <EmptyState
-          icon="📋"
-          title="No Applications Yet"
-          message="You haven't submitted any loan applications. Complete your profile and upload your documents to get started."
-          action={() => setView("borrower-apply")}
+          icon={tab === "track" ? "📋" : "📂"}
+          title={tab === "track" ? "No Pending Applications" : "No Loan History"}
+          message={tab === "track" ? "You don't have any applications awaiting a decision right now." : "You don't have any completed or decided applications yet."}
+          action={tab === "track" ? function() { setView("borrower-apply"); } : null}
           actionLabel="Apply Now →"
         />
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
-          {apps.map(app => {
-            const lender = DB.lenders.find(l => l.id === app.lenderId);
-            const steps = statusSteps[app.status] || statusSteps.pending;
-            const activeStep = stepIdx[app.status] ?? 1;
-            const statusColor = { approved: DS.colors.accent, pending: DS.colors.gold, declined: DS.colors.danger }[app.status] || DS.colors.textMuted;
+          {displayApps.map(function(app) {
+            var steps = statusSteps[app.status] || statusSteps.pending;
+            var activeStep = stepIdx[app.status] != null ? stepIdx[app.status] : 1;
+            var statusColor = { approved: DS.colors.accent, pending: DS.colors.gold, new_lead: DS.colors.gold, under_review: DS.colors.info, declined: DS.colors.danger, rejected: DS.colors.danger, disbursed: DS.colors.accent, completed: DS.colors.info }[app.status] || DS.colors.textMuted;
 
             return (
-              <Card key={app.id} style={{ borderLeft: `4px solid ${statusColor}` }}>
+              <Card key={app.id} style={{ borderLeft: "4px solid " + statusColor }}>
                 {/* Header row */}
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
                   <div>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                       <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15 }}>
-                        Application #{app.id.toUpperCase()}
+                        Application #{(app.id || "").toString().slice(-8).toUpperCase()}
                       </span>
-                      <StatusBadge status={app.status} />
+                      <StatusBadge status={app.status === "new_lead" ? "pending" : app.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      Submitted {app.createdAt} ·
-                      {app.amount ? ` N$${app.amount.toLocaleString()}` : " amount pending"} ·
-                      {app.term ? ` ${app.term} months` : ""}
+                      Submitted {app.createdAt ? app.createdAt.slice(0, 10) : "—"} ·
+                      {app.amount ? " N$" + app.amount.toLocaleString() : " amount pending"} ·
+                      {app.term ? " " + app.term + " months" : ""} ·
+                      {app.purpose ? " " + app.purpose : ""}
                     </p>
-                    {lender && (
-                      <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 3 }}>
-                        🏦 Assigned to <strong style={{ color: DS.colors.textSecondary }}>{lender.name}</strong>
-                      </p>
-                    )}
                   </div>
                   {app.amount && app.term && (
                     <div style={{ padding: "10px 16px", borderRadius: 10, background: DS.colors.surfaceAlt, textAlign: "center", flexShrink: 0 }}>
@@ -2924,7 +3016,7 @@ const BorrowerStatus = ({ borrower, setView }) => {
                         {app.status === "approved" ? "Monthly Payment" : "Loan Amount"}
                       </p>
                       <p style={{ fontWeight: 800, fontFamily: "'DM Mono',monospace", fontSize: 18, color: statusColor }}>
-                        N${app.status === "approved" && app.rate ? (app.amount * (1 + app.rate / 100 * (app.term / 12)) / app.term).toFixed(0) : app.amount.toLocaleString()}
+                        N${app.status === "approved" && app.rate ? Math.round(app.amount * (1 + app.rate / 100 * (app.term / 12)) / app.term).toLocaleString() : app.amount.toLocaleString()}
                       </p>
                     </div>
                   )}
@@ -2932,40 +3024,42 @@ const BorrowerStatus = ({ borrower, setView }) => {
 
                 {/* Progress timeline */}
                 <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 16 }}>
-                  {steps.map((step, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
-                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                        <div style={{
-                          width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700,
-                          background: i <= activeStep ? statusColor : DS.colors.surfaceAlt,
-                          color: i <= activeStep ? "#0A0F1E" : DS.colors.textMuted,
-                          border: `2px solid ${i <= activeStep ? statusColor : DS.colors.border}`,
-                          flexShrink: 0,
-                        }}>
-                          {i <= activeStep ? "✓" : i + 1}
+                  {steps.map(function(step, i) {
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                          <div style={{
+                            width: 28, height: 28, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700,
+                            background: i <= activeStep ? statusColor : DS.colors.surfaceAlt,
+                            color: i <= activeStep ? "#0A0F1E" : DS.colors.textMuted,
+                            border: "2px solid " + (i <= activeStep ? statusColor : DS.colors.border),
+                            flexShrink: 0,
+                          }}>
+                            {i <= activeStep ? "✓" : i + 1}
+                          </div>
+                          <p style={{ fontSize: 10, color: i <= activeStep ? statusColor : DS.colors.textMuted, whiteSpace: "nowrap", fontWeight: i === activeStep ? 700 : 400 }}>{step}</p>
                         </div>
-                        <p style={{ fontSize: 10, color: i <= activeStep ? statusColor : DS.colors.textMuted, whiteSpace: "nowrap", fontWeight: i === activeStep ? 700 : 400 }}>{step}</p>
+                        {i < steps.length - 1 && (
+                          <div style={{ flex: 1, height: 2, background: i < activeStep ? statusColor : DS.colors.border, margin: "-14px 4px 0", transition: "background .3s" }} />
+                        )}
                       </div>
-                      {i < steps.length - 1 && (
-                        <div style={{ flex: 1, height: 2, background: i < activeStep ? statusColor : DS.colors.border, margin: "-14px 4px 0", transition: "background .3s" }} />
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Status message */}
                 {app.status === "approved" && (
-                  <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 8, border: `1px solid ${DS.colors.accent}33` }}>
-                    <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500 }}>✅ Your application is approved. {lender ? lender.name : "Your lender"} will contact you within 24 hours to arrange disbursement to your bank account.</p>
+                  <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 8, border: "1px solid " + DS.colors.accent + "33" }}>
+                    <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500 }}>✅ Your application is approved. Your lender will contact you within 24 hours to arrange disbursement.</p>
                   </div>
                 )}
-                {app.status === "pending" && (
-                  <div style={{ padding: "10px 14px", background: DS.colors.goldDim, borderRadius: 8, border: `1px solid ${DS.colors.gold}33` }}>
+                {(app.status === "pending" || app.status === "new_lead" || app.status === "under_review") && (
+                  <div style={{ padding: "10px 14px", background: DS.colors.goldDim, borderRadius: 8, border: "1px solid " + DS.colors.gold + "33" }}>
                     <p style={{ fontSize: 13, color: DS.colors.gold, fontWeight: 500 }}>⏳ Your application is being reviewed. Most decisions are made within 24 hours.</p>
                   </div>
                 )}
-                {app.status === "declined" && (
-                  <div style={{ padding: "10px 14px", background: DS.colors.dangerDim, borderRadius: 8, border: `1px solid ${DS.colors.danger}33` }}>
+                {(app.status === "declined" || app.status === "rejected") && (
+                  <div style={{ padding: "10px 14px", background: DS.colors.dangerDim, borderRadius: 8, border: "1px solid " + DS.colors.danger + "33" }}>
                     <p style={{ fontSize: 13, color: DS.colors.danger, fontWeight: 500 }}>❌ This application was not approved. Improving your DTI ratio or reducing monthly obligations may help in a future application.</p>
                   </div>
                 )}
@@ -3225,6 +3319,20 @@ const StorageService = {
       var rows = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=*");
       if (rows && rows.length > 0) {
         var r = rows[0];
+        // Fetch name/email from profiles table (survives logout/login)
+        var profileName = _MLNA_MEM["name:" + uid] || "";
+        var profileEmail = _MLNA_MEM["email:" + uid] || "";
+        if (!profileName) {
+          try {
+            var userRows = await SB.query("profiles", "id=eq." + uid + "&select=name,email,phone");
+            if (userRows && userRows[0]) {
+              profileName = userRows[0].name || "";
+              profileEmail = userRows[0].email || "";
+              _MLNA_MEM["name:" + uid] = profileName;
+              _MLNA_MEM["email:" + uid] = profileEmail;
+            }
+          } catch(ue) {}
+        }
         return {
           id: r.id, userId: r.user_id, idNumber: r.id_number, employer: r.employer,
           salary: r.salary_cents ? r.salary_cents / 100 : null,
@@ -3232,9 +3340,13 @@ const StorageService = {
           firstBorrower: r.is_first_borrower, tier: r.tier, dti: r.dti_ratio,
           adjDTI: r.adj_dti_ratio, maxLoan: r.max_loan_cents ? r.max_loan_cents / 100 : null,
           riskScore: r.risk_score, kycStatus: r.kyc_status, amlStatus: r.aml_status,
-          bankVerified: r.bank_verified, status: "active",
-          name: _MLNA_MEM["name:" + uid] || "", email: _MLNA_MEM["email:" + uid] || "",
+          bankVerified: r.bank_verified, status: r.kyc_status === "verified" ? "active" : "pending",
+          name: profileName, email: profileEmail,
           documents: _MLNA_MEM["docs:" + uid] || [],
+          jobTenure: r.job_tenure || null,
+          incomeRegularity: r.income_regularity || null,
+          employerType: r.employer_type || null,
+          accountAge: r.account_age || null,
         };
       }
     } catch (e) { console.log("SB getBorrower fallback:", e.message); }
@@ -4846,6 +4958,23 @@ const AdminBorrowers = ({ showToast, setView }) => {
           };
         });
         setSbBorrowers(mapped);
+        // Also include borrower users who registered but don't have a profile yet
+        var bpUserIds = {};
+        mapped.forEach(function(m) { bpUserIds[m.userId] = true; });
+        (users || []).forEach(function(u) {
+          if (!bpUserIds[u.id]) {
+            mapped.push({
+              id: u.id, userId: u.id, name: u.name || "Unknown", email: u.email || "",
+              phone: u.phone || "", idNumber: "", employer: "", salary: 0, expenses: 0,
+              tier: "—", riskScore: 0, dti: "—",
+              kycStatus: "pending", amlStatus: "pending",
+              bankVerified: false, firstBorrower: true,
+              status: "pending", assignedDate: u.created_at ? u.created_at.slice(0, 10) : "—",
+              documents: [], loans: [],
+            });
+          }
+        });
+        setSbBorrowers(mapped);
         // Also sync into LENDER_DB for other components
         mapped.forEach(function(b) { StorageService.syncToLenderDB(b.userId, b); });
       } catch (e) {
@@ -4948,6 +5077,33 @@ const AdminBorrowers = ({ showToast, setView }) => {
             const a=document.createElement("a");a.href=url;a.download=`${b.name.replace(/\s+/g,"_")}.txt`;a.click();
             showToast("Report downloaded");
           }}>⬇ Download</Btn>
+          {b.kycStatus !== "verified" && (
+            <Btn small onClick={async function() {
+              try {
+                await SB.update("borrower_profiles", { user_id: b.userId }, { kyc_status: "verified", kyc_verified_at: new Date().toISOString() });
+                // Notify the borrower
+                try {
+                  await SB.insert("notifications", {
+                    user_id: b.userId,
+                    title: "Account Approved!",
+                    message: "Your account has been verified and approved by an administrator. You can now apply for loans.",
+                    type: "success",
+                  });
+                } catch(ne) {}
+                // Update local state
+                var updatedBorrowers = sbBorrowers.map(function(sb) {
+                  if (sb.userId === b.userId) return Object.assign({}, sb, { kycStatus: "verified", status: "active" });
+                  return sb;
+                });
+                setSbBorrowers(updatedBorrowers);
+                setSelected(Object.assign({}, b, { kycStatus: "verified", status: "active" }));
+                showToast("Borrower approved — they can now apply for loans ✓");
+              } catch(e) { showToast("Failed to approve: " + e.message, "error"); }
+            }}>✓ Approve Borrower</Btn>
+          )}
+          {b.kycStatus === "verified" && (
+            <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>✅ Verified</span>
+          )}
         </div>
 
         {/* Summary ribbon */}
