@@ -4,9 +4,17 @@ import { useState, useEffect, useRef } from "react";
 const SUPABASE_URL = "https://eipuaeczssshrvauuncw.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpcHVhZWN6c3NzaHJ2YXV1bmN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0ODMxMzksImV4cCI6MjA5MTA1OTEzOX0.mVTw2wcscnEIsQZRIRv9vnsnev5m-ZQEAw-V4dhRPc4";
 
-// Session token stored in memory (set after login)
+// Session token stored in memory + sessionStorage for persistence
 let _sbToken = null;
 let _sbUser = null;
+
+// Restore session from sessionStorage on page load
+try {
+  var _savedToken = window.sessionStorage.getItem("mlna_token");
+  var _savedUser = window.sessionStorage.getItem("mlna_user");
+  if (_savedToken) { _sbToken = _savedToken; }
+  if (_savedUser) { _sbUser = JSON.parse(_savedUser); }
+} catch (e) {}
 
 const SB = {
   // ── Auth ──
@@ -18,7 +26,7 @@ const SB = {
     });
     const data = await res.json();
     if (data.error || data.msg) throw new Error(data.error?.message || data.msg || "Signup failed");
-    if (data.access_token) { _sbToken = data.access_token; _sbUser = data.user; }
+    if (data.access_token) { _sbToken = data.access_token; _sbUser = data.user; try { window.sessionStorage.setItem("mlna_token", data.access_token); window.sessionStorage.setItem("mlna_user", JSON.stringify(data.user)); } catch(e) {} }
     return data;
   },
 
@@ -32,6 +40,7 @@ const SB = {
     if (data.error || data.error_description) throw new Error(data.error_description || data.error || "Login failed");
     _sbToken = data.access_token;
     _sbUser = data.user;
+    try { window.sessionStorage.setItem("mlna_token", data.access_token); window.sessionStorage.setItem("mlna_user", JSON.stringify(data.user)); } catch(e) {}
     return data;
   },
 
@@ -45,6 +54,7 @@ const SB = {
       } catch (e) {}
     }
     _sbToken = null; _sbUser = null;
+    try { window.sessionStorage.removeItem("mlna_token"); window.sessionStorage.removeItem("mlna_user"); window.sessionStorage.removeItem("mlna_profile"); } catch(e) {}
   },
 
   getToken() { return _sbToken; },
@@ -3379,12 +3389,55 @@ const StorageService = {
 
 // ── LENDER HOME ───────────────────────────────────────────────────────────────
 const LenderHome = ({ user, setView }) => {
-  const lender = DB.lenders.find(l => l.id === user.id) || { applications: 0, approved: 0 };
-  const allB = LENDER_DB.borrowers;
+  const lender = DB.lenders.find(l => l.id === user.id) || { applications: 0, approved: 0, plan: "—" };
+  const [allB, setAllB] = useState(LENDER_DB.borrowers);
+  const [allApps, setAllApps] = useState(LENDER_DB.applications);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(function() {
+    (async function() {
+      try {
+        // Load real borrower profiles
+        var bpRows = await SB.query("borrower_profiles", "select=*");
+        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+        var userMap = {};
+        (users || []).forEach(function(u) { userMap[u.id] = u; });
+        var mapped = (bpRows || []).map(function(bp) {
+          var u = userMap[bp.user_id] || {};
+          return {
+            id: bp.id, userId: bp.user_id, name: u.name || "Unknown",
+            tier: bp.tier || "—", riskScore: bp.risk_score || 0,
+            status: bp.kyc_status === "verified" ? "active" : "pending",
+            loans: [],
+          };
+        });
+        if (mapped.length > 0) setAllB(mapped);
+        // Load real applications
+        var appRows = await SB.query("applications", "select=*&order=created_at.desc");
+        if (appRows && appRows.length > 0) {
+          var bpMap = {};
+          (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
+          var mappedApps = appRows.map(function(r) {
+            var bp = bpMap[r.borrower_id] || {};
+            var u = userMap[bp.user_id] || {};
+            return {
+              id: r.id, borrowerName: u.name || "Unknown", tier: r.tier_at_application || bp.tier || "—",
+              amount: r.amount_cents ? r.amount_cents / 100 : 0, purpose: r.purpose || "Personal",
+              status: r.status || "pending",
+              receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+            };
+          });
+          setAllApps(mappedApps);
+        }
+      } catch (e) { console.log("LenderHome load:", e.message); }
+      setLoading(false);
+    })();
+  }, []);
+
   const active = allB.filter(b => b.status === "active").length;
   const declined = allB.filter(b => b.status === "declined").length;
-  const totalDisbursed = allB.flatMap(b => b.loans).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
-  const newLeads = LENDER_DB.applications.filter(a => a.status === "new_lead").length;
+  const totalDisbursed = allB.flatMap(b => b.loans || []).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
+  const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
 
   return (
     <div className="fade-in">
@@ -3421,7 +3474,7 @@ const LenderHome = ({ user, setView }) => {
             <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>New Leads Queue</h3>
             {newLeads > 0 && <Btn small onClick={() => setView("lender-apps")}>View All →</Btn>}
           </div>
-          {LENDER_DB.applications.filter(a => a.status === "new_lead").map((a, i) => (
+          {allApps.filter(a => a.status === "new_lead" || a.status === "pending").map((a, i) => (
             <div key={a.id} onClick={() => setView("lender-apps")} className="card-hover" style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 12, marginBottom: 12, borderBottom: i < newLeads - 1 ? `1px solid ${DS.colors.border}` : "none", cursor: "pointer", borderRadius: 8, padding: "10px 8px", transition: "all .15s" }}>
               <div style={{ width: 38, height: 38, background: DS.colors[`tier${a.tier}`] + "22", border: `1px solid ${DS.colors[`tier${a.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: DS.colors[`tier${a.tier}`] }}>{a.borrowerName[0]}</div>
               <div style={{ flex: 1 }}>
@@ -3466,6 +3519,60 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [storedBorrower, setStoredBorrower] = useState(null);
   const [storedDocMetas, setStoredDocMetas] = useState({});
+  const [sbApps, setSbApps] = useState([]);
+  const [sbBorrowerMap, setSbBorrowerMap] = useState({});
+  const [loadingApps, setLoadingApps] = useState(true);
+
+  // Load applications from Supabase
+  const loadAppsFromDB = async function() {
+    try {
+      var rows = await SB.query("applications", "select=*&order=created_at.desc");
+      var bpIds = [...new Set((rows || []).map(function(r) { return r.borrower_id; }).filter(Boolean))];
+      // Load borrower profiles and user profiles for names
+      var bpMap = {};
+      if (bpIds.length > 0) {
+        var bpRows = await SB.query("borrower_profiles", "select=*");
+        (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
+      }
+      var userMap = {};
+      try {
+        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+        (users || []).forEach(function(u) { userMap[u.id] = u; });
+      } catch(e) {}
+      setSbBorrowerMap(bpMap);
+      var mapped = (rows || []).map(function(r) {
+        var bp = bpMap[r.borrower_id] || {};
+        var u = userMap[bp.user_id] || {};
+        return {
+          id: r.id,
+          borrowerId: r.borrower_id,
+          borrowerUserId: bp.user_id || null,
+          borrowerName: u.name || "Unknown",
+          tier: r.tier_at_application || bp.tier || "—",
+          riskScore: r.risk_score_at_application || bp.risk_score || 0,
+          amount: r.amount_cents ? r.amount_cents / 100 : 0,
+          term: r.term_months || 0,
+          purpose: r.purpose || "Personal",
+          status: r.status || "pending",
+          dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : (bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "—"),
+          employer: bp.employer || "",
+          salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
+          receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+          kycStatus: bp.kyc_status || "pending",
+          amlStatus: bp.aml_status || "pending",
+          bankVerified: bp.bank_verified || false,
+          firstBorrower: bp.is_first_borrower || false,
+          channel: "platform",
+          lenderId: r.lender_id || null,
+          rate: r.interest_rate || null,
+        };
+      });
+      setSbApps(mapped);
+    } catch (e) { console.log("Load apps:", e.message); }
+    setLoadingApps(false);
+  };
+
+  useEffect(function() { loadAppsFromDB(); }, []);
 
   // When a lender opens an application, load the borrower's latest saved profile
   // from storage (source of truth) so any borrower edits are reflected
@@ -3497,7 +3604,8 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState(null);
 
-  const apps = LENDER_DB.applications;
+  // Merge Supabase apps with LENDER_DB mock apps (SB takes priority, mock fills demo gaps)
+  const apps = sbApps.length > 0 ? sbApps : LENDER_DB.applications;
   const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
   // Use storage-loaded profile as primary (reflects latest edits); fall back to LENDER_DB seed
   const ldbBorrower = (selectedApp && selectedApp.borrowerId) ? LENDER_DB.borrowers.find(b => b.id === selectedApp.borrowerId) || null : null;
@@ -3509,11 +3617,36 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
       : (selectedBorrower.documents || [])
     : [];
 
-  const handleDecision = (appId, decision, amount) => {
+  const handleDecision = async (appId, decision, amount) => {
     setAppStatuses(prev => ({ ...prev, [appId]: decision }));
-    showToast(decision === "approved" ? `✅ N$${amount?.toLocaleString()} approved — borrower notified` : "Application declined — borrower notified.", decision === "approved" ? "success" : "error");
+    var app = apps.find(function(a) { return a.id === appId; });
+    // Persist to Supabase
+    try {
+      await SB.update("applications", { id: appId }, {
+        status: decision,
+        decided_at: new Date().toISOString(),
+        decided_by: user?.id || null,
+      });
+      // Create notification for the borrower
+      if (app && app.borrowerUserId) {
+        try {
+          await SB.insert("notifications", {
+            user_id: app.borrowerUserId,
+            title: decision === "approved" ? "Loan Approved!" : "Loan Application Update",
+            message: decision === "approved"
+              ? "Your loan of N$" + (amount || 0).toLocaleString() + " has been approved."
+              : "Your loan application has been declined. Contact support for details.",
+            type: decision === "approved" ? "success" : "warning",
+            read: false,
+          });
+        } catch(ne) { console.log("Notification create:", ne.message); }
+      }
+    } catch(e) { console.log("Decision save:", e.message); }
+    showToast(decision === "approved" ? "✅ N$" + (amount || 0).toLocaleString() + " approved — borrower notified" : "Application declined — borrower notified.", decision === "approved" ? "success" : "error");
     setSelectedApp(null);
     setAppTab("overview");
+    // Refresh the applications list
+    loadAppsFromDB();
   };
 
   const confirmDecision = (app, decision) => {
@@ -4586,10 +4719,40 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
 
 // ── ADMIN ALL APPLICATIONS ────────────────────────────────────────────────────
 const AdminAllApplications = ({ showToast }) => {
-  const allApps = [
-    ...LENDER_DB.applications,
-    { id: "ap7", borrowerId: "lb4", borrowerName: "Maria Haulofu", tier: "D", riskScore: 31, amount: 0, term: 0, purpose: "Personal", status: "new_lead", dti: "78.2%", employer: "City of Windhoek", salary: 12000, receivedAt: "2025-02-18 10:00", docs: 1, kycStatus: "verified", amlStatus: "flagged", bankVerified: false, firstBorrower: true },
-  ];
+  const [allApps, setAllApps] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  useEffect(function() {
+    (async function() {
+      try {
+        var rows = await SB.query("applications", "select=*&order=created_at.desc");
+        var bpRows = await SB.query("borrower_profiles", "select=*");
+        var bpMap = {};
+        (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
+        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email");
+        var userMap = {};
+        (users || []).forEach(function(u) { userMap[u.id] = u; });
+        var mapped = (rows || []).map(function(r) {
+          var bp = bpMap[r.borrower_id] || {};
+          var u = userMap[bp.user_id] || {};
+          return {
+            id: r.id, borrowerName: u.name || "Unknown",
+            tier: r.tier_at_application || bp.tier || "—",
+            amount: r.amount_cents ? r.amount_cents / 100 : 0,
+            purpose: r.purpose || "Personal", status: r.status || "pending",
+            dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : "—",
+            employer: bp.employer || "", salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
+            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+            kycStatus: bp.kyc_status || "pending", amlStatus: bp.aml_status || "pending",
+            bankVerified: bp.bank_verified || false, firstBorrower: bp.is_first_borrower || false,
+            lenderId: r.lender_id || null,
+          };
+        });
+        if (mapped.length > 0) setAllApps(mapped);
+        else setAllApps(LENDER_DB.applications); // fallback to mock if no SB data
+      } catch(e) { setAllApps(LENDER_DB.applications); }
+      setLoadingApps(false);
+    })();
+  }, []);
   const [filter, setFilter] = useState("all");
   const filtered = filter === "all" ? allApps : allApps.filter(a => a.status === filter);
 
@@ -8655,6 +8818,20 @@ const EmptyState = ({ icon, title, message, action, actionLabel }) => (
   </Card>
 );
 
+// ── TIME AGO HELPER ───────────────────────────────────────────────────────────
+function timeAgo(dateStr) {
+  try {
+    var now = Date.now();
+    var then = new Date(dateStr).getTime();
+    var diff = Math.floor((now - then) / 1000);
+    if (diff < 60) return "just now";
+    if (diff < 3600) return Math.floor(diff / 60) + "m ago";
+    if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
+    if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
+    return new Date(dateStr).toLocaleDateString();
+  } catch(e) { return "—"; }
+}
+
 // ── LOADING SKELETON ───────────────────────────────────────────────────────────
 const Skeleton = ({ height = 40, width = "100%", radius = 8, style = {} }) => (
   <div className="shimmer" style={{ height, width, borderRadius: radius, ...style }} />
@@ -8668,9 +8845,57 @@ export default function App() {
   const [prevView, setPrevView] = useState(null);
   const [borrower, setBorrower] = useState(null);
   const [toast, setToast] = useState(null);
-  const [notifications, setNotifications] = useState(DB.notifications);
+  const [notifications, setNotifications] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [confirm, setConfirm] = useState(null); // { title, message, onConfirm, danger }
+  const [sessionRestored, setSessionRestored] = useState(false);
+
+  // Restore session on mount
+  useEffect(function() {
+    var token = null;
+    try { token = window.sessionStorage.getItem("mlna_token"); } catch(e) {}
+    if (!token) { setSessionRestored(true); return; }
+    // We have a token — try to fetch the user profile
+    (async function() {
+      try {
+        var savedProfile = null;
+        try { var sp = window.sessionStorage.getItem("mlna_profile"); if (sp) savedProfile = JSON.parse(sp); } catch(e) {}
+        if (savedProfile && savedProfile.id) {
+          // Fast restore from cached profile
+          handleLogin(savedProfile);
+          setSessionRestored(true);
+          return;
+        }
+        // Fetch from Supabase
+        var savedUser = null;
+        try { var su = window.sessionStorage.getItem("mlna_user"); if (su) savedUser = JSON.parse(su); } catch(e) {}
+        if (savedUser && savedUser.id) {
+          var profiles = await SB.query("profiles", "id=eq." + savedUser.id + "&select=*");
+          var p = profiles && profiles[0];
+          if (p) {
+            var restoredUser = { id: p.id, email: p.email, name: p.name, role: p.role, twoFAEnabled: p.two_fa_enabled };
+            handleLogin(restoredUser);
+          }
+        }
+      } catch (e) { console.log("Session restore failed:", e.message); }
+      setSessionRestored(true);
+    })();
+  }, []);
+
+  // Load notifications from Supabase
+  useEffect(function() {
+    if (!user) return;
+    (async function() {
+      try {
+        var rows = await SB.query("notifications", "user_id=eq." + user.id + "&order=created_at.desc&limit=20");
+        if (rows && rows.length > 0) {
+          setNotifications(rows.map(function(n) {
+            return { id: n.id, userId: n.user_id, msg: n.message, title: n.title, read: n.read, time: n.created_at ? timeAgo(n.created_at) : "now", type: n.type, link_to: n.link_to };
+          }));
+        }
+      } catch (e) { console.log("Notifications load:", e.message); }
+    })();
+  }, [user?.id]);
 
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
@@ -8690,6 +8915,7 @@ export default function App() {
   const handleLogin = async (u) => {
     setUser(u);
     setScreen("app");
+    try { window.sessionStorage.setItem("mlna_profile", JSON.stringify(u)); } catch(e) {}
     if (u.role === "borrower") {
       try {
         var saved = await StorageService.getBorrowerProfile(u.id);
@@ -8734,6 +8960,19 @@ export default function App() {
     setPrefilledRole(role);
     setScreen("login");
   };
+
+  // Show loading while restoring session
+  if (!sessionRestored) return (
+    <>
+      <GlobalStyles />
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: DS.colors.bg }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>₦</div>
+          <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Loading...</p>
+        </div>
+      </div>
+    </>
+  );
 
   if (screen === "home") return (
     <>
