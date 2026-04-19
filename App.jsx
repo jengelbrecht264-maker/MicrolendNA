@@ -8012,8 +8012,17 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
       return SB.query("profiles", "id=eq." + data.user.id + "&select=*").then(function(profiles) {
         var profile = profiles && profiles[0];
         if (!profile) { setError("Account found but profile missing. Contact admin."); return; }
-        var user = { id: profile.id, email: profile.email, name: profile.name, role: profile.role, twoFAEnabled: profile.two_fa_enabled };
-        if (user.twoFAEnabled) { _sbUser = data.user; setStep(2); return; }
+        var user = { 
+          id: profile.id, 
+          email: profile.email, 
+          name: profile.name, 
+          role: profile.role, 
+          twoFAEnabled: profile.two_fa_enabled 
+        };
+        if (user.role === "borrower" && profile.approval_status !== "approved") {
+          setError("Your borrower account is pending admin approval.");
+          return;
+        }
         onLogin(user);
       });
     }).catch(function(err) {
