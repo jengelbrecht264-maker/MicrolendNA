@@ -2881,8 +2881,21 @@ const trackingApps = apps.filter(app =>
         actions={<Btn onClick={() => setView("borrower-apply")} icon="📝">New Application</Btn>}
       />
 <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-  <button onClick={() => setTab("history")}>Loan History</button>
-  <button onClick={() => setTab("track")}>Track Application</button>
+  <Btn
+    variant={tab === "history" ? "primary" : "ghost"}
+    small
+    onClick={() => setTab("history")}
+  >
+    Loan History
+  </Btn>
+
+  <Btn
+    variant={tab === "track" ? "primary" : "ghost"}
+    small
+    onClick={() => setTab("track")}
+  >
+    Track Application
+  </Btn>
 </div>
       {loading ? (
         <Card style={{ textAlign: "center", padding: 48 }}>
