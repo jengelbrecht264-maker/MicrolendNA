@@ -970,6 +970,37 @@ const RiskProfileBar = ({ label, pct, color, weight, weighted }) => (
 // SAMPLE SCORECARD DATA
 // ══════════════════════════════════════════════════════════════════════════════
 
+// ── SAFE BORROWER DEFAULTS — prevents crashes when real Supabase data lacks mock fields ──
+function safeBorrower(b) {
+  if (!b) return { loans: [], documents: [], scorecard: null, scorecardAnswers: null, phone: "", email: "", idNumber: "", employer: "", salary: 0, expenses: 0, tier: "—", riskScore: 0, dti: "—", kycStatus: "pending", amlStatus: "pending", bankVerified: false, firstBorrower: true, status: "pending", assignedDate: "—", name: "Unknown" };
+  return {
+    loans: [],
+    documents: [],
+    scorecard: null,
+    scorecardAnswers: null,
+    phone: "",
+    email: "",
+    idNumber: "",
+    employer: "",
+    salary: 0,
+    expenses: 0,
+    tier: "—",
+    riskScore: 0,
+    dti: "—",
+    kycStatus: "pending",
+    amlStatus: "pending",
+    bankVerified: false,
+    firstBorrower: true,
+    status: "pending",
+    assignedDate: "—",
+    ...b,
+    loans: b.loans || [],
+    documents: b.documents || [],
+    scorecard: b.scorecard || SAMPLE_SCORECARD,
+    scorecardAnswers: b.scorecardAnswers || DEMO_ANSWERS,
+  };
+}
+
 const SAMPLE_SCORECARD = {
   name: "Manfriedt Muundjua",
   account: "62132353377",
@@ -1032,6 +1063,7 @@ const ScorecardBadge = ({ type }) => {
 };
 
 const MiniSparkline = ({ data, color }) => {
+  if (!data || !data.length) return null;
   const max = Math.max(...data); const min = Math.min(...data); const range = max - min || 1;
   const w = 200, h = 50;
   const pts = data.map((v, i) => `${(i/(data.length-1))*w},${h-((v-min)/range)*(h-8)-4}`).join(" ");
@@ -3588,14 +3620,14 @@ const LenderHome = ({ user, setView }) => {
           </div>
           {allApps.filter(a => a.status === "new_lead" || a.status === "pending").map((a, i) => (
             <div key={a.id} onClick={() => setView("lender-apps")} className="card-hover" style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 12, marginBottom: 12, borderBottom: i < newLeads - 1 ? `1px solid ${DS.colors.border}` : "none", cursor: "pointer", borderRadius: 8, padding: "10px 8px", transition: "all .15s" }}>
-              <div style={{ width: 38, height: 38, background: DS.colors[`tier${a.tier}`] + "22", border: `1px solid ${DS.colors[`tier${a.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: DS.colors[`tier${a.tier}`] }}>{a.borrowerName[0]}</div>
+              <div style={{ width: 38, height: 38, background: (DS.colors[`tier${a.tier}`]||DS.colors.textMuted) + "22", border: `1px solid ${(DS.colors[`tier${a.tier}`]||DS.colors.textMuted)}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: DS.colors[`tier${a.tier}`]||DS.colors.textMuted }}>{(a.borrowerName||"?")[0]}</div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 13, fontWeight: 600 }}>{a.borrowerName}</p>
-                <div style={{ display: "flex", gap: 6, marginTop: 3 }}><TierBadge tier={a.tier} /><span style={{ fontSize: 11, color: DS.colors.textMuted }}>N${a.amount.toLocaleString()} · {a.purpose}</span></div>
+                <p style={{ fontSize: 13, fontWeight: 600 }}>{a.borrowerName||"Unknown"}</p>
+                <div style={{ display: "flex", gap: 6, marginTop: 3 }}><TierBadge tier={a.tier} /><span style={{ fontSize: 11, color: DS.colors.textMuted }}>N${(a.amount||0).toLocaleString()} · {a.purpose||"—"}</span></div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <p style={{ fontSize: 13, fontWeight: 600, color: DS.colors.accent }}>N${a.amount.toLocaleString()}</p>
-                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{a.receivedAt.split(" ")[0]}</p>
+                <p style={{ fontSize: 13, fontWeight: 600, color: DS.colors.accent }}>N${(a.amount||0).toLocaleString()}</p>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{(a.receivedAt||"—").split(" ")[0]}</p>
               </div>
             </div>
           ))}
@@ -3608,10 +3640,10 @@ const LenderHome = ({ user, setView }) => {
         <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Active Loan Book</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
-            { label: "Outstanding Balance", value: `N$${allB.flatMap(b=>b.loans).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
-            { label: "Loans Disbursed", value: allB.flatMap(b=>b.loans).filter(l=>l.status==="approved"&&l.disbursed).length, color: DS.colors.accent, view: "lender-borrowers" },
-            { label: "Fully Repaid", value: allB.flatMap(b=>b.loans).filter(l=>l.outstanding===0&&l.disbursed).length, color: DS.colors.info, view: "lender-borrowers" },
-            { label: "Pending Disbursement", value: allB.flatMap(b=>b.loans).filter(l=>l.status==="pending").length, color: DS.colors.gold, view: "lender-apps" },
+            { label: "Outstanding Balance", value: `N$${allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
+            { label: "Loans Disbursed", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.disbursed).length, color: DS.colors.accent, view: "lender-borrowers" },
+            { label: "Fully Repaid", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.outstanding===0&&l.disbursed).length, color: DS.colors.info, view: "lender-borrowers" },
+            { label: "Pending Disbursement", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="pending").length, color: DS.colors.gold, view: "lender-apps" },
           ].map((s,i) => (
             <div key={i} onClick={() => setView(s.view)} className="card-hover" style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10, cursor: "pointer", border: `1px solid ${DS.colors.border}`, transition: "all .2s" }}>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
@@ -3774,19 +3806,21 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     }
   };
 
-  const getAiRec = async (app, borrower) => {
+  const getAiRec = async (app, rawBorrower) => {
     setLoadingAi(true);
-    const _sc = borrower?.scorecardAnswers || DEMO_ANSWERS;
+    const borrower = safeBorrower(rawBorrower);
+    const _sc = borrower.scorecardAnswers || DEMO_ANSWERS;
     const rr = RISK_SCORECARD.computeScore(_sc);
+    const sc = borrower.scorecard || {};
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514", max_tokens: 600,
           messages: [{ role: "user", content: `Namibian microlender credit analyst. Application review for ${app.borrowerName}:
-Risk Score: ${rr.finalScore}/100 Tier ${rr.tier}. DTI: ${app.dti}. Salary: NAD ${app.salary.toLocaleString()}/mo.
-Loan request: NAD ${app.amount.toLocaleString()} over ${app.term} months for ${app.purpose}.
-Bank conduct: Unpaids ${borrower.scorecard.unpaidCount}, Low days ${borrower.scorecard.lowDays}, Avg surplus NAD ${borrower.scorecard.avgSurplusDeficit.toLocaleString()}.
+Risk Score: ${rr.finalScore}/100 Tier ${rr.tier}. DTI: ${app.dti}. Salary: NAD ${(app.salary||0).toLocaleString()}/mo.
+Loan request: NAD ${(app.amount||0).toLocaleString()} over ${app.term} months for ${app.purpose}.
+Bank conduct: Unpaids ${sc.unpaidCount||0}, Low days ${sc.lowDays||0}, Avg surplus NAD ${(sc.avgSurplusDeficit||0).toLocaleString()}.
 KYC: ${app.kycStatus}. AML: ${app.amlStatus}. Bank verified: ${app.bankVerified}. First borrower: ${app.firstBorrower}.
 Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors for THIS specific loan 3) Clear decision: Approve/Decline with NAD monthly repayment. Be decisive.` }]
         })
@@ -4086,7 +4120,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             </div>
             {(b?.loans || []).map(loan => (
               <Card key={loan.id} style={{ marginBottom: 14, borderLeft: `4px solid ${loan.status === "approved" ? DS.colors.accent : loan.status === "pending" ? DS.colors.gold : DS.colors.danger}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: loan.repayments.length > 0 ? 14 : 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: (loan.repayments||[]).length > 0 ? 14 : 0 }}>
                   <div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
                       <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
@@ -4107,11 +4141,11 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                     </div>
                   )}
                 </div>
-                {loan.repayments.length > 0 && (
+                {(loan.repayments||[]).length > 0 && (
                   <div style={{ borderTop: `1px solid ${DS.colors.border}`, paddingTop: 12 }}>
                     <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8, letterSpacing: "0.05em", textTransform: "uppercase" }}>Repayment Schedule</p>
                     <div style={{ display: "grid", gap: 6 }}>
-                      {loan.repayments.map((r, i) => (
+                      {(loan.repayments||[]).map((r, i) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
                           <span style={{ fontSize: 13 }}>{r.date}</span>
                           <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>N${r.amount.toLocaleString()}</span>
@@ -4286,9 +4320,10 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
     return function() { alive = false; };
   }, []);
   const allBorrowers = LENDER_DB.borrowers.map(function(b) {
-    return (b.userId && storedProfiles[b.userId])
+    var merged = (b.userId && storedProfiles[b.userId])
       ? Object.assign({}, b, storedProfiles[b.userId], { id: b.id })
       : b;
+    return safeBorrower(merged);
   });
   const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
 
@@ -4304,7 +4339,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
 
   const downloadCSV = () => {
     const rows = [["Name", "ID Number", "Phone", "Email", "Employer", "Salary", "Expenses", "Tier", "Risk Score", "DTI", "Status", "KYC", "AML", "Bank Verified", "First Borrower", "Loans", "Assigned Date"]];
-    allBorrowers.forEach(b => rows.push([b.name, b.idNumber, b.phone, b.email, b.employer, b.salary, b.expenses, b.tier, b.riskScore, b.dti, b.status, b.kycStatus, b.amlStatus, b.bankVerified, b.firstBorrower, b.loans.length, b.assignedDate]));
+    allBorrowers.forEach(b => rows.push([b.name, b.idNumber, b.phone, b.email, b.employer, b.salary, b.expenses, b.tier, b.riskScore, b.dti, b.status, b.kycStatus, b.amlStatus, b.bankVerified, b.firstBorrower, (b.loans||[]).length, b.assignedDate]));
     const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -4312,7 +4347,8 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
     showToast("Borrowers list exported as CSV");
   };
 
-  const downloadBorrowerReport = (b) => {
+  const downloadBorrowerReport = (rawB) => {
+    const b = safeBorrower(rawB);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
     const txt = [
       `BORROWER REPORT — ${b.name}`,
@@ -4328,9 +4364,9 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       "",
       "EMPLOYMENT & INCOME",
       `Employer: ${b.employer}`,
-      `Monthly Salary: NAD ${b.salary.toLocaleString()}`,
-      `Monthly Expenses: NAD ${b.expenses.toLocaleString()}`,
-      `Disposable Income: NAD ${(b.salary - b.expenses).toLocaleString()}`,
+      `Monthly Salary: NAD ${(b.salary||0).toLocaleString()}`,
+      `Monthly Expenses: NAD ${(b.expenses||0).toLocaleString()}`,
+      `Disposable Income: NAD ${((b.salary||0) - (b.expenses||0)).toLocaleString()}`,
       `DTI Ratio: ${b.dti}`,
       "",
       "RISK PROFILE",
@@ -4339,7 +4375,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       `Recommendation: ${rr.recommendation}`,
       `Max Loan Multiplier: ${rr.maxLoanMultiplier}× disposable income`,
       `Interest Rate: ${rr.interestRate ? rr.interestRate + "% p.a." : "N/A"}`,
-      `Max Loan Amount: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}`,
+      `Max Loan Amount: NAD ${rr.maxLoanMultiplier > 0 ? Math.round(((b.salary||0) - (b.expenses||0)) * rr.maxLoanMultiplier).toLocaleString() : "0"}`,
       "",
       "VERIFICATION STATUS",
       `KYC: ${b.kycStatus}`,
@@ -4348,21 +4384,21 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       `First-Time Borrower: ${b.firstBorrower ? "Yes" : "No"}`,
       "",
       "DOCUMENTS UPLOADED",
-      ...b.documents.map(d => `- ${d.label} (${d.date}, ${d.size}) — ${d.verified ? "Verified" : "Pending"}`),
+      ...(b.documents || []).map(d => typeof d === "string" ? `- ${d}` : `- ${d.label || d.key || "doc"} (${d.date || "—"}, ${d.size || "—"}) — ${d.verified ? "Verified" : "Pending"}`),
       "",
       "LOAN HISTORY",
-      ...b.loans.map(l => `- NAD ${l.amount.toLocaleString()} | ${l.purpose} | ${l.term}mo | ${l.status}${l.disbursed ? " | Disbursed: " + l.disbursed : ""}${l.outstanding !== null ? " | Outstanding: NAD " + (l.outstanding || 0).toLocaleString() : ""}`),
+      ...(b.loans || []).map(l => `- NAD ${(l.amount||0).toLocaleString()} | ${l.purpose||"—"} | ${l.term||0}mo | ${l.status||"—"}`),
       "",
       "BANK STATEMENT SUMMARY",
-      `Period: ${b.scorecard.period}`,
-      `Avg Core Credits: NAD ${b.scorecard.avgCoreCredits.toLocaleString()}`,
-      `Avg Monthly Debits: NAD ${b.scorecard.avgDebits.toLocaleString()}`,
-      `Avg Surplus/Deficit: NAD ${b.scorecard.avgSurplusDeficit.toLocaleString()}`,
-      `Avg Balance: NAD ${b.scorecard.avgBalance.toLocaleString()}`,
-      `Committed Deductions: NAD ${b.scorecard.totalDeductionAvg.toLocaleString()}/mo`,
-      `Unpaid Debit Orders: ${b.scorecard.unpaidCount}`,
-      `Low Balance Days: ${b.scorecard.lowDays}`,
-      `Negative Balance Days: ${b.scorecard.negativeDays}`,
+      `Period: ${b.scorecard?.period || "N/A"}`,
+      `Avg Core Credits: NAD ${(b.scorecard?.avgCoreCredits||0).toLocaleString()}`,
+      `Avg Monthly Debits: NAD ${(b.scorecard?.avgDebits||0).toLocaleString()}`,
+      `Avg Surplus/Deficit: NAD ${(b.scorecard?.avgSurplusDeficit||0).toLocaleString()}`,
+      `Avg Balance: NAD ${(b.scorecard?.avgBalance||0).toLocaleString()}`,
+      `Committed Deductions: NAD ${(b.scorecard?.totalDeductionAvg||0).toLocaleString()}/mo`,
+      `Unpaid Debit Orders: ${b.scorecard?.unpaidCount||0}`,
+      `Low Balance Days: ${b.scorecard?.lowDays||0}`,
+      `Negative Balance Days: ${b.scorecard?.negativeDays||0}`,
     ].join("\n");
     const blob = new Blob([txt], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -4370,20 +4406,21 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
     showToast(`Full report for ${b.name} downloaded`);
   };
 
-  const getAiMemo = async (b) => {
+  const getAiMemo = async (rawB) => {
     setLoadingAi(true);
     setAiInsight(null);
+    const b = safeBorrower(rawB);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
-    const sc = b.scorecard;
+    const sc = b.scorecard || {};
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514", max_tokens: 700,
           messages: [{ role: "user", content: `Namibian microlender. Credit memo for ${b.name}:
-Risk score ${rr.finalScore}/100, Tier ${rr.tier}. Income NAD ${b.salary.toLocaleString()}/mo, Expenses NAD ${b.expenses.toLocaleString()}/mo, Disposable NAD ${(b.salary - b.expenses).toLocaleString()}/mo.
-DTI ${b.dti}. Unpaids ${sc.unpaidCount}. Low days ${sc.lowDays}. Surplus NAD ${sc.avgSurplusDeficit.toLocaleString()}/mo.
-Loans: ${b.loans.map(l => `${l.status} NAD ${l.amount} ${l.purpose} ${l.term}mo${l.outstanding ? " outstanding NAD " + l.outstanding : ""}`).join("; ")}.
+Risk score ${rr.finalScore}/100, Tier ${rr.tier}. Income NAD ${(b.salary||0).toLocaleString()}/mo, Expenses NAD ${(b.expenses||0).toLocaleString()}/mo, Disposable NAD ${((b.salary||0) - (b.expenses||0)).toLocaleString()}/mo.
+DTI ${b.dti}. Unpaids ${sc.unpaidCount||0}. Low days ${sc.lowDays||0}. Surplus NAD ${(sc.avgSurplusDeficit||0).toLocaleString()}/mo.
+Loans: ${(b.loans||[]).map(l => `${l.status} NAD ${l.amount} ${l.purpose} ${l.term}mo`).join("; ") || "None"}.
 KYC: ${b.kycStatus}. AML: ${b.amlStatus}. First borrower: ${b.firstBorrower}.
 Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2) Risk flags & conduct 3) Recommendation for future lending with specific max loan in NAD. Decisive and direct.` }]
         })
@@ -4396,11 +4433,11 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
 
   // ── BORROWER DETAIL VIEW ──
   if (selectedBorrower) {
-    const b = selectedBorrower;
+    const b = safeBorrower(selectedBorrower);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
     const totalLoaned = b.loans.filter(l => l.status === "approved").reduce((s, l) => s + l.amount, 0);
     const totalOutstanding = b.loans.reduce((s, l) => s + (l.outstanding || 0), 0);
-    const totalRepaid = b.loans.flatMap(l => l.repayments).filter(r => r.status === "paid").reduce((s, r) => s + r.amount, 0);
+    const totalRepaid = b.loans.flatMap(l => l.repayments || []).filter(r => r.status === "paid").reduce((s, r) => s + r.amount, 0);
 
     const tabs = [
       { key: "overview", label: "Overview" },
@@ -4632,7 +4669,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Complete Loan History — {b.name}</h3>
-              <Btn small variant="ghost" onClick={() => { const txt = `LOAN HISTORY — ${b.name}\n${"=".repeat(40)}\n${b.loans.map(l => [`Loan: NAD ${l.amount} — ${l.purpose}`, `Status: ${l.status} | Term: ${l.term} months | Rate: ${l.rate || "N/A"}`, `Monthly: ${l.monthly ? "NAD " + l.monthly.toLocaleString() : "N/A"} | Disbursed: ${l.disbursed || "N/A"}`, `Outstanding: ${l.outstanding !== null ? "NAD " + (l.outstanding || 0).toLocaleString() : "N/A"}`, `Repayments: ${l.repayments.length > 0 ? l.repayments.map(r => r.date + " NAD " + r.amount + " " + r.status).join(", ") : "None"}`, ""].join("\n")).join("\n")}`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `loan_history_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Loan history exported"); }}>⬇ Export History</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt = `LOAN HISTORY — ${b.name}\n${"=".repeat(40)}\n${b.loans.map(l => [`Loan: NAD ${l.amount} — ${l.purpose}`, `Status: ${l.status} | Term: ${l.term} months | Rate: ${l.rate || "N/A"}`, `Monthly: ${l.monthly ? "NAD " + l.monthly.toLocaleString() : "N/A"} | Disbursed: ${l.disbursed || "N/A"}`, `Outstanding: ${l.outstanding !== null ? "NAD " + (l.outstanding || 0).toLocaleString() : "N/A"}`, `Repayments: ${(l.repayments||[]).length > 0 ? (l.repayments||[]).map(r => r.date + " NAD " + r.amount + " " + r.status).join(", ") : "None"}`, ""].join("\n")).join("\n")}`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `loan_history_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Loan history exported"); }}>⬇ Export History</Btn>
             </div>
 
             {/* Loan summary */}
@@ -4651,7 +4688,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
 
             {b.loans.map(loan => (
               <Card key={loan.id} style={{ marginBottom: 14, borderLeft: `4px solid ${loan.status === "approved" ? DS.colors.accent : loan.status === "pending" ? DS.colors.gold : DS.colors.danger}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: loan.repayments.length > 0 ? 14 : 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: (loan.repayments||[]).length > 0 ? 14 : 0 }}>
                   <div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
                       <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
@@ -4672,11 +4709,11 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                     </div>
                   )}
                 </div>
-                {loan.repayments.length > 0 && (
+                {(loan.repayments||[]).length > 0 && (
                   <div style={{ borderTop: `1px solid ${DS.colors.border}`, paddingTop: 12 }}>
                     <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.05em" }}>Repayment Schedule</p>
                     <div style={{ display: "grid", gap: 6 }}>
-                      {loan.repayments.map((r, i) => (
+                      {(loan.repayments||[]).map((r, i) => (
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: DS.colors.surfaceAlt, borderRadius: 8, borderLeft: `3px solid ${r.status === "paid" ? DS.colors.accent : DS.colors.warning}` }}>
                           <span style={{ fontSize: 13 }}>{r.date}</span>
                           <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>N${r.amount.toLocaleString()}</span>
@@ -4686,7 +4723,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                     </div>
                   </div>
                 )}
-                {loan.repayments.length === 0 && loan.status !== "declined" && (
+                {(loan.repayments||[]).length === 0 && loan.status !== "declined" && (
                   <p style={{ fontSize: 13, color: DS.colors.textMuted, paddingTop: 10, borderTop: `1px solid ${DS.colors.border}` }}>No repayments recorded yet.</p>
                 )}
               </Card>
@@ -5023,15 +5060,16 @@ const AdminBorrowers = ({ showToast, setView }) => {
     showToast("Platform borrowers exported as CSV");
   };
 
-  const getAiMemo = async (b) => {
+  const getAiMemo = async (rawB) => {
     setLoadingAi(true); setAiInsight(null);
+    const b = safeBorrower(rawB);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
-    const sc = b.scorecard;
+    const sc = b.scorecard || {};
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600,
-          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N$${b.salary.toLocaleString()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
+          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N$${(b.salary||0).toLocaleString()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount||0}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
       });
       const d = await resp.json();
       setAiInsight(d.content?.map(c=>c.text||"").join(""));
@@ -5041,7 +5079,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
 
   // ── BORROWER DETAIL ──
   if (selected) {
-    const b = selected;
+    const b = safeBorrower(selected);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
     const totalLoaned = b.loans.filter(l=>l.status==="approved").reduce((s,l)=>s+l.amount,0);
     const totalOutstanding = b.loans.reduce((s,l)=>s+(l.outstanding||0),0);
@@ -5431,10 +5469,10 @@ const AdminBorrowers = ({ showToast, setView }) => {
 const AdminHome = ({ setView }) => {
   const allB = LENDER_DB.borrowers;
   const allApps = LENDER_DB.applications;
-  const amlFlagged = allB.filter(b => b.amlStatus === "flagged").length;
-  const kycPending = allB.filter(b => b.kycStatus !== "verified").length;
-  const newLeads = allApps.filter(a => a.status === "new_lead").length;
-  const totalDisbursed = allB.flatMap(b => b.loans).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
+  const amlFlagged = allB.filter(b => (b.amlStatus||"") === "flagged").length;
+  const kycPending = allB.filter(b => (b.kycStatus||"") !== "verified").length;
+  const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
+  const totalDisbursed = allB.flatMap(b => b.loans||[]).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
 
   return (
     <div className="fade-in">
