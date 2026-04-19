@@ -2569,6 +2569,17 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         // Save to Supabase applications table
         await StorageService.saveApplication(appRecord);
 
+        await StorageService.saveNotification({
+  userId: "u1",
+  title: "New loan application",
+  msg: `${borrower.name} submitted a new loan application for N$${form.loanAmount}`,
+  read: false,
+  time: "Just now",
+  type: "loan_application",
+  applicationId: appRecord.id,
+  borrowerId: borrower.id || borrower.userId,
+});
+
         // Also push to in-memory for immediate UI display
         LENDER_DB.applications.push({
           id: appRecord.id, borrowerId: borrower.id, borrowerName: borrower.name,
