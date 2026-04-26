@@ -4059,7 +4059,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
 
   const downloadCSV = () => {
     const rows = [["Name", "ID Number", "Phone", "Email", "Employer", "Salary", "Expenses", "Tier", "Risk Score", "DTI", "Status", "KYC", "AML", "Bank Verified", "First Borrower", "Loans", "Assigned Date"]];
-    allBorrowers.forEach(b => rows.push([b.name, b.idNumber, b.phone, b.email, b.employer, b.salary, b.expenses, b.tier, b.riskScore, b.dti, b.status, b.kycStatus, b.amlStatus, b.bankVerified, b.firstBorrower, b.loans.length, b.assignedDate]));
+    allBorrowers.forEach(b => rows.push([b.name, b.idNumber, b.phone, b.email, b.employer, b.salary, b.expenses, b.tier, b.riskScore, b.dti, b.status, b.kycStatus, b.amlStatus, b.bankVerified, b.firstBorrower, (b.loans||[]).length, b.assignedDate]));
     const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
@@ -4162,7 +4162,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
       { key: "documents", label: `Documents (${b.documents.length})` },
       { key: "scorecard", label: "Bank Analysis" },
       { key: "riskprofile", label: "Risk Profile" },
-      { key: "history", label: `Loan History (${b.loans.length})` },
+      { key: "history", label: `Loan History (${(b.loans||[]).length})` },
       { key: "memo", label: "🤖 AI Memo" },
     ];
 
@@ -4550,7 +4550,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                       ["Salary", `N$${N${b.salary.toLocaleString()}()}`],
                       ["DTI", b.dti],
                       ["Score", `${rr.finalScore}/100`],
-                      ["Loans", b.loans.length],
+                      ["Loans", (b.loans||[]).length],
                       ["Outstanding", activeLoan ? `N$${activeLoan.outstanding.toLocaleString()}` : settled > 0 ? "✓ Settled" : "None"],
                       ["Docs", `${b.documents.length} files`],
                     ].map(([l, v]) => (
@@ -4779,7 +4779,7 @@ if (selected) {
       { key:"documents", label:`Documents (${b.documents.length})` },
       { key:"scorecard", label:"Bank Analysis" },
       { key:"riskprofile", label:"Risk Profile" },
-      { key:"history", label:`Loan History (${b.loans.length})` },
+      { key:"history", label:`Loan History (${(b.loans||[]).length})` },
       { key:"memo", label:"🤖 AI Memo" },
     ];
 
@@ -5107,7 +5107,7 @@ if (selected) {
                   <td style={{padding:"12px 14px"}}><span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span></td>
                   <td style={{padding:"12px 14px"}}><Badge label={b.kycStatus} color={b.kycStatus==="verified"?DS.colors.accent:DS.colors.warning}/></td>
                   <td style={{padding:"12px 14px"}}><Badge label={b.amlStatus} color={b.amlStatus==="clear"?DS.colors.accent:DS.colors.danger}/></td>
-                  <td style={{padding:"12px 14px",color:DS.colors.textMuted}}>{b.loans.length}</td>
+                  <td style={{padding:"12px 14px",color:DS.colors.textMuted}}>{(b.loans||[]).length}</td>
                   <td style={{padding:"12px 14px"}} onClick={e=>e.stopPropagation()}>
                     <Btn small variant="outline" onClick={()=>{setSelected(b);setActiveTab("overview");setAiInsight(null);}}>View →</Btn>
                   </td>
