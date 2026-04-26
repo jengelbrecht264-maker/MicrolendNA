@@ -2441,7 +2441,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
           return (
             <Card key={b.id} style={{ border: `1px solid ${tierColors[b.tier]}33` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier] }}>{{(b.name||"?")[0]}}</div>
+                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier] }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                     <p style={{ fontWeight: 700, fontSize: 15 }}>{b.name}</p>
@@ -4545,7 +4545,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             <Card key={b.id} style={{ padding: 0, overflow: "hidden", opacity: b.status === "declined" ? 0.85 : 1 }}>
               <div style={{ height: 3, background: b.status === "active" ? DS.colors.accent : b.status === "declined" ? DS.colors.danger : DS.colors.textMuted }} />
               <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier], flexShrink: 0 }}>{{(b.name||"?")[0]}}</div>
+                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier], flexShrink: 0 }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 6 }}>
                     <p style={{ fontWeight: 700, fontSize: 15 }}>{b.name}</p>
@@ -5102,16 +5102,16 @@ if (selected) {
                   onClick={()=>{setSelected(b);setActiveTab("overview");setAiInsight(null);}}>
                   <td style={{padding:"12px 14px"}}>
                     <div style={{display:"flex",alignItems:"center",gap:10}}>
-                      <div style={{width:32,height:32,background:DS.colors[`tier${b.tier}`]+"22",border:`1px solid ${DS.colors[`tier${b.tier}`]}44`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,color:DS.colors[`tier${b.tier}`],flexShrink:0}}>{{(b.name||"?")[0]}}</div>
+                      <div style={{width:32,height:32,background:DS.colors[`tier${b.tier}`]+"22",border:`1px solid ${DS.colors[`tier${b.tier}`]}44`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700,fontSize:13,color:DS.colors[`tier${b.tier}`],flexShrink:0}}>{(b.name||"?")[0]}</div>
                       <div>
-                        <p style={{fontWeight:600}}>{b.name}</p>
-                        <p style={{fontSize:11,color:DS.colors.textMuted}}>{b.idNumber}</p>
+                        <p style={{fontWeight:600}}>{b.name||"—"}</p>
+                        <p style={{fontSize:11,color:DS.colors.textMuted}}>{b.idNumber||"—"}</p>
                       </div>
                     </div>
                   </td>
                   <td style={{padding:"12px 14px"}}><TierBadge tier={b.tier}/></td>
                   <td style={{padding:"12px 14px",fontSize:12,color:DS.colors.textMuted}}>{lenderName}</td>
-                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${N${b.salary.toLocaleString()}()}</td>
+                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${(b.salary||0).toLocaleString()}</td>
                   <td style={{padding:"12px 14px",color:parseFloat(b.dti)>45?DS.colors.warning:DS.colors.textPrimary,fontFamily:"'DM Mono',monospace"}}>{b.dti}</td>
                   <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${(b.salary||0).toLocaleString()}</td>
                   <td style={{padding:"12px 14px"}}><span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span></td>
@@ -7079,7 +7079,7 @@ const AgentHome = ({ user, setView }) => {
             const statusColor = { approved: DS.colors.accent, pending: DS.colors.gold, declined: DS.colors.danger }[b.status] || DS.colors.textMuted;
             return (
               <div key={b.id} className="card-hover" onClick={() => setView("agent-borrowers")} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 8px", borderRadius: 10, marginBottom: 6, cursor: "pointer", transition: "background .15s" }}>
-                <div style={{ width: 36, height: 36, background: DS.colors[`tier${b.tier}`] + "22", border: `1px solid ${DS.colors[`tier${b.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: DS.colors[`tier${b.tier}`], flexShrink: 0 }}>{{(b.name||"?")[0]}}</div>
+                <div style={{ width: 36, height: 36, background: DS.colors[`tier${b.tier}`] + "22", border: `1px solid ${DS.colors[`tier${b.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: DS.colors[`tier${b.tier}`], flexShrink: 0 }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</p>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{b.employer} · N${b.amount?.toLocaleString()}</p>
@@ -7444,7 +7444,7 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
                     <p style={{ fontSize:11,color:DS.colors.textMuted }}>{b.phone}</p>
                   </td>
                   <td style={{ padding:"12px 14px",color:DS.colors.textMuted,fontSize:12 }}>{b.employer}</td>
-                  <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace" }}>N${N${b.salary.toLocaleString()}()}</td>
+                  <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace" }}>N${(b.salary||0).toLocaleString()}</td>
                   <td style={{ padding:"12px 14px",color:parseFloat(b.dti)>45?DS.colors.warning:DS.colors.textPrimary,fontFamily:"'DM Mono',monospace" }}>{b.dti}</td>
                   <td style={{ padding:"12px 14px" }}><TierBadge tier={b.tier}/></td>
                   <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace",fontWeight:700,color:DS.colors[`tier${b.tier}`]||DS.colors.textMuted }}>{b.riskScore}</td>
