@@ -4083,7 +4083,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       "",
       "EMPLOYMENT & INCOME",
       `Employer: ${b.employer}`,
-      `Monthly Salary: NAD ${b.salary.toLocaleString()}`,
+      `Monthly Salary: NAD ${N${b.salary.toLocaleString()}()}`,
       `Monthly Expenses: NAD ${b.expenses.toLocaleString()}`,
       `Disposable Income: NAD ${(b.salary - b.expenses).toLocaleString()}`,
       `DTI Ratio: ${b.dti}`,
@@ -4136,7 +4136,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
         body: JSON.stringify({
           model: "claude-sonnet-4-20250514", max_tokens: 700,
           messages: [{ role: "user", content: `Namibian microlender. Credit memo for ${b.name}:
-Risk score ${rr.finalScore}/100, Tier ${rr.tier}. Income NAD ${b.salary.toLocaleString()}/mo, Expenses NAD ${b.expenses.toLocaleString()}/mo, Disposable NAD ${(b.salary - b.expenses).toLocaleString()}/mo.
+Risk score ${rr.finalScore}/100, Tier ${rr.tier}. Income NAD ${N${b.salary.toLocaleString()}()}/mo, Expenses NAD ${b.expenses.toLocaleString()}/mo, Disposable NAD ${(b.salary - b.expenses).toLocaleString()}/mo.
 DTI ${b.dti}. Unpaids ${sc.unpaidCount}. Low days ${sc.lowDays}. Surplus NAD ${sc.avgSurplusDeficit.toLocaleString()}/mo.
 Loans: ${b.loans.map(l => `${l.status} NAD ${l.amount} ${l.purpose} ${l.term}mo${l.outstanding ? " outstanding NAD " + l.outstanding : ""}`).join("; ")}.
 KYC: ${b.kycStatus}. AML: ${b.amlStatus}. First borrower: ${b.firstBorrower}.
@@ -4223,7 +4223,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                   {[
-                    { l: "Monthly Salary", v: `N$${b.salary.toLocaleString()}`, c: DS.colors.accent },
+                    { l: "Monthly Salary", v: `N$${N${b.salary.toLocaleString()}()}`, c: DS.colors.accent },
                     { l: "Monthly Expenses", v: `N$${b.expenses.toLocaleString()}`, c: DS.colors.warning },
                     { l: "Disposable Income", v: `N$${(b.salary - b.expenses).toLocaleString()}`, c: DS.colors.info },
                     { l: "DTI Ratio", v: b.dti, c: parseFloat(b.dti) > 45 ? DS.colors.warning : DS.colors.accent },
@@ -4547,7 +4547,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
                     {[
                       ["Employer", b.employer],
-                      ["Salary", `N$${b.salary.toLocaleString()}`],
+                      ["Salary", `N$${N${b.salary.toLocaleString()}()}`],
                       ["DTI", b.dti],
                       ["Score", `${rr.finalScore}/100`],
                       ["Loans", b.loans.length],
@@ -4753,7 +4753,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600,
-          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N$${b.salary.toLocaleString()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
+          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N$${N${b.salary.toLocaleString()}()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
       });
       const d = await resp.json();
       setAiInsight(d.content?.map(c=>c.text||"").join(""));
@@ -4799,7 +4799,7 @@ if (selected) {
             <p style={{fontSize:13,color:DS.colors.textMuted,marginTop:2}}>{b.employer} · ID: {b.idNumber} · {b.phone}</p>
           </div>
           <Btn small variant="ghost" onClick={()=>{
-            const txt=`ADMIN BORROWER REPORT\n${b.name}\nID: ${b.idNumber}\nEmployer: ${b.employer}\nSalary: N$${b.salary.toLocaleString()}\nTier: ${b.tier}\nRisk: ${b.riskScore}/100\nKYC: ${b.kycStatus} | AML: ${b.amlStatus}\nStatus: ${b.status}`;
+            const txt=`ADMIN BORROWER REPORT\n${b.name}\nID: ${b.idNumber}\nEmployer: ${b.employer}\nSalary: N$${N${b.salary.toLocaleString()}()}\nTier: ${b.tier}\nRisk: ${b.riskScore}/100\nKYC: ${b.kycStatus} | AML: ${b.amlStatus}\nStatus: ${b.status}`;
             const blob=new Blob([txt],{type:"text/plain"});
             const url=URL.createObjectURL(blob);
             const a=document.createElement("a");a.href=url;a.download=`${b.name.replace(/\s+/g,"_")}.txt`;a.click();
@@ -4842,7 +4842,7 @@ if (selected) {
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
                   {[
-                    {l:"Salary",v:`N$${b.salary.toLocaleString()}`,c:DS.colors.accent},
+                    {l:"Salary",v:`N$${N${b.salary.toLocaleString()}()}`,c:DS.colors.accent},
                     {l:"Expenses",v:`N$${b.expenses.toLocaleString()}`,c:DS.colors.warning},
                     {l:"Disposable",v:`N$${(b.salary-b.expenses).toLocaleString()}`,c:DS.colors.info},
                     {l:"DTI",v:b.dti,c:parseFloat(b.dti)>45?DS.colors.danger:DS.colors.accent},
@@ -5101,7 +5101,7 @@ if (selected) {
                   </td>
                   <td style={{padding:"12px 14px"}}><TierBadge tier={b.tier}/></td>
                   <td style={{padding:"12px 14px",fontSize:12,color:DS.colors.textMuted}}>{lenderName}</td>
-                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${b.salary.toLocaleString()}</td>
+                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${N${b.salary.toLocaleString()}()}</td>
                   <td style={{padding:"12px 14px",color:parseFloat(b.dti)>45?DS.colors.warning:DS.colors.textPrimary,fontFamily:"'DM Mono',monospace"}}>{b.dti}</td>
                   <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace",fontWeight:700,color:rr.tierColor}}>{rr.finalScore}</td>
                   <td style={{padding:"12px 14px"}}><span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span></td>
@@ -7434,7 +7434,7 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
                     <p style={{ fontSize:11,color:DS.colors.textMuted }}>{b.phone}</p>
                   </td>
                   <td style={{ padding:"12px 14px",color:DS.colors.textMuted,fontSize:12 }}>{b.employer}</td>
-                  <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace" }}>N${b.salary.toLocaleString()}</td>
+                  <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace" }}>N${N${b.salary.toLocaleString()}()}</td>
                   <td style={{ padding:"12px 14px",color:parseFloat(b.dti)>45?DS.colors.warning:DS.colors.textPrimary,fontFamily:"'DM Mono',monospace" }}>{b.dti}</td>
                   <td style={{ padding:"12px 14px" }}><TierBadge tier={b.tier}/></td>
                   <td style={{ padding:"12px 14px",fontFamily:"'DM Mono',monospace",fontWeight:700,color:DS.colors[`tier${b.tier}`]||DS.colors.textMuted }}>{b.riskScore}</td>
