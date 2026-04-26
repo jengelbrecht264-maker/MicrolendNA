@@ -240,28 +240,9 @@ const GlobalStyles = () => (
 
 // ── MOCK DATABASE ─────────────────────────────────────────────────────────────
 const DB = {
-  users: [
-    { id: "u1", email: "admin@microlend.na", password: "Admin@123", role: "admin", name: "System Admin", twoFAEnabled: true },
-    { id: "u2", email: "lender@capitalmicro.na", password: "Lender@123", role: "lender", name: "Capital Micro Finance", plan: "subscription", twoFAEnabled: true },
-    { id: "u3", email: "lender2@quickcash.na", password: "Lender@123", role: "lender", name: "QuickCash Namibia", plan: "payasyougo", twoFAEnabled: false },
-    { id: "u4", email: "john.smith@gmail.com", password: "Test@123", role: "borrower", name: "John Smith", twoFAEnabled: false },
-    { id: "ua1", email: "agent@capitalmicro.na", password: "Agent@123", role: "agent", name: "Johannes Kamati", twoFAEnabled: false, lenderId: "u2", region: "Windhoek Central" },
-    { id: "ua2", email: "agent2@capitalmicro.na", password: "Agent@123", role: "agent", name: "Maria Shifidi", twoFAEnabled: false, lenderId: "u2", region: "Katutura" },
-  ],
-  borrowers: [
-    {
-      id: "b1", userId: "u4", name: "John Smith", idNumber: "90042300543", phone: "+264 81 234 5678",
-      email: "john.smith@gmail.com", employer: "Namibia Breweries", salary: 18500, expenses: 6800,
-      status: "approved", tier: "B", loanAmount: 5000, term: 3, purpose: "Medical",
-      kycStatus: "verified", amlStatus: "clear", documents: ["id.pdf","payslip.pdf","bank_stmt.pdf"],
-      createdAt: "2025-01-15", assignedLender: "u2",
-      dti: 0.368, maxLoan: 23400, firstBorrower: false,
-    },
-  ],
-  applications: [
-    { id: "a1", borrowerId: "b1", status: "approved", tier: "B", createdAt: "2025-01-15", lenderId: "u2", amount: 5000, term: 3 },
-    { id: "a2", borrowerId: "b1", status: "pending", tier: null, createdAt: "2025-02-10", lenderId: null, amount: 8000, term: 6 },
-  ],
+  users: [],
+  borrowers: [],
+  applications: [],
   lenders: [
     {
       id: "u2", name: "Capital Micro Finance", email: "lender@capitalmicro.na",
@@ -269,8 +250,8 @@ const DB = {
       registeredAt: "2024-11-01", approvedAt: "2024-11-03", approvedBy: "System Admin",
       contactPerson: "Marius van Zyl", phone: "+264 61 220 4400", regNumber: "CC/2019/00234",
       namfisaLicense: "ML-2019-0045", licenseExpiry: "2026-12-31",
-      leadsTotal: 47, leadsApproved: 31, leadsDeclined: 11, leadsPending: 5,
-      revenue: 12500, notes: "Long-standing partner. Subscription plan. Specialises in government employees.",
+      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
+      revenue: 0, notes: "Long-standing partner. Subscription plan. Specialises in government employees.",
     },
     {
       id: "u3", name: "QuickCash Namibia", email: "lender2@quickcash.na",
@@ -278,8 +259,8 @@ const DB = {
       registeredAt: "2024-12-15", approvedAt: "2024-12-17", approvedBy: "System Admin",
       contactPerson: "Anna Nghipandulwa", phone: "+264 81 400 5500", regNumber: "CC/2022/01122",
       namfisaLicense: "ML-2022-0198", licenseExpiry: "2025-12-31",
-      leadsTotal: 23, leadsApproved: 14, leadsDeclined: 7, leadsPending: 2,
-      revenue: 1750, notes: "Pay-as-you-go partner. Focuses on payday loans under N$10,000.",
+      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
+      revenue: 0, notes: "Pay-as-you-go partner. Focuses on payday loans under N$10,000.",
     },
     {
       id: "u5", name: "Trustco Microfinance", email: "admin@trustcomicro.na",
@@ -313,8 +294,8 @@ const DB = {
       registeredAt: "2025-01-10", approvedAt: "2025-01-12", approvedBy: "System Admin",
       contactPerson: "Heinrich Mouton", phone: "+264 61 299 2400", regNumber: "CC/2010/00089",
       namfisaLicense: "ML-2010-0008", licenseExpiry: "2027-01-31",
-      leadsTotal: 18, leadsApproved: 14, leadsDeclined: 3, leadsPending: 1,
-      revenue: 5000, notes: "FNB Namibia microfinance arm. Focuses on Tier A and B borrowers.",
+      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
+      revenue: 0, notes: "FNB Namibia microfinance arm. Focuses on Tier A and B borrowers.",
       dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
     },
     {
@@ -323,8 +304,8 @@ const DB = {
       registeredAt: "2025-01-20", approvedAt: "2025-01-22", approvedBy: "System Admin",
       contactPerson: "Sophia Beukes", phone: "+264 61 299 1300", regNumber: "CC/2012/00145",
       namfisaLicense: "ML-2012-0019", licenseExpiry: "2026-12-31",
-      leadsTotal: 12, leadsApproved: 9, leadsDeclined: 2, leadsPending: 1,
-      revenue: 3750, notes: "Bank Windhoek micro division. Accepts Tier A, B and C borrowers.",
+      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
+      revenue: 0, notes: "Bank Windhoek micro division. Accepts Tier A, B and C borrowers.",
       dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
     },
     {
@@ -333,8 +314,8 @@ const DB = {
       registeredAt: "2025-02-05", approvedAt: "2025-02-07", approvedBy: "System Admin",
       contactPerson: "Petrus Hamutenya", phone: "+264 61 295 2000", regNumber: "CC/2008/00067",
       namfisaLicense: "ML-2008-0005", licenseExpiry: "2027-06-30",
-      leadsTotal: 9, leadsApproved: 7, leadsDeclined: 1, leadsPending: 1,
-      revenue: 875, notes: "Nedbank personal finance. Specialises in funeral and medical emergency loans.",
+      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
+      revenue: 0, notes: "Nedbank personal finance. Specialises in funeral and medical emergency loans.",
       dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
     },
   ],
@@ -350,13 +331,7 @@ const DB = {
     subscriptionFee: 2500,
     payAsYouGoFee: 125,
   },
-  notifications: [
-    { id: "n1", userId: "u2", msg: "New application from John Smith – Tier B", read: false, time: "2h ago" },
-    { id: "n2", userId: "u1", msg: "QuickCash Namibia signed up — awaiting review", read: false, time: "5h ago" },
-    { id: "n3", userId: "u1", msg: "🔔 New lender signup: Trustco Microfinance — due diligence required", read: false, time: "1d ago" },
-    { id: "n5", userId: "u1", msg: "💬 2 new WhatsApp leads — Festus Hamutenya (Tier B) and Grace Nambala (Tier A)", read: false, time: "3h ago" },
-    { id: "n4", userId: "u1", msg: "🔔 New lender signup: Letshego MFB Namibia — due diligence required", read: false, time: "2d ago" },
-  ],
+  notifications: [],
 };
 
 // ── RISK ENGINE ───────────────────────────────────────────────────────────────
@@ -3227,230 +3202,20 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
 
 // ── EXPANDED LENDER DATA STORE ────────────────────────────────────────────────
 const LENDER_DB = {
-  borrowers: [
-    {
-      id: "lb1", name: "John Smith", idNumber: "90042300543", phone: "+264 81 234 5678",
-      email: "john.smith@gmail.com", employer: "Namibia Breweries", salary: 18500, expenses: 6800,
-      tier: "B", riskScore: 71, dti: "36.8%", kycStatus: "verified", amlStatus: "clear", bankVerified: true,
-      status: "active", assignedDate: "2025-01-15", firstBorrower: false,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2025-01-10", size: "1.2 MB" },
-        { key: "payslip.pdf", label: "Payslip – Dec 2024", type: "📄", verified: true, date: "2025-01-10", size: "0.8 MB" },
-        { key: "bank_stmt.pdf", label: "Bank Statement 3mo", type: "🏦", verified: true, date: "2025-01-11", size: "3.4 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "John Smith" },
-      scorecardAnswers: { ...DEMO_ANSWERS, dtiRatio: "30 – 50%", disposableIncome: "Moderate" },
-      loans: [
-        { id: "a1", amount: 5000, term: 3, purpose: "Medical", status: "approved", disbursed: "2025-01-18", rate: "24%", monthly: 1700, outstanding: 1700, dueDate: "2025-04-18", repayments: [{ date: "2025-02-18", amount: 1700, status: "paid" }, { date: "2025-03-18", amount: 1700, status: "paid" }] },
-        { id: "a3", amount: 8000, term: 6, purpose: "Home Improvement", status: "pending", disbursed: null, rate: "24%", monthly: 1493, outstanding: null, dueDate: null, repayments: [] },
-      ],
-    },
-    {
-      id: "lb2", name: "Sarah Nangolo", idNumber: "88091500221", phone: "+264 81 456 7890",
-      email: "sarah.nangolo@gov.na", employer: "Bank of Namibia", salary: 45000, expenses: 11000,
-      tier: "A", riskScore: 88, dti: "22.1%", kycStatus: "verified", amlStatus: "clear", bankVerified: true,
-      status: "active", assignedDate: "2025-02-10", firstBorrower: false,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2025-02-08", size: "1.1 MB" },
-        { key: "payslip.pdf", label: "Payslip – Jan 2025", type: "📄", verified: true, date: "2025-02-08", size: "0.9 MB" },
-        { key: "bank_stmt.pdf", label: "Bank Statement 3mo", type: "🏦", verified: true, date: "2025-02-09", size: "4.1 MB" },
-        { key: "employment.pdf", label: "Employment Letter", type: "💼", verified: true, date: "2025-02-09", size: "0.4 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "Sarah Nangolo", avgCoreCredits: 95000, avgSurplusDeficit: 18500, avgBalance: 380000, totalDeductionAvg: 22400 },
-      scorecardAnswers: { ...DEMO_ANSWERS, dtiRatio: "< 30%", disposableIncome: "Strong surplus", loanBurden: "Low" },
-      loans: [
-        { id: "a2", amount: 12000, term: 6, purpose: "Education", status: "pending", disbursed: null, rate: "18%", monthly: 2180, outstanding: null, dueDate: null, repayments: [] },
-      ],
-    },
-    {
-      id: "lb3", name: "David Amupolo", idNumber: "85030200876", phone: "+264 81 678 9012",
-      email: "d.amupolo@yahoo.com", employer: "Self-employed", salary: 9500, expenses: 3600,
-      tier: "C", riskScore: 52, dti: "51.3%", kycStatus: "verified", amlStatus: "clear", bankVerified: true,
-      status: "active", assignedDate: "2025-02-15", firstBorrower: true,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2025-02-14", size: "1.0 MB" },
-        { key: "payslip.pdf", label: "Bank Statements (income proof)", type: "📄", verified: true, date: "2025-02-14", size: "2.2 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "David Amupolo", avgCoreCredits: 9500, avgSurplusDeficit: -3200, avgBalance: 8500, unpaidCount: 2, lowDays: 5, totalDeductionAvg: 5100 },
-      scorecardAnswers: { ...DEMO_ANSWERS, negativeDays: "1 – 3 days", unpaidOrders: "1 – 2", dtiRatio: "30 – 50%", disposableIncome: "Moderate", jobTenure: "6 – 12 months", employerType: "SME / informal" },
-      loans: [
-        { id: "a4", amount: 3000, term: 1, purpose: "Vehicle Repair", status: "approved", disbursed: "2025-02-20", rate: "30%", monthly: 3075, outstanding: 3075, dueDate: "2025-03-20", repayments: [] },
-      ],
-    },
-    {
-      id: "lb4", name: "Maria Haulofu", idNumber: "92110400334", phone: "+264 81 890 1234",
-      email: "maria.h@gmail.com", employer: "City of Windhoek", salary: 12000, expenses: 11200,
-      tier: "D", riskScore: 31, dti: "78.2%", kycStatus: "verified", amlStatus: "flagged", bankVerified: false,
-      status: "declined", assignedDate: "2025-02-18", firstBorrower: true,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2025-02-17", size: "1.3 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "Maria Haulofu", avgCoreCredits: 5500, avgSurplusDeficit: -18000, avgBalance: 1200, unpaidCount: 5, lowDays: 14, totalDeductionAvg: 6200 },
-      scorecardAnswers: { ...DEMO_ANSWERS, negativeDays: "> 3 days", unpaidOrders: "> 2", dtiRatio: "> 50%", disposableIncome: "Weak / negative", loanBurden: "High", jobTenure: "< 6 months", incomeMismatch: "Major mismatch" },
-      loans: [
-        { id: "a5", amount: 0, term: 0, purpose: "Personal", status: "declined", disbursed: null, rate: null, monthly: null, outstanding: null, dueDate: null, repayments: [] },
-      ],
-    },
-    {
-      id: "lb5", name: "Thomas Nghipandulwa", idNumber: "79060100554", phone: "+264 81 012 3456",
-      email: "thomas.n@mte.com.na", employer: "MTC Namibia", salary: 28000, expenses: 11000,
-      tier: "B", riskScore: 76, dti: "38.0%", kycStatus: "verified", amlStatus: "clear", bankVerified: true,
-      status: "inactive", assignedDate: "2024-11-05", firstBorrower: false,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2024-11-03", size: "1.1 MB" },
-        { key: "payslip.pdf", label: "Payslip – Oct 2024", type: "📄", verified: true, date: "2024-11-03", size: "0.7 MB" },
-        { key: "bank_stmt.pdf", label: "Bank Statement 3mo", type: "🏦", verified: true, date: "2024-11-04", size: "2.9 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "Thomas Nghipandulwa", avgCoreCredits: 28000, avgSurplusDeficit: 3200, avgBalance: 42000, totalDeductionAvg: 11500 },
-      scorecardAnswers: { ...DEMO_ANSWERS, dtiRatio: "30 – 50%", disposableIncome: "Moderate" },
-      loans: [
-        { id: "a6", amount: 15000, term: 6, purpose: "Business", status: "approved", disbursed: "2024-11-10", rate: "24%", monthly: 2800, outstanding: 0, dueDate: "2025-05-10", repayments: [{ date: "2024-12-10", amount: 2800, status: "paid" }, { date: "2025-01-10", amount: 2800, status: "paid" }, { date: "2025-02-10", amount: 2800, status: "paid" }, { date: "2025-03-10", amount: 2800, status: "paid" }, { date: "2025-04-10", amount: 2800, status: "paid" }, { date: "2025-05-10", amount: 2800, status: "paid" }] },
-      ],
-    },
-    {
-      id: "lb6", name: "Anna //Khomasdal", idNumber: "87051200667", phone: "+264 81 333 4444",
-      email: "anna.k@gmail.com", employer: "NamPost", salary: 12000, expenses: 2800,
-      tier: "A", riskScore: 82, dti: "23.3%", kycStatus: "verified", amlStatus: "clear", bankVerified: true,
-      status: "active", assignedDate: "2025-03-01", firstBorrower: false,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: true, date: "2025-02-28", size: "1.0 MB" },
-        { key: "payslip.pdf", label: "Payslip – Feb 2025", type: "📄", verified: true, date: "2025-02-28", size: "0.6 MB" },
-        { key: "bank_stmt.pdf", label: "Bank Statement 3mo", type: "🏦", verified: true, date: "2025-02-28", size: "2.8 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "Anna //Khomasdal", avgCoreCredits: 12000, avgSurplusDeficit: 9200, avgBalance: 22000, totalDeductionAvg: 2800 },
-      scorecardAnswers: { ...DEMO_ANSWERS, dtiRatio: "< 30%", disposableIncome: "Strong surplus" },
-      loans: [
-        { id: "a7", amount: 4000, term: 3, purpose: "Education", status: "pending", disbursed: null, rate: "18%", monthly: 1387, outstanding: null, dueDate: null, repayments: [] },
-      ],
-    },
-    {
-      id: "lb7", name: "Petrus Nghiwete", idNumber: "95030700881", phone: "+264 81 555 6666",
-      email: "petrus.n@yahoo.com", employer: "Namib Mills", salary: 8500, expenses: 6800,
-      tier: "D", riskScore: 28, dti: "80.0%", kycStatus: "pending", amlStatus: "flagged", bankVerified: false,
-      status: "declined", assignedDate: "2025-03-10", firstBorrower: true,
-      documents: [
-        { key: "id.pdf", label: "National ID", type: "🪪", verified: false, date: "2025-03-09", size: "0.9 MB" },
-      ],
-      scorecard: { ...SAMPLE_SCORECARD, name: "Petrus Nghiwete", avgCoreCredits: 8500, avgSurplusDeficit: -5100, avgBalance: 900, unpaidCount: 3, lowDays: 14, totalDeductionAvg: 6800 },
-      scorecardAnswers: { ...DEMO_ANSWERS, negativeDays: "> 3 days", unpaidOrders: "> 2", dtiRatio: "> 50%", disposableIncome: "Weak / negative", incomeMismatch: "Major mismatch" },
-      loans: [
-        { id: "a8", amount: 0, term: 0, purpose: "Personal", status: "declined", disbursed: null, rate: null, monthly: null, outstanding: null, dueDate: null, repayments: [] },
-      ],
-    }
-  ],
-  // Per-lender settings/preferences
-  lenderPrefs: {
-    "u2": {
-      minLoanAmount: 500,
-      maxLoanAmount: 25000,
-      minSalary: 5000,
-      acceptedTiers: ["A", "B", "C"],
-      interestRates: { A: 18, B: 24, C: 30 },
-      loanTermsMonths: [1, 3, 6, 12],
-      maxDTI: 0.50,
-      firstBorrowerAllowed: true,
-      firstBorrowerMaxLoan: 5000,
-      requireBankVerification: true,
-      requireKYC: true,
-      autoApproveThreshold: 85,
-      preferredPurposes: ["Medical", "Education", "Home", "Vehicle"],
-    },
-    "u3": {
-      minLoanAmount: 200,
-      maxLoanAmount: 10000,
-      minSalary: 3000,
-      acceptedTiers: ["A", "B", "C", "D"],
-      interestRates: { A: 20, B: 28, C: 36, D: 42 },
-      loanTermsMonths: [1, 3],
-      maxDTI: 0.60,
-      firstBorrowerAllowed: true,
-      firstBorrowerMaxLoan: 2000,
-      requireBankVerification: false,
-      requireKYC: true,
-      autoApproveThreshold: 90,
-      preferredPurposes: ["Medical", "Funeral", "Vehicle", "Other"],
-    },
-  },
-  // Applications = only new leads + pending/under-review (not yet decided)
-  applications: [
-    { id: "ap1", borrowerId: "lb2", borrowerName: "Sarah Nangolo", tier: "A", riskScore: 88, amount: 12000, term: 6, purpose: "Education", status: "new_lead", dti: "22.1%", employer: "Bank of Namibia", salary: 45000, receivedAt: "2025-02-10 09:14", docs: 4, kycStatus: "verified", amlStatus: "clear", bankVerified: true, firstBorrower: false },
-    { id: "ap2", borrowerId: "lb1", borrowerName: "John Smith", tier: "B", riskScore: 71, amount: 8000, term: 6, purpose: "Home Improvement", status: "under_review", dti: "36.8%", employer: "Namibia Breweries", salary: 18500, receivedAt: "2025-02-10 14:32", docs: 3, kycStatus: "verified", amlStatus: "clear", bankVerified: true, firstBorrower: false },
-    { id: "ap3", borrowerId: "lb3", borrowerName: "David Amupolo", tier: "C", riskScore: 52, amount: 3000, term: 1, purpose: "Vehicle Repair", status: "new_lead", dti: "51.3%", employer: "Self-employed", salary: 9500, receivedAt: "2025-02-15 11:05", docs: 2, kycStatus: "verified", amlStatus: "clear", bankVerified: true, firstBorrower: true },
-    { id: "ap4", borrowerId: "lb2", borrowerName: "Sarah Nangolo", tier: "A", riskScore: 88, amount: 5000, term: 3, purpose: "Funeral Cover", status: "under_review", dti: "24.4%", employer: "Bank of Namibia", salary: 45000, receivedAt: "2025-03-01 08:45", docs: 4, kycStatus: "verified", amlStatus: "clear", bankVerified: true, firstBorrower: false },
-    { id: "ap5", borrowerId: null, borrowerName: "Festus Hamutenya", tier: "B", riskScore: 74, amount: 8000, term: 6, purpose: "Education", status: "new_lead", dti: "37.1%", employer: "City of Windhoek", salary: 14000, receivedAt: "2025-03-15 09:45", docs: 0, kycStatus: "pending", amlStatus: "clear", bankVerified: false, firstBorrower: true, channel: "whatsapp", phone: "+264 81 555 1234" },
-    { id: "ap6", borrowerId: null, borrowerName: "Grace Nambala", tier: "A", riskScore: 89, amount: 18000, term: 12, purpose: "Home Improvement", status: "new_lead", dti: "24.4%", employer: "Bank of Namibia", salary: 28000, receivedAt: "2025-03-16 14:15", docs: 0, kycStatus: "pending", amlStatus: "clear", bankVerified: false, firstBorrower: false, channel: "whatsapp", phone: "+264 81 666 5678" },
-  ],
+  borrowers: [],
+  lenderPrefs: {},
+  applications: [],
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
 // AGENT DATABASE
 // ══════════════════════════════════════════════════════════════════════════════
-const AGENT_DB = {
-  agents: [
-    { id: "ag1", userId: "ua1", name: "Johannes Kamati", phone: "+264 81 100 2200", region: "Windhoek Central", lenderId: "u2", totalCaptured: 12, approved: 8, pending: 3, declined: 1, joined: "2025-01-15", commission: 1000 },
-    { id: "ag2", userId: "ua2", name: "Maria Shifidi", phone: "+264 81 200 3300", region: "Katutura", lenderId: "u2", totalCaptured: 7, approved: 5, pending: 1, declined: 1, joined: "2025-02-01", commission: 625 },
-  ],
-  borrowers: [
-    { id: "ab1", agentId: "ag1", name: "Festus Hamutenya", idNumber: "88030400234", phone: "+264 81 411 2233", employer: "City of Windhoek", salary: 14000, expenses: 5200, tier: "B", riskScore: 74, dti: "37.1%", kycStatus: "pending", amlStatus: "clear", bankVerified: false, status: "pending", capturedAt: "2025-03-10", purpose: "Education", amount: 8000, term: 6, channel: "agent", firstBorrower: true },
-    { id: "ab2", agentId: "ag1", name: "Loide Amunime", idNumber: "92061500445", phone: "+264 81 522 3344", employer: "Pupkewitz Motors", salary: 22000, expenses: 8500, tier: "B", riskScore: 78, dti: "38.6%", kycStatus: "verified", amlStatus: "clear", bankVerified: true, status: "approved", capturedAt: "2025-02-20", purpose: "Home", amount: 15000, term: 12, channel: "agent", firstBorrower: false },
-    { id: "ab3", agentId: "ag1", name: "Simon Nghipandulwa", idNumber: "79110600556", phone: "+264 81 633 4455", employer: "Namibia Post", salary: 11000, expenses: 4200, tier: "B", riskScore: 71, dti: "38.2%", kycStatus: "pending", amlStatus: "clear", bankVerified: false, status: "pending", capturedAt: "2025-03-18", purpose: "Medical", amount: 5000, term: 3, channel: "agent", firstBorrower: true },
-    { id: "ab4", agentId: "ag2", name: "Ndapewa Amunyela", idNumber: "95040200667", phone: "+264 81 744 5566", employer: "MTC Namibia", salary: 19500, expenses: 4700, tier: "A", riskScore: 86, dti: "24.1%", kycStatus: "verified", amlStatus: "clear", bankVerified: true, status: "approved", capturedAt: "2025-02-28", purpose: "Business", amount: 20000, term: 12, channel: "agent", firstBorrower: false },
-    { id: "ab5", agentId: "ag2", name: "Paulus Nghifikwa", idNumber: "83091500778", phone: "+264 81 855 6677", employer: "Shoprite Namibia", salary: 9500, expenses: 5800, tier: "C", riskScore: 55, dti: "61.1%", kycStatus: "pending", amlStatus: "clear", bankVerified: false, status: "declined", capturedAt: "2025-03-05", purpose: "Vehicle", amount: 3000, term: 3, channel: "agent", firstBorrower: true },
-  ],
-};
+const AGENT_DB = { agents: [], borrowers: [] };
 
 // ══════════════════════════════════════════════════════════════════════════════
 // WHATSAPP DATABASE
 // ══════════════════════════════════════════════════════════════════════════════
-const WHATSAPP_DB = {
-  leads: [
-    { id: "wa1", name: "Festus Hamutenya", phone: "+264 81 555 1234", timestamp: "2025-03-15 09:23", stage: "qualified", status: "new_lead", salary: 14000, employer: "City of Windhoek", purpose: "Education", amount: 8000, tier: "B", riskScore: 74, status: "new_lead", lenderId: "u2", dti: "37.1%", kycStatus: "pending" },
-    { id: "wa2", name: "Grace Nambala", phone: "+264 81 666 5678", timestamp: "2025-03-16 14:07", stage: "documents", status: "new_lead", salary: 28000, employer: "Bank of Namibia", purpose: "Home", amount: 18000, tier: "A", riskScore: 89, status: "new_lead", lenderId: "u2", dti: "21.4%", kycStatus: "pending" },
-    { id: "wa3", name: "Thomas Katjiuanjo", phone: "+264 81 777 9012", timestamp: "2025-03-17 11:30", stage: "screening", status: "under_review", salary: 7500, employer: "Self-employed", purpose: "Medical", amount: 4000, tier: "C", riskScore: 51, status: "under_review", lenderId: "u3", dti: "53.3%", kycStatus: "pending" },
-    { id: "wa4", name: "Selma Iyambo", phone: "+264 81 888 3456", timestamp: "2025-03-18 08:45", stage: "new", status: "new_lead", salary: null, employer: null, purpose: null, amount: null, tier: null, riskScore: null, status: "new_lead", lenderId: null, dti: null, kycStatus: "pending" },
-  ],
-  conversations: {
-    "wa1": [
-      { from: "bot", text: "👋 Welcome to *MicroLendNA*! I'm your digital loan assistant. How can I help you today?\n\nReply:\n1️⃣ APPLY — Start a new loan application\n2️⃣ STATUS — Check your application\n3️⃣ HELP — Learn how it works", time: "09:20" },
-      { from: "user", text: "1", time: "09:23" },
-      { from: "bot", text: "Great! Let's get you started 🚀\n\nFirst, what is your *full name* as it appears on your Namibian ID?", time: "09:23" },
-      { from: "user", text: "Festus Hamutenya", time: "09:24" },
-      { from: "bot", text: "Nice to meet you, Festus! 👋\n\nWhat is your *monthly gross salary* (before tax, in N$)?\n\nExample: 15000", time: "09:24" },
-      { from: "user", text: "14000", time: "09:25" },
-      { from: "bot", text: "Got it — N$14,000/month ✅\n\nWhat are your *total monthly expenses* (rent, food, existing loans, debit orders)?\n\nExample: 6000", time: "09:25" },
-      { from: "user", text: "5200", time: "09:26" },
-      { from: "bot", text: "Thank you! Running your assessment... ⚙️\n\n✅ *Initial Assessment Complete*\n\n• DTI Ratio: 37.1%\n• Credit Tier: *Tier B* (Moderate Risk)\n• Estimated Max Loan: *N$17,600*\n• Est. Rate: 24% p.a.\n\nWould you like to proceed with an application? Reply YES to continue.", time: "09:26" },
-      { from: "user", text: "YES", time: "09:27" },
-      { from: "bot", text: "Perfect! 🎉 What is the *purpose* of your loan?\n\n1. Medical\n2. Education\n3. Home Improvement\n4. Business\n5. Vehicle\n6. Funeral\n7. Other", time: "09:27" },
-      { from: "user", text: "2", time: "09:28" },
-      { from: "bot", text: "Education loan — noted 📚\n\nHow much do you need? (Maximum N$17,600 based on your profile)\n\nType the amount in N$:", time: "09:28" },
-      { from: "user", text: "8000", time: "09:29" },
-      { from: "bot", text: "N$8,000 over how many months?\n\n1️⃣ 1 month\n2️⃣ 3 months\n3️⃣ 6 months\n4️⃣ 12 months", time: "09:29" },
-      { from: "user", text: "3", time: "09:30" },
-      { from: "bot", text: "📋 *Application Summary*\n\nName: Festus Hamutenya\nAmount: N$8,000\nTerm: 6 months\nPurpose: Education\nEst. Monthly: N$1,600\nTier: B | Rate: 24%\n\nTo complete your application, please send:\n📎 Photo of your *Namibian ID*\n📎 Your latest *payslip*\n📎 *3-month bank statement* (PDF)\n\nReply DOCS when you've sent them all.", time: "09:30" },
-      { from: "user", text: "DOCS", time: "09:45" },
-      { from: "bot", text: "✅ Documents received! Your application has been submitted to a partner lender.\n\n*Reference: WA-001*\n\nYou'll receive a decision via WhatsApp within 24 hours. To check status anytime, reply STATUS.", time: "09:45" },
-    ],
-    "wa2": [
-      { from: "bot", text: "👋 Welcome to *MicroLendNA*! Reply APPLY to start.", time: "14:00" },
-      { from: "user", text: "APPLY", time: "14:07" },
-      { from: "bot", text: "What is your full name?", time: "14:07" },
-      { from: "user", text: "Grace Nambala", time: "14:08" },
-      { from: "bot", text: "Monthly gross salary?", time: "14:08" },
-      { from: "user", text: "28000", time: "14:09" },
-      { from: "bot", text: "Total monthly expenses?", time: "14:09" },
-      { from: "user", text: "6000", time: "14:10" },
-      { from: "bot", text: "✅ *Assessment Complete*\n\n• DTI: 21.4% → Tier *A* (Low Risk) 🌟\n• Max Loan: N$66,000\n• Rate: 18% p.a.\n\nExcellent profile! Ready to apply? Reply YES", time: "14:10" },
-      { from: "user", text: "YES please, I need 18000 for home improvements over 12 months", time: "14:11" },
-      { from: "bot", text: "📋 Summary: N$18,000 | 12 months | Home | N$1,770/mo\n\nPlease send your ID, payslip and bank statement.", time: "14:11" },
-    ],
-    "wa4": [
-      { from: "bot", text: "👋 Welcome to *MicroLendNA*! Reply APPLY to start a loan application or HELP to learn more.", time: "08:45" },
-      { from: "user", text: "Hi I want a loan", time: "08:47" },
-      { from: "bot", text: "I'd be happy to help! Reply *APPLY* to start your application. It takes about 5 minutes 🚀", time: "08:47" },
-    ],
-  },
-};
+const WHATSAPP_DB = { leads: [], conversations: {} };
 
 
 
@@ -8876,12 +8641,8 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
                 <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>Password</label>
                 <input id="pw-input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} autoComplete="current-password" />
               </div>
-              <div style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8, marginBottom: 16, fontSize: 12, color: DS.colors.textMuted }}>
-                <strong style={{ color: DS.colors.textSecondary }}>Demo accounts:</strong><br />
-                Admin: admin@microlend.na / Admin@123<br />
-                Lender: lender@capitalmicro.na / Lender@123<br />
-                Agent: agent@capitalmicro.na / Agent@123<br />
-                Borrower: john.smith@gmail.com / Test@123
+              <div style={{ padding: 12, background: DS.colors.infoDim, borderRadius: 8, marginBottom: 16, fontSize: 12, color: DS.colors.info }}>
+                ℹ Use your registered email and password to sign in. Contact admin if you need access.
               </div>
               <Btn style={{ width: "100%" }} onClick={handleLogin} disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
