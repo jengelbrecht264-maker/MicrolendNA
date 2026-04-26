@@ -4068,7 +4068,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
   };
 
   const downloadBorrowerReport = (b) => {
-    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const txt = [
       `BORROWER REPORT — ${b.name}`,
       "=".repeat(50),
@@ -4128,7 +4128,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
   const getAiMemo = async (b) => {
     setLoadingAi(true);
     setAiInsight(null);
-    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const sc = b.scorecard;
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -4152,7 +4152,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
   // ── BORROWER DETAIL VIEW ──
   if (selectedBorrower) {
     const b = selectedBorrower;
-    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const totalLoaned = b.loans.filter(l => l.status === "approved").reduce((s, l) => s + l.amount, 0);
     const totalOutstanding = b.loans.reduce((s, l) => s + (l.outstanding || 0), 0);
     const totalRepaid = b.loans.flatMap(l => l.repayments).filter(r => r.status === "paid").reduce((s, r) => s + r.amount, 0);
@@ -4528,7 +4528,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
       {/* Borrower cards */}
       <div style={{ display: "grid", gap: 10 }}>
         {filtered.map(b => {
-          const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+          const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
           const activeLoan = b.loans.find(l => l.status === "approved" && l.outstanding > 0);
           const settled = b.loans.filter(l => l.outstanding === 0 && l.disbursed).length;
           return (
@@ -4747,7 +4747,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
 
   const getAiMemo = async (b) => {
     setLoadingAi(true); setAiInsight(null);
-    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const sc = b.scorecard;
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -4770,7 +4770,7 @@ if (selected) {
       scorecard: selected.scorecard || NULL_SCORECARD,
       scorecardAnswers: selected.scorecardAnswers || NULL_SCORECARD_ANSWERS,
     };
-    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+    const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const totalLoaned = b.loans.filter(l=>l.status==="approved").reduce((s,l)=>s+l.amount,0);
     const totalOutstanding = b.loans.reduce((s,l)=>s+(l.outstanding||0),0);
 
