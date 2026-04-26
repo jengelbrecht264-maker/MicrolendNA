@@ -889,7 +889,7 @@ const RISK_SCORECARD = {
     },
   },
 
-  computeScore(answers) {
+  computeScore(answers || NULL_SCORECARD_ANSWERS) {
     let totalWeighted = 0;
     const breakdown = {};
     for (const [catKey, cat] of Object.entries(this.categories)) {
@@ -1886,7 +1886,7 @@ const BorrowerScorecard = ({ borrower, showToast }) => {
   };
 
   const computeRisk = () => {
-    const result = RISK_SCORECARD.computeScore(answers);
+    const result = RISK_SCORECARD.computeScore(answers || NULL_SCORECARD_ANSWERS);
     setRiskResult(result);
     setProfileSaved(true);
     showToast(`Risk score: ${result.finalScore}/100 — Tier ${result.tier}`);
