@@ -890,7 +890,17 @@ const RISK_SCORECARD = {
   },
 
   computeScore(answers) {
-    answers = answers || NULL_SCORECARD_ANSWERS;
+    if (!answers || typeof answers !== 'object') {
+      answers = {
+        jobTenure: "6 – 12 months", incomeRegularity: "Mostly regular",
+        employerType: "SME / informal", accountAge: "< 12 months",
+        salaryInAccount: "Partial / inconsistent", accountUsage: "Active & stable",
+        negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
+        incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
+        dtiRatio: "30 – 50%", disposableIncome: "Moderate", loanBurden: "Low",
+        incomeMismatch: "None", docAuthenticity: "Verified",
+      };
+    }
     let totalWeighted = 0;
     const breakdown = {};
     for (const [catKey, cat] of Object.entries(this.categories)) {
