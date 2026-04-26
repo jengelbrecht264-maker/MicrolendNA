@@ -2352,7 +2352,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
   };
 
   if (selected) {
-    const result = RISK_SCORECARD.computeScore(selected.answers);
+    const result = RISK_SCORECARD.const result = RISK_SCORECARD.computeScore(selected.answers || NULL_SCORECARD_ANSWERS);.answers);
     const sc = selected.scorecard;
     const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
 
