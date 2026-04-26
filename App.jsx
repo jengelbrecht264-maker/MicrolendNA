@@ -4061,9 +4061,20 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
     return function() { alive = false; };
   }, []);
   const allBorrowers = LENDER_DB.borrowers.map(function(b) {
-    return (b.userId && storedProfiles[b.userId])
+    var merged = (b.userId && storedProfiles[b.userId])
       ? Object.assign({}, b, storedProfiles[b.userId], { id: b.id })
       : b;
+    // Always ensure safe defaults so UI never crashes
+    merged.loans = Array.isArray(merged.loans) ? merged.loans : [];
+    merged.documents = Array.isArray(merged.documents) ? merged.documents : [];
+    merged.scorecardAnswers = merged.scorecardAnswers || NULL_SCORECARD_ANSWERS;
+    merged.scorecard = merged.scorecard || NULL_SCORECARD;
+    merged.name = merged.name || "Unknown";
+    merged.salary = merged.salary || 0;
+    merged.expenses = merged.expenses || 0;
+    merged.dti = merged.dti || "—";
+    merged.tier = merged.tier || "D";
+    return merged;
   });
   const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
 
@@ -4549,7 +4560,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
       <div style={{ display: "grid", gap: 10 }}>
         {filtered.map(b => {
           const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
-          const activeLoan = b.loans.find(l => l.status === "approved" && l.outstanding > 0);
+          const activeLoan = (b.loans||[]).find(l => l.status === "approved" && l.outstanding > 0);
           const settled = (b.loans||[]).filter(l => l.outstanding === 0 && l.disbursed).length;
           return (
             <Card key={b.id} style={{ padding: 0, overflow: "hidden", opacity: b.status === "declined" ? 0.85 : 1 }}>
@@ -4732,6 +4743,20 @@ const AdminBorrowers = ({ showToast, setView }) => {
   sbBorrowers.forEach(function(b) { seenIds[b.userId || b.id] = true; allBorrowers.push(b); });
   LENDER_DB.borrowers.forEach(function(b) {
     if (!seenIds[b.userId || b.id]) { allBorrowers.push(b); }
+  });
+  // Ensure all borrowers have safe defaults
+  allBorrowers = allBorrowers.map(function(b) {
+    return Object.assign({}, b, {
+      loans: Array.isArray(b.loans) ? b.loans : [],
+      documents: Array.isArray(b.documents) ? b.documents : [],
+      scorecardAnswers: b.scorecardAnswers || NULL_SCORECARD_ANSWERS,
+      scorecard: b.scorecard || NULL_SCORECARD,
+      name: b.name || "Unknown",
+      salary: b.salary || 0,
+      expenses: b.expenses || 0,
+      dti: b.dti || "—",
+      tier: b.tier || "D",
+    });
   });
 
   const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
