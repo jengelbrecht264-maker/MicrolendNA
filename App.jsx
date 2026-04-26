@@ -5103,7 +5103,7 @@ if (selected) {
                   <td style={{padding:"12px 14px",fontSize:12,color:DS.colors.textMuted}}>{lenderName}</td>
                   <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${N${b.salary.toLocaleString()}()}</td>
                   <td style={{padding:"12px 14px",color:parseFloat(b.dti)>45?DS.colors.warning:DS.colors.textPrimary,fontFamily:"'DM Mono',monospace"}}>{b.dti}</td>
-                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace",fontWeight:700,color:rr.tierColor}}>{rr.finalScore}</td>
+                  <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace"}}>N${(b.salary||0).toLocaleString()}</td>
                   <td style={{padding:"12px 14px"}}><span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span></td>
                   <td style={{padding:"12px 14px"}}><Badge label={b.kycStatus} color={b.kycStatus==="verified"?DS.colors.accent:DS.colors.warning}/></td>
                   <td style={{padding:"12px 14px"}}><Badge label={b.amlStatus} color={b.amlStatus==="clear"?DS.colors.accent:DS.colors.danger}/></td>
