@@ -4324,7 +4324,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               <div style={{ background: "#1e3a5f", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "#e2e8f0", display: "flex", justifyContent: "space-between" }}>
                 <span>Committed Monthly Deductions</span><span>Avg/Month</span>
               </div>
-              {b.scorecard.deductions.map((d, i) => (
+              {(b.scorecard.deductions||[]).map((d,i)=>(
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderTop: `1px solid ${DS.colors.border}`, background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}><ScorecardBadge type={d.badge} /><span style={{ fontSize: 12, color: DS.colors.textSecondary }}>{d.desc}</span></div>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 700, color: DS.colors.info }}>N${d.avg.toLocaleString()}</span>
