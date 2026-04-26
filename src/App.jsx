@@ -128,7 +128,7 @@ const SB = {
   },
 
   getFileUrl(bucket, path) {
-    return `${SUPABASE_URL}/storage/v1/object/authenticated/${bucket}/${path}`;
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
   },
 
   async getSignedUrl(bucket, path, expiresIn = 3600) {
@@ -1891,10 +1891,10 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
                   : isUploaded
                     ? <>
                         {fileInfo && fileInfo.filePath && (
-                          <Btn variant="outline" small onClick={async function() {
-                            var signed = await SB.getSignedUrl("kyc-documents", fileInfo.filePath);
-                            if (signed) { window.open(signed, "_blank"); }
-                            else { showToast("Could not open file — try re-uploading", "info"); }
+                          <Btn variant="outline" small onClick={function() {
+                            if (fileInfo.filePath) {
+                              window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + fileInfo.filePath, "_blank");
+                            } else { showToast("Could not open file — try re-uploading", "info"); }
                           }}>👁 View</Btn>
                         )}
                         <Btn variant="ghost" small onClick={function() { triggerFileInput(doc.key); }}>🔄 Replace</Btn>
@@ -2619,9 +2619,13 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
     if (!user?.id) { setCheckingApproval(false); return; }
     (async function() {
       try {
-        var rows = await SB.query("borrower_profiles", "user_id=eq." + user.id + "&select=kyc_status");
-        if (rows && rows.length > 0 && rows[0].kyc_status === "verified") {
-          setBorrowerApproved(true);
+        var rows = await SB.query("borrower_profiles", "user_id=eq." + user.id + "&select=kyc_status,salary_cents,tier");
+        if (rows && rows.length > 0) {
+          var r = rows[0];
+          // Approved if admin verified OR if they have salary data and a valid tier
+          if (r.kyc_status === "verified") {
+            setBorrowerApproved(true);
+          }
         }
       } catch(e) {}
       setCheckingApproval(false);
@@ -2860,15 +2864,24 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                 ))}
               </div>
               {(() => {
-                const _t = borrower.tier || (borrower.salary && borrower.expenses ? runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).tier : "—");
-                const _ml = borrower.maxLoan != null ? borrower.maxLoan : (borrower.salary && borrower.expenses ? runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan : 0);
+                const hasSalary = borrower.salary && borrower.expenses && +borrower.salary > 0;
+                const _t = hasSalary ? (borrower.tier || runRiskEngine(+borrower.salary, +borrower.expenses, borrower.firstBorrower, DB.riskRules).tier) : null;
+                const _ml = hasSalary ? (borrower.maxLoan != null ? borrower.maxLoan : runRiskEngine(+borrower.salary, +borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan) : 0;
+                if (!hasSalary) return (
+                  <div style={{ padding: 16, background: DS.colors.infoDim, border: "1px solid " + DS.colors.info + "33", borderRadius: 8, marginBottom: 20 }}>
+                    <p style={{ fontSize: 13, color: DS.colors.info, fontWeight: 600 }}>ℹ Profile incomplete — please go to My Profile and add your salary, expenses and employer details to see your eligibility.</p>
+                  </div>
+                );
                 return (
-                  <div style={{ padding: 16, background: DS.colors.accentDim, borderRadius: 8, marginBottom: 20 }}>
+                  <div style={{ padding: 16, background: _t === "D" ? DS.colors.dangerDim : DS.colors.accentDim, border: "1px solid " + (_t === "D" ? DS.colors.danger : DS.colors.accent) + "33", borderRadius: 8, marginBottom: 20 }}>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Eligibility</p><p style={{ fontWeight: 700, fontSize: 16, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "Not eligible" : "Pre-qualified ✓"}</p></div>
-                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Max Loan</p><p style={{ fontWeight: 700, fontSize: 20, color: DS.colors.accent }}>N${Math.round(_ml).toLocaleString()}</p></div>
-                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Terms</p><p style={{ fontWeight: 700, fontSize: 14, color: DS.colors.textSecondary }}>Subject to lender approval</p></div>
+                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Eligibility</p><p style={{ fontWeight: 700, fontSize: 16, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "❌ High DTI — not eligible" : "✅ Pre-qualified"}</p></div>
+                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Max Loan</p><p style={{ fontWeight: 700, fontSize: 20, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "Reduce expenses first" : "N$" + Math.round(_ml).toLocaleString()}</p></div>
+                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Tier</p><p style={{ fontWeight: 700, fontSize: 14, color: DS.colors[`tier${_t}`] || DS.colors.textMuted }}>Tier {_t}</p></div>
                     </div>
+                    {_t === "D" && (
+                      <p style={{ fontSize: 12, color: DS.colors.danger, marginTop: 8 }}>Your debt-to-income ratio is too high. Reduce your monthly expenses or existing loan repayments, then update your profile.</p>
+                    )}
                   </div>
                 );
               })()}
@@ -3564,7 +3577,7 @@ const StorageService = {
         var k = reverseMap[r.doc_type] || r.doc_type;
         // Only keep latest version (order=desc so first one wins)
         if (!out[k]) {
-          var fileUrl = r.file_path ? SB.getFileUrl("kyc-documents", r.file_path) : null;
+          var fileUrl = r.file_path ? `${SUPABASE_URL}/storage/v1/object/public/kyc-documents/${r.file_path}` : null;
           out[k] = { 
             key: k, 
             name: r.file_name, 
@@ -4166,16 +4179,14 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                       <Btn small variant="outline" onClick={async function() {
                         var path = typeof doc === "object" ? doc.filePath : null;
                         if (path) {
-                          var signed = await SB.getSignedUrl("kyc-documents", path);
-                          if (signed) { window.open(signed, "_blank"); return; }
+                          if (path) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + path, "_blank"); return; }
                         }
                         showToast("File not available — borrower may need to re-upload", "info");
                       }}>👁 View</Btn>
                       <Btn small variant="ghost" onClick={async function() {
                         var path = typeof doc === "object" ? doc.filePath : null;
                         if (path) {
-                          var signed = await SB.getSignedUrl("kyc-documents", path);
-                          if (signed) { window.open(signed, "_blank"); return; }
+                          if (path) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + path, "_blank"); return; }
                         }
                         showToast("Download not available", "info");
                       }}>⬇ Download</Btn>
@@ -5315,32 +5326,38 @@ const AdminBorrowers = ({ showToast, setView }) => {
             const a=document.createElement("a");a.href=url;a.download=`${b.name.replace(/\s+/g,"_")}.txt`;a.click();
             showToast("Report downloaded");
           }}>⬇ Download</Btn>
-          {b.kycStatus !== "verified" && (
+          {b.kycStatus !== "verified" ? (
             <Btn small onClick={async function() {
               try {
                 await SB.update("borrower_profiles", { user_id: b.userId }, { kyc_status: "verified", kyc_verified_at: new Date().toISOString() });
-                // Notify the borrower
                 try {
                   await SB.insert("notifications", {
                     user_id: b.userId,
-                    title: "Account Approved!",
-                    message: "Your account has been verified and approved by an administrator. You can now apply for loans.",
+                    title: "Account Approved! ✅",
+                    message: "Your account has been verified and approved by an administrator. You can now apply for loans on MicroLendNA.",
                     type: "success",
                   });
                 } catch(ne) {}
-                // Update local state
                 var updatedBorrowers = sbBorrowers.map(function(sb) {
                   if (sb.userId === b.userId) return Object.assign({}, sb, { kycStatus: "verified", status: "active" });
                   return sb;
                 });
                 setSbBorrowers(updatedBorrowers);
                 setSelected(Object.assign({}, b, { kycStatus: "verified", status: "active" }));
-                showToast("Borrower approved — they can now apply for loans ✓");
+                showToast("✅ " + b.name + " approved — they can now apply for loans");
               } catch(e) { showToast("Failed to approve: " + e.message, "error"); }
-            }}>✓ Approve Borrower</Btn>
-          )}
-          {b.kycStatus === "verified" && (
-            <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>✅ Verified</span>
+            }} style={{background: DS.colors.accent, color: "#0A0F1E"}}>✓ Approve Borrower</Btn>
+          ) : (
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>✅ Approved</span>
+              <Btn small variant="danger" onClick={async function() {
+                try {
+                  await SB.update("borrower_profiles", { user_id: b.userId }, { kyc_status: "pending" });
+                  setSelected(Object.assign({}, b, { kycStatus: "pending", status: "pending" }));
+                  showToast("Approval revoked", "warning");
+                } catch(e) { showToast("Error: " + e.message, "error"); }
+              }}>Revoke</Btn>
+            </div>
           )}
         </div>
 
@@ -5450,11 +5467,11 @@ const AdminBorrowers = ({ showToast, setView }) => {
                   </div>
                   <div style={{display:"flex",gap:8}}>
                     <Btn small variant="outline" onClick={async function() {
-                      if (filePath) { var s = await SB.getSignedUrl("kyc-documents", filePath); if (s) { window.open(s,"_blank"); return; } }
+                      if (filePath) { if (filePath) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath, "_blank"); return; } }
                       showToast("File not available — borrower may need to re-upload","info");
                     }}>👁 View</Btn>
                     <Btn small variant="ghost" onClick={async function() {
-                      if (filePath) { var s = await SB.getSignedUrl("kyc-documents", filePath); if (s) { window.open(s,"_blank"); return; } }
+                      if (filePath) { if (filePath) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath, "_blank"); return; } }
                       showToast("Download not available","info");
                     }}>⬇</Btn>
                     {!verified && <Btn small onClick={async function() {
