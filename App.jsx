@@ -2353,7 +2353,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
   };
 
   if (selected) {
-    const result = RISK_SCORECARD.const result = RISK_SCORECARD.computeScore(selected.answers || NULL_SCORECARD_ANSWERS);.answers);
+    const result = RISK_SCORECARD.computeScore(selected.answers || NULL_SCORECARD_ANSWERS);
     const sc = selected.scorecard;
     const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
 
@@ -3541,7 +3541,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
 
   const getAiRec = async (app, borrower) => {
     setLoadingAi(true);
-    const _sc = borrower?.scorecardAnswers || DEMO_ANSWERS;
+    const _sc = borrower?.scorecardAnswers || NULL_SCORECARD_ANSWERS;
     const rr = RISK_SCORECARD.computeScore(_sc);
     try {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
@@ -3582,7 +3582,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
       loanBurden: app.firstBorrower ? "Medium" : "Low",
     };
   })();
-  const rr = RISK_SCORECARD.computeScore(_answers);
+  const rr = RISK_SCORECARD.computeScore(_answers || NULL_SCORECARD_ANSWERS);
     const tierColor = DS.colors[`tier${app.tier}`];
     const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
     const decided = appStatuses[app.id];
