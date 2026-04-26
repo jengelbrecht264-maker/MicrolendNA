@@ -2321,7 +2321,7 @@ const LenderScorecard = ({ showToast }) => {
 
   const getAiInsight = async (b) => {
     setLoadingAi(true);
-    const result = RISK_SCORECARD.computeScore(b.answers);
+    const result = RISK_SCORECARD.computeScore(b.answers || NULL_SCORECARD_ANSWERS);
     const sc = b.scorecard;
     try {
       const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -2427,7 +2427,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
       <p style={{ color: DS.colors.textSecondary, marginBottom: 28 }}>Risk-scored borrower profiles — all pre-screened via 5-category scorecard</p>
       <div style={{ display: "grid", gap: 12 }}>
         {borrowers.map(b => {
-          const result = RISK_SCORECARD.computeScore(b.answers);
+          const result = RISK_SCORECARD.computeScore(b.answers || NULL_SCORECARD_ANSWERS);
           return (
             <Card key={b.id} style={{ border: `1px solid ${tierColors[b.tier]}33` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
