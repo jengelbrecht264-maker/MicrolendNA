@@ -130,6 +130,27 @@ const SB = {
   getFileUrl(bucket, path) {
     return `${SUPABASE_URL}/storage/v1/object/authenticated/${bucket}/${path}`;
   },
+
+  async getSignedUrl(bucket, path, expiresIn = 3600) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${bucket}/${path}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${_sbToken || SUPABASE_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ expiresIn }),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data.signedURL ? `${SUPABASE_URL}/storage/v1${data.signedURL}` : null;
+    } catch(e) { return null; }
+  },
+
+  getPublicUrl(bucket, path) {
+    return `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}`;
+  },
 };
 
 // ── DESIGN SYSTEM ──────────────────────────────────────────────────────────────
@@ -1660,6 +1681,23 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         await StorageService.saveBorrowerProfile(uid, updated);
         StorageService.syncToLenderDB(uid, updated);
 
+        // 5. If all 3 required docs now uploaded, notify admin to review
+        var requiredKeys = ["id", "payslip", "bank_stmt"];
+        var uploadedKeys = Object.keys(uploadedFilesRef || {});
+        // merge current doc keys
+        var allUploadedKeys = Object.keys(Object.assign({}, uploadedFiles, {[key]: meta}));
+        var allRequiredUploaded = requiredKeys.every(function(k) { return allUploadedKeys.includes(k) || updatedDocs.includes(k+".pdf"); });
+        if (allRequiredUploaded) {
+          try {
+            await SB.insert("notifications", {
+              user_id: "admin",
+              title: "Documents Ready for Review",
+              message: (borrower?.name || "A borrower") + " has uploaded all required documents and is awaiting KYC verification and approval.",
+              type: "warning",
+            });
+          } catch(ne) { console.log("Admin notify:", ne.message); }
+        }
+
       } catch (err) {
         console.log("Upload error:", err);
         // Still update UI optimistically
@@ -1852,8 +1890,12 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
                     </div>
                   : isUploaded
                     ? <>
-                        {fileInfo && fileInfo.fileUrl && (
-                          <Btn variant="outline" small onClick={function() { window.open(fileInfo.fileUrl, "_blank"); }}>👁 View</Btn>
+                        {fileInfo && fileInfo.filePath && (
+                          <Btn variant="outline" small onClick={async function() {
+                            var signed = await SB.getSignedUrl("kyc-documents", fileInfo.filePath);
+                            if (signed) { window.open(signed, "_blank"); }
+                            else { showToast("Could not open file — try re-uploading", "info"); }
+                          }}>👁 View</Btn>
                         )}
                         <Btn variant="ghost" small onClick={function() { triggerFileInput(doc.key); }}>🔄 Replace</Btn>
                         <Btn variant="danger" small onClick={async function() {
@@ -4121,13 +4163,21 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                       {docUrl && <p style={{ fontSize: 11, color: DS.colors.info, marginTop: 2 }}>✓ File available for viewing</p>}
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
-                      <Btn small variant="outline" onClick={function() {
-                        if (docUrl) { window.open(docUrl, "_blank"); }
-                        else { showToast("File not yet available — borrower may need to re-upload", "info"); }
+                      <Btn small variant="outline" onClick={async function() {
+                        var path = typeof doc === "object" ? doc.filePath : null;
+                        if (path) {
+                          var signed = await SB.getSignedUrl("kyc-documents", path);
+                          if (signed) { window.open(signed, "_blank"); return; }
+                        }
+                        showToast("File not available — borrower may need to re-upload", "info");
                       }}>👁 View</Btn>
-                      <Btn small variant="ghost" onClick={function() {
-                        if (docUrl) { window.open(docUrl, "_blank"); }
-                        else { showToast("Download not available", "info"); }
+                      <Btn small variant="ghost" onClick={async function() {
+                        var path = typeof doc === "object" ? doc.filePath : null;
+                        if (path) {
+                          var signed = await SB.getSignedUrl("kyc-documents", path);
+                          if (signed) { window.open(signed, "_blank"); return; }
+                        }
+                        showToast("Download not available", "info");
                       }}>⬇ Download</Btn>
                     </div>
                   </div>
@@ -5115,7 +5165,6 @@ const AdminBorrowers = ({ showToast, setView }) => {
             accountAge: bp.account_age || null,
           };
         });
-        setSbBorrowers(mapped);
         // Also include borrower users who registered but don't have a profile yet
         var bpUserIds = {};
         mapped.forEach(function(m) { bpUserIds[m.userId] = true; });
@@ -5132,6 +5181,36 @@ const AdminBorrowers = ({ showToast, setView }) => {
             });
           }
         });
+
+        // Load ALL documents from DB and attach to borrowers
+        try {
+          var allDocs = await SB.query("documents", "select=*&order=uploaded_at.desc");
+          var reverseMap = { national_id: "id", payslip: "payslip", bank_statement: "bank_stmt", proof_of_address: "proof_addr", employment_letter: "employment" };
+          var docsByProfileId = {};
+          (allDocs || []).forEach(function(d) {
+            if (!docsByProfileId[d.borrower_id]) docsByProfileId[d.borrower_id] = [];
+            var k = reverseMap[d.doc_type] || d.doc_type;
+            var already = docsByProfileId[d.borrower_id].find(function(x) { return x.key === k; });
+            if (!already) {
+              docsByProfileId[d.borrower_id].push({
+                key: k,
+                label: ({national_id:"National ID/Passport",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type] || d.doc_type,
+                type: ({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type] || "📎",
+                verified: d.verified || false,
+                date: d.uploaded_at ? d.uploaded_at.slice(0,10) : "—",
+                size: d.file_size_bytes ? Math.round(d.file_size_bytes/1024) + " KB" : "—",
+                filePath: d.file_path || null,
+                dbId: d.id,
+              });
+            }
+          });
+          // Attach docs to each borrower using their borrower_profile id
+          mapped = mapped.map(function(b) {
+            var docs = docsByProfileId[b.id] || [];
+            return Object.assign({}, b, { documents: docs });
+          });
+        } catch(docErr) { console.log("Doc load error:", docErr.message); }
+
         setSbBorrowers(mapped);
         // Also sync into LENDER_DB for other components
         mapped.forEach(function(b) { StorageService.syncToLenderDB(b.userId, b); });
@@ -5337,40 +5416,78 @@ const AdminBorrowers = ({ showToast, setView }) => {
         )}
 
         {/* Documents */}
-        {activeTab==="documents"&&(
+                {activeTab==="documents"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents</h3>
-              <Btn small variant="ghost" onClick={()=>showToast("Documents downloaded as ZIP")}>⬇ Download All</Btn>
+              <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents — {b.name}</h3>
+              <span style={{fontSize:13,color:DS.colors.textMuted}}>{(b.documents||[]).length} document{(b.documents||[]).length!==1?"s":""} on file</span>
             </div>
-            {(b.documents||[]).map(doc=>(
-              <div key={doc.key} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px",background:DS.colors.surfaceAlt,border:`1px solid ${doc.verified?DS.colors.accent+"33":DS.colors.warning+"33"}`,borderRadius:12,marginBottom:10}}>
-                <span style={{fontSize:24}}>{doc.type}</span>
-                <div style={{flex:1}}>
-                  <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
-                    <p style={{fontWeight:600}}>{doc.label}</p>
-                    <Badge label={doc.verified?"Verified ✓":"Pending"} color={doc.verified?DS.colors.accent:DS.colors.warning}/>
-                  </div>
-                  <p style={{fontSize:12,color:DS.colors.textMuted}}>Uploaded {doc.date} · {doc.size}</p>
-                </div>
-                <div style={{display:"flex",gap:8}}>
-                  <Btn small variant="outline" onClick={()=>showToast(`Viewing ${doc.label}`)}>👁 View</Btn>
-                  <Btn small variant="ghost" onClick={()=>showToast(`Downloaded ${doc.key}`)}>⬇</Btn>
-                  {!doc.verified&&<Btn small onClick={()=>showToast(`${doc.label} verified`)}>✓ Verify</Btn>}
-                </div>
+            {(b.documents||[]).length === 0 && (
+              <div style={{padding:24,background:DS.colors.surfaceAlt,borderRadius:12,textAlign:"center",marginBottom:16}}>
+                <p style={{fontSize:32,marginBottom:8}}>📂</p>
+                <p style={{color:DS.colors.textMuted,fontSize:13}}>No documents uploaded yet by this borrower.</p>
               </div>
-            ))}
+            )}
+            {(b.documents||[]).map(function(doc) {
+              var docKey = typeof doc === "string" ? doc : doc.key;
+              var docLabel = typeof doc === "object" ? doc.label : docKey;
+              var docType = typeof doc === "object" ? doc.type : "📎";
+              var docDate = typeof doc === "object" ? doc.date : "—";
+              var docSize = typeof doc === "object" ? doc.size : "—";
+              var filePath = typeof doc === "object" ? doc.filePath : null;
+              var verified = typeof doc === "object" ? doc.verified : false;
+              var dbId = typeof doc === "object" ? doc.dbId : null;
+              return (
+                <div key={docKey} style={{display:"flex",alignItems:"center",gap:14,padding:"14px 18px",background:DS.colors.surfaceAlt,border:"1px solid "+(verified?DS.colors.accent+"33":DS.colors.warning+"33"),borderRadius:12,marginBottom:10}}>
+                  <span style={{fontSize:24}}>{docType}</span>
+                  <div style={{flex:1}}>
+                    <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
+                      <p style={{fontWeight:600}}>{docLabel}</p>
+                      <Badge label={verified?"Verified ✓":"Uploaded"} color={verified?DS.colors.accent:DS.colors.gold}/>
+                    </div>
+                    <p style={{fontSize:12,color:DS.colors.textMuted}}>Uploaded {docDate} · {docSize} · AES-256 encrypted</p>
+                    {filePath && <p style={{fontSize:11,color:DS.colors.info,marginTop:2}}>✓ Stored in Supabase</p>}
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <Btn small variant="outline" onClick={async function() {
+                      if (filePath) { var s = await SB.getSignedUrl("kyc-documents", filePath); if (s) { window.open(s,"_blank"); return; } }
+                      showToast("File not available — borrower may need to re-upload","info");
+                    }}>👁 View</Btn>
+                    <Btn small variant="ghost" onClick={async function() {
+                      if (filePath) { var s = await SB.getSignedUrl("kyc-documents", filePath); if (s) { window.open(s,"_blank"); return; } }
+                      showToast("Download not available","info");
+                    }}>⬇</Btn>
+                    {!verified && <Btn small onClick={async function() {
+                      try {
+                        if (dbId) await SB.update("documents", {id:dbId}, {verified:true});
+                        showToast(docLabel+" marked as verified");
+                      } catch(e) { showToast("Error: "+e.message,"error"); }
+                    }}>✓ Verify</Btn>}
+                  </div>
+                </div>
+              );
+            })}
             {b.kycStatus!=="verified"&&(
               <div style={{marginTop:16,display:"flex",gap:10}}>
-                <Btn onClick={()=>showToast("KYC status updated to Verified")}>✓ Mark KYC Verified</Btn>
-                <Btn variant="danger" onClick={()=>showToast("KYC flagged for review","error")}>⚠ Flag for Review</Btn>
+                <Btn onClick={async function() {
+                  try {
+                    await SB.update("borrower_profiles",{user_id:b.userId},{kyc_status:"verified",kyc_verified_at:new Date().toISOString()});
+                    setSelected(Object.assign({},b,{kycStatus:"verified",status:"active"}));
+                    showToast("KYC verified — borrower can now apply for loans ✓");
+                  } catch(e) { showToast("Error: "+e.message,"error"); }
+                }}>✓ Verify & Approve Borrower</Btn>
+                <Btn variant="danger" onClick={async function() {
+                  try {
+                    await SB.update("borrower_profiles",{user_id:b.userId},{kyc_status:"flagged"});
+                    setSelected(Object.assign({},b,{kycStatus:"flagged"}));
+                    showToast("Flagged for review","warning");
+                  } catch(e) { showToast("Error: "+e.message,"error"); }
+                }}>⚠ Flag</Btn>
               </div>
             )}
           </div>
         )}
-
-        {/* Bank Analysis */}
-        {activeTab==="scorecard"&&(
+                {activeTab==="scorecard"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
               <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>Bank Statement — {b.scorecard.period}</h3>
@@ -5598,6 +5715,18 @@ const AdminHome = ({ setView }) => {
   return (
     <div className="fade-in">
       <PageHeader title="Platform Overview" subtitle="MicroLendNA Admin — real-time platform analytics" />
+
+      {/* Verification Queue Banner */}
+      {allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length > 0 && (
+        <div onClick={() => setView("admin-borrowers")} className="card-hover" style={{padding:"12px 18px",background:DS.colors.warningDim,border:"1px solid "+DS.colors.warning+"33",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
+          <span style={{fontSize:22}}>🔍</span>
+          <div style={{flex:1}}>
+            <p style={{fontWeight:700,color:DS.colors.warning,fontSize:13}}>{allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length} borrower{allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length!==1?"s":""} awaiting KYC verification & approval</p>
+            <p style={{fontSize:12,color:DS.colors.textSecondary}}>Documents uploaded — click to review and approve →</p>
+          </div>
+          <Btn small onClick={() => setView("admin-borrowers")}>Review Now →</Btn>
+        </div>
+      )}
 
       {/* WhatsApp + Agent banner */}
       {(WHATSAPP_DB.leads.filter(l=>l.status==="new_lead").length > 0 || AGENT_DB.borrowers.filter(b=>b.status==="pending").length > 0) && (
