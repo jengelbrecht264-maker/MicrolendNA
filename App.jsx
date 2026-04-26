@@ -889,7 +889,8 @@ const RISK_SCORECARD = {
     },
   },
 
-  computeScore(answers || NULL_SCORECARD_ANSWERS) {
+  computeScore(answers) {
+    answers = answers || NULL_SCORECARD_ANSWERS;
     let totalWeighted = 0;
     const breakdown = {};
     for (const [catKey, cat] of Object.entries(this.categories)) {
