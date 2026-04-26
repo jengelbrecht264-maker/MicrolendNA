@@ -2462,19 +2462,9 @@ const LenderScorecard = ({ showToast }) => {
   const [aiInsight, setAiInsight] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const borrowers = [
-    { id: "b1", name: "John Smith", tier: "B", status: "approved", riskScore: 71, scorecard: SAMPLE_SCORECARD,
-      answers: DEMO_ANSWERS },
-    { id: "b2", name: "Sarah Nangolo", tier: "A", status: "pending", riskScore: 88,
-      scorecard: { ...SAMPLE_SCORECARD, name: "Sarah Nangolo", avgSurplusDeficit: 18500, avgBalance: 380000, unpaidCount: 0, lowDays: 0, totalDeductionAvg: 22400, avgCoreCredits: 95000 },
-      answers: { ...DEMO_ANSWERS, dtiRatio: "< 30%", disposableIncome: "Strong surplus", loanBurden: "Low" } },
-    { id: "b3", name: "David Amupolo", tier: "C", status: "pending", riskScore: 52,
-      scorecard: { ...SAMPLE_SCORECARD, name: "David Amupolo", avgSurplusDeficit: -3200, avgBalance: 8500, unpaidCount: 2, lowDays: 5, totalDeductionAvg: 5100, avgCoreCredits: 9500 },
-      answers: { ...DEMO_ANSWERS, negativeDays: "1 – 3 days", unpaidOrders: "1 – 2", dtiRatio: "30 – 50%", disposableIncome: "Moderate", jobTenure: "6 – 12 months", employerType: "SME / informal" } },
-    { id: "b4", name: "Maria Haulofu", tier: "D", status: "declined", riskScore: 31,
-      scorecard: { ...SAMPLE_SCORECARD, name: "Maria Haulofu", avgSurplusDeficit: -18000, avgBalance: 1200, unpaidCount: 5, lowDays: 14, totalDeductionAvg: 6200, avgCoreCredits: 5500 },
-      answers: { ...DEMO_ANSWERS, negativeDays: "> 3 days", unpaidOrders: "> 2", dtiRatio: "> 50%", disposableIncome: "Weak / negative", loanBurden: "High", jobTenure: "< 6 months", employerType: "SME / informal", incomeMismatch: "Major mismatch" } },
-  ];
+  // Scorecard view only shows borrowers assigned to this lender
+  // This is populated from LenderApplications data
+  const borrowers = [];  // Will be populated once lender has assigned borrowers
 
   const tierColors = { A: DS.colors.tierA, B: DS.colors.tierB, C: DS.colors.tierC, D: DS.colors.tierD };
 
@@ -3704,8 +3694,8 @@ const StorageService = {
 // ── LENDER HOME ───────────────────────────────────────────────────────────────
 const LenderHome = ({ user, setView }) => {
   const lender = DB.lenders.find(l => l.id === user.id) || { applications: 0, approved: 0, plan: "—" };
-  const [allB, setAllB] = useState(LENDER_DB.borrowers);
-  const [allApps, setAllApps] = useState(LENDER_DB.applications);
+  const [allB, setAllB] = useState([]);
+  const [allApps, setAllApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(function() {
@@ -3802,6 +3792,9 @@ const LenderHome = ({ user, setView }) => {
             <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>New Leads Queue</h3>
             {newLeads > 0 && <Btn small onClick={() => setView("lender-apps")}>View All →</Btn>}
           </div>
+          {allApps.filter(a => a.status === "new_lead" || a.status === "pending").length === 0 && (
+            <p style={{ color: DS.colors.textMuted, fontSize: 13, padding: "12px 0" }}>No applications assigned to you yet. Admin will route borrowers here.</p>
+          )}
           {allApps.filter(a => a.status === "new_lead" || a.status === "pending").map((a, i) => (
             <div key={a.id} onClick={() => setView("lender-apps")} className="card-hover" style={{ display: "flex", alignItems: "center", gap: 12, paddingBottom: 12, marginBottom: 12, borderBottom: i < newLeads - 1 ? `1px solid ${DS.colors.border}` : "none", cursor: "pointer", borderRadius: 8, padding: "10px 8px", transition: "all .15s" }}>
               <div style={{ width: 38, height: 38, background: (DS.colors[`tier${a.tier}`]||DS.colors.textMuted) + "22", border: `1px solid ${(DS.colors[`tier${a.tier}`]||DS.colors.textMuted)}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: DS.colors[`tier${a.tier}`]||DS.colors.textMuted }}>{(a.borrowerName||"?")[0]}</div>
@@ -3824,7 +3817,7 @@ const LenderHome = ({ user, setView }) => {
         <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Active Loan Book</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
-            { label: "Outstanding Balance", value: `N${allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
+            { label: "Outstanding Balance", value: `N${(allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0)||0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
             { label: "Loans Disbursed", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.disbursed).length, color: DS.colors.accent, view: "lender-borrowers" },
             { label: "Fully Repaid", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.outstanding===0&&l.disbursed).length, color: DS.colors.info, view: "lender-borrowers" },
             { label: "Pending Disbursement", value: allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="pending").length, color: DS.colors.gold, view: "lender-apps" },
@@ -3854,9 +3847,20 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   // Load applications from Supabase
   const loadAppsFromDB = async function() {
     try {
-      var rows = await SB.query("applications", "select=*&order=created_at.desc");
-      var bpIds = [...new Set((rows || []).map(function(r) { return r.borrower_id; }).filter(Boolean))];
-      // Load borrower profiles and user profiles for names
+      // ── CRITICAL: Only load applications explicitly assigned to THIS lender ──
+      var allRows = await SB.query("applications", "select=*&order=created_at.desc");
+      // Filter strictly to apps where lender_user_id matches this lender's user ID
+      var rows = (allRows || []).filter(function(r) {
+        return r.lender_user_id === user.id || r.lender_id === user.id;
+      });
+
+      if (rows.length === 0) {
+        setSbApps([]);
+        setLoadingApps(false);
+        return;
+      }
+
+      var bpIds = [...new Set(rows.map(function(r) { return r.borrower_id; }).filter(Boolean))];
       var bpMap = {};
       if (bpIds.length > 0) {
         var bpRows = await SB.query("borrower_profiles", "select=*");
@@ -3868,7 +3872,30 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
         (users || []).forEach(function(u) { userMap[u.id] = u; });
       } catch(e) {}
       setSbBorrowerMap(bpMap);
-      var mapped = (rows || []).map(function(r) {
+
+      // Load documents for assigned borrowers
+      var docsByBpId = {};
+      try {
+        var allDocs = await SB.query("documents", "select=*&order=uploaded_at.desc");
+        var revMap = {national_id:"id",payslip:"payslip",bank_statement:"bank_stmt",proof_of_address:"proof_addr",employment_letter:"employment"};
+        (allDocs||[]).forEach(function(d) {
+          if (!docsByBpId[d.borrower_id]) docsByBpId[d.borrower_id] = [];
+          var k = revMap[d.doc_type] || d.doc_type;
+          if (!docsByBpId[d.borrower_id].find(function(x){return x.key===k;})) {
+            docsByBpId[d.borrower_id].push({
+              key: k,
+              label: ({national_id:"National ID",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type]||d.doc_type,
+              type: ({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type]||"📎",
+              verified: d.verified||false,
+              date: d.uploaded_at?d.uploaded_at.slice(0,10):"—",
+              size: d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"—",
+              filePath: d.file_path||null, dbId: d.id,
+            });
+          }
+        });
+      } catch(e) {}
+
+      var mapped = rows.map(function(r) {
         var bp = bpMap[r.borrower_id] || {};
         var u = userMap[bp.user_id] || {};
         return {
@@ -3881,22 +3908,28 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
           amount: r.amount_cents ? r.amount_cents / 100 : 0,
           term: r.term_months || 0,
           purpose: r.purpose || "Personal",
-          status: r.status || "pending",
+          status: r.status || "new_lead",
           dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : (bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "—"),
           employer: bp.employer || "",
           salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
+          expenses: bp.expenses_cents ? bp.expenses_cents / 100 : 0,
           receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
           kycStatus: bp.kyc_status || "pending",
           amlStatus: bp.aml_status || "pending",
           bankVerified: bp.bank_verified || false,
           firstBorrower: bp.is_first_borrower || false,
+          docs: (docsByBpId[r.borrower_id] || []).length,
+          docsData: docsByBpId[r.borrower_id] || [],
           channel: "platform",
-          lenderId: r.lender_id || null,
+          lenderId: r.lender_user_id || r.lender_id || null,
           rate: r.interest_rate || null,
+          idNumber: bp.id_number || "",
+          phone: u.phone || "",
+          email: u.email || "",
         };
       });
       setSbApps(mapped);
-    } catch (e) { console.log("Load apps:", e.message); }
+    } catch (e) { console.log("Load apps:", e.message); setSbApps([]); }
     setLoadingApps(false);
   };
 
@@ -3932,12 +3965,34 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState(null);
 
-  // Merge Supabase apps with LENDER_DB mock apps (SB takes priority, mock fills demo gaps)
-  const apps = sbApps.length > 0 ? sbApps : LENDER_DB.applications;
+  // Only show apps assigned to this lender — NO mock data fallback
+  const apps = sbApps;
   const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
   // Use storage-loaded profile as primary (reflects latest edits); fall back to LENDER_DB seed
-  const ldbBorrower = (selectedApp && selectedApp.borrowerId) ? LENDER_DB.borrowers.find(b => b.id === selectedApp.borrowerId) || null : null;
-  const selectedBorrower = storedBorrower || ldbBorrower;
+  // Build borrower from the app's embedded data (loaded from Supabase)
+  const selectedBorrower = storedBorrower || (selectedApp ? {
+    id: selectedApp.borrowerId,
+    userId: selectedApp.borrowerUserId,
+    name: selectedApp.borrowerName || "Unknown",
+    email: selectedApp.email || "",
+    phone: selectedApp.phone || "",
+    idNumber: selectedApp.idNumber || "",
+    employer: selectedApp.employer || "",
+    salary: selectedApp.salary || 0,
+    expenses: selectedApp.expenses || 0,
+    tier: selectedApp.tier || "—",
+    riskScore: selectedApp.riskScore || 0,
+    dti: selectedApp.dti || "—",
+    kycStatus: selectedApp.kycStatus || "pending",
+    amlStatus: selectedApp.amlStatus || "pending",
+    bankVerified: selectedApp.bankVerified || false,
+    firstBorrower: selectedApp.firstBorrower || false,
+    assignedDate: selectedApp.receivedAt || "—",
+    documents: selectedApp.docsData || [],
+    loans: [],
+    scorecard: NULL_SCORECARD,
+    scorecardAnswers: NULL_SCORECARD_ANSWERS,
+  } : null);
   // Merge storedDocMetas into documents display — shows real uploaded files
   // Build effective docs list with real file URLs from Supabase
   const effectiveDocsList = Object.keys(storedDocMetas).length > 0
@@ -4505,12 +4560,27 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             </Card>
           );
         })}
-        {filtered.filter(a => !appStatuses[a.id]).length === 0 && (
+        {loadingApps && (
+          <Card style={{textAlign:"center",padding:48}}>
+            <div className="spin" style={{width:36,height:36,border:"3px solid "+DS.colors.border,borderTop:"3px solid "+DS.colors.accent,borderRadius:"50%",margin:"0 auto 16px"}}/>
+            <p style={{color:DS.colors.textMuted,fontSize:13}}>Loading your assigned applications...</p>
+          </Card>
+        )}
+        {!loadingApps && apps.length === 0 && (
+          <Card style={{ textAlign: "center", padding: 56 }}>
+            <p style={{ fontSize: 52, marginBottom: 16 }}>📬</p>
+            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8, fontSize: 20 }}>No Applications Assigned Yet</h3>
+            <p style={{ color: DS.colors.textMuted, fontSize: 14, maxWidth: 420, margin: "0 auto", lineHeight: 1.6 }}>
+              The admin will review borrower profiles and route approved applications to you. You will receive a notification when an application is assigned.
+            </p>
+          </Card>
+        )}
+        {!loadingApps && apps.length > 0 && filtered.filter(a => !appStatuses[a.id]).length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
             <p style={{ fontSize: 40, marginBottom: 12 }}>📭</p>
             <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8 }}>No applications here</h3>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>
-              {filter === "new_lead" ? "No new leads waiting. Check back soon." : filter === "under_review" ? "No applications currently under review." : "All applications have been processed."}
+              {filter === "new_lead" ? "No new leads in this filter." : filter === "under_review" ? "No applications under review." : "All applications have been processed."}
             </p>
           </Card>
         )}
@@ -5153,8 +5223,8 @@ const AdminAllApplications = ({ showToast }) => {
           };
         });
         if (mapped.length > 0) setAllApps(mapped);
-        else setAllApps(LENDER_DB.applications); // fallback to mock if no SB data
-      } catch(e) { setAllApps(LENDER_DB.applications); }
+        else setAllApps([]);
+      } catch(e) { setAllApps([]); }
       setLoadingApps(false);
     })();
   }, []);
