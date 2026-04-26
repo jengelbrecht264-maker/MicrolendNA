@@ -307,6 +307,36 @@ const DB = {
         amlCheck: false, bankAccountVerified: false, contractSigned: false,
       },
     },
+    {
+      id: "u7", name: "FNB Namibia Microfinance", email: "micro@fnbnamibia.na",
+      plan: "subscription", planFee: 2500, status: "active",
+      registeredAt: "2025-01-10", approvedAt: "2025-01-12", approvedBy: "System Admin",
+      contactPerson: "Heinrich Mouton", phone: "+264 61 299 2400", regNumber: "CC/2010/00089",
+      namfisaLicense: "ML-2010-0008", licenseExpiry: "2027-01-31",
+      leadsTotal: 18, leadsApproved: 14, leadsDeclined: 3, leadsPending: 1,
+      revenue: 5000, notes: "FNB Namibia microfinance arm. Focuses on Tier A and B borrowers.",
+      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
+    },
+    {
+      id: "u8", name: "Bank Windhoek Micro Loans", email: "microloans@bankwindhoek.na",
+      plan: "subscription", planFee: 2500, status: "active",
+      registeredAt: "2025-01-20", approvedAt: "2025-01-22", approvedBy: "System Admin",
+      contactPerson: "Sophia Beukes", phone: "+264 61 299 1300", regNumber: "CC/2012/00145",
+      namfisaLicense: "ML-2012-0019", licenseExpiry: "2026-12-31",
+      leadsTotal: 12, leadsApproved: 9, leadsDeclined: 2, leadsPending: 1,
+      revenue: 3750, notes: "Bank Windhoek micro division. Accepts Tier A, B and C borrowers.",
+      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
+    },
+    {
+      id: "u9", name: "Nedbank Namibia Personal Finance", email: "personalfinance@nedbank.na",
+      plan: "payasyougo", planFee: 0, status: "active",
+      registeredAt: "2025-02-05", approvedAt: "2025-02-07", approvedBy: "System Admin",
+      contactPerson: "Petrus Hamutenya", phone: "+264 61 295 2000", regNumber: "CC/2008/00067",
+      namfisaLicense: "ML-2008-0005", licenseExpiry: "2027-06-30",
+      leadsTotal: 9, leadsApproved: 7, leadsDeclined: 1, leadsPending: 1,
+      revenue: 875, notes: "Nedbank personal finance. Specialises in funeral and medical emergency loans.",
+      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
+    },
   ],
   riskRules: {
     dtiMax: 0.45,
@@ -3696,12 +3726,16 @@ const LenderHome = ({ user, setView }) => {
           };
         });
         if (mapped.length > 0) setAllB(mapped);
-        // Load real applications
+        // Load ONLY applications assigned to THIS lender
         var appRows = await SB.query("applications", "select=*&order=created_at.desc");
         if (appRows && appRows.length > 0) {
           var bpMap = {};
           (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
-          var mappedApps = appRows.map(function(r) {
+          // Filter: only show apps where lender_user_id matches this lender's user.id
+          var myAppRows = appRows.filter(function(r) {
+            return r.lender_user_id === user.id || r.lender_id === user.id;
+          });
+          var mappedApps = myAppRows.map(function(r) {
             var bp = bpMap[r.borrower_id] || {};
             var u = userMap[bp.user_id] || {};
             return {
@@ -3709,14 +3743,24 @@ const LenderHome = ({ user, setView }) => {
               amount: r.amount_cents ? r.amount_cents / 100 : 0, purpose: r.purpose || "Personal",
               status: r.status || "pending",
               receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+              borrowerId: r.borrower_id,
             };
           });
-          setAllApps(mappedApps);
+          setAllApps(mappedApps.length > 0 ? mappedApps : []);
+          
+          // Build assigned borrowers from assigned apps only
+          var assignedBpIds = [...new Set(myAppRows.map(r => r.borrower_id).filter(Boolean))];
+          var assignedMapped = mapped.filter(function(b) { return assignedBpIds.includes(b.id); });
+          if (assignedMapped.length > 0) setAllB(assignedMapped);
+          else if (mapped.length === 0) setAllB([]); // No borrowers assigned yet
+        } else {
+          setAllApps([]);
+          setAllB([]);
         }
       } catch (e) { console.log("LenderHome load:", e.message); }
       setLoading(false);
     })();
-  }, []);
+  }, [user.id]);
 
   const active = allB.filter(b => b.status === "active").length;
   const declined = allB.filter(b => b.status === "declined").length;
@@ -4485,28 +4529,45 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
   const [aiInsight, setAiInsight] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
-  const [storedProfiles, setStoredProfiles] = useState({});
+  const [allBorrowers, setAllBorrowers] = useState([]);
+  const [loadingBorr, setLoadingBorr] = useState(true);
+
   useEffect(function() {
-    var alive = true;
+    setLoadingBorr(true);
     (async function() {
       try {
-        var idx = await StorageService.getAllBorrowerIndex();
-        var map = {};
-        for (var i = 0; i < idx.length; i++) {
-          var p = await StorageService.getBorrowerProfile(idx[i].userId);
-          if (p) { map[idx[i].userId] = p; StorageService.syncToLenderDB(idx[i].userId, p); }
+        // Load ONLY borrowers with applications assigned to this lender
+        var appRows = await SB.query("applications", "select=*&order=created_at.desc");
+        var myApps = (appRows||[]).filter(function(r){ return r.lender_user_id===user.id||r.lender_id===user.id; });
+        var myBpIds = [...new Set(myApps.map(function(r){return r.borrower_id;}).filter(Boolean))];
+
+        if (myBpIds.length > 0) {
+          var bpRows = await SB.query("borrower_profiles","id=in.("+myBpIds.join(",")+")&select=*");
+          var users = await SB.query("profiles","role=eq.borrower&select=id,name,email,phone");
+          var userMap = {}; (users||[]).forEach(function(u){userMap[u.id]=u;});
+          var allDocs = await SB.query("documents","select=*&order=uploaded_at.desc");
+          var revMap={national_id:"id",payslip:"payslip",bank_statement:"bank_stmt",proof_of_address:"proof_addr",employment_letter:"employment"};
+          var docsByBpId={};
+          (allDocs||[]).forEach(function(d){
+            if(!docsByBpId[d.borrower_id])docsByBpId[d.borrower_id]=[];
+            var k=revMap[d.doc_type]||d.doc_type;
+            if(!docsByBpId[d.borrower_id].find(function(x){return x.key===k;})){
+              docsByBpId[d.borrower_id].push({key:k,label:({national_id:"National ID",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type]||d.doc_type,type:({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type]||"📎",verified:d.verified||false,date:d.uploaded_at?d.uploaded_at.slice(0,10):"—",size:d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"—",filePath:d.file_path||null,dbId:d.id});
+            }
+          });
+          var mapped=(bpRows||[]).map(function(bp){
+            var u=userMap[bp.user_id]||{};
+            return safeBorrower({id:bp.id,userId:bp.user_id,name:u.name||"Unknown",email:u.email||"",phone:u.phone||"",idNumber:bp.id_number||"",employer:bp.employer||"",salary:bp.salary_cents?bp.salary_cents/100:0,expenses:bp.expenses_cents?bp.expenses_cents/100:0,tier:bp.tier||"—",riskScore:bp.risk_score||0,dti:bp.dti_ratio?(bp.dti_ratio*100).toFixed(1)+"%":"—",kycStatus:bp.kyc_status||"pending",amlStatus:bp.aml_status||"pending",bankVerified:bp.bank_verified||false,firstBorrower:bp.is_first_borrower||false,status:bp.kyc_status==="verified"?"active":"pending",assignedDate:bp.created_at?bp.created_at.slice(0,10):"—",loans:[],documents:docsByBpId[bp.id]||[]});
+          });
+          setAllBorrowers(mapped);
+        } else {
+          setAllBorrowers([]);
         }
-        if (alive) setStoredProfiles(map);
-      } catch (e) {}
+      } catch(e){ console.log("LenderBorrowers:",e.message); setAllBorrowers([]); }
+      setLoadingBorr(false);
     })();
-    return function() { alive = false; };
-  }, []);
-  const allBorrowers = LENDER_DB.borrowers.map(function(b) {
-    var merged = (b.userId && storedProfiles[b.userId])
-      ? Object.assign({}, b, storedProfiles[b.userId], { id: b.id })
-      : b;
-    return safeBorrower(merged);
-  });
+  }, [user.id]);
+
   const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
 
   const filtered = allBorrowers.filter(b => {
@@ -5031,7 +5092,20 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             </Card>
           );
         })}
-        {filtered.length === 0 && (
+        {loadingBorr && (
+          <Card style={{textAlign:"center",padding:48}}>
+            <div className="spin" style={{width:36,height:36,border:"3px solid "+DS.colors.border,borderTop:"3px solid "+DS.colors.accent,borderRadius:"50%",margin:"0 auto 16px"}}/>
+            <p style={{color:DS.colors.textMuted,fontSize:13}}>Loading your assigned borrowers...</p>
+          </Card>
+        )}
+        {!loadingBorr && allBorrowers.length === 0 && (
+          <Card style={{ textAlign: "center", padding: 48 }}>
+            <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
+            <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers assigned yet</p>
+            <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Admin will assign approved borrowers to you. Check Applications for new leads.</p>
+          </Card>
+        )}
+        {!loadingBorr && allBorrowers.length > 0 && filtered.length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
             <p style={{ fontSize: 36, marginBottom: 12 }}>🔍</p>
             <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers match</p>
@@ -5367,7 +5441,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             {l:"Total Loaned",v:`N${totalLoaned.toLocaleString()}`,c:DS.colors.accent},
             {l:"Outstanding",v:totalOutstanding>0?`N${totalOutstanding.toLocaleString()}`:"✓ Clear",c:totalOutstanding>0?DS.colors.warning:DS.colors.accent},
             {l:"Risk Score",v:`${rr.finalScore}/100`,c:rr.tierColor},
-            {l:"Lender",v:LENDER_DB.borrowers.find(x=>x.id===b.id)?"Capital Micro":"QuickCash",c:DS.colors.info},
+            {l:"Credit Tier",v:`Tier ${rr.tier}`,c:rr.tierColor},
           ].map((s,i)=>(
             <div key={i} style={{padding:14,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:12}}>
               <p style={{fontSize:11,color:DS.colors.textMuted,marginBottom:4}}>{s.l}</p>
@@ -5419,6 +5493,66 @@ const AdminBorrowers = ({ showToast, setView }) => {
                     <span key={i} style={{fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:20,background:v.ok?DS.colors.accentDim:DS.colors.warningDim,color:v.ok?DS.colors.accent:DS.colors.warning}}>{v.ok?"✓":"⚠"} {v.label}</span>
                   ))}
                 </div>
+
+                {/* ── ASSIGN TO LENDER ── */}
+                {b.kycStatus==="verified" && (
+                  <div style={{padding:16,background:DS.colors.surfaceAlt,borderRadius:12,border:`1px solid ${DS.colors.border}`}}>
+                    <p style={{fontSize:13,fontWeight:700,marginBottom:10,color:DS.colors.textPrimary}}>🏦 Assign to Lender</p>
+                    <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
+                      <select
+                        defaultValue=""
+                        id={"lender-select-"+b.userId}
+                        style={{flex:1,minWidth:200,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,color:DS.colors.textPrimary,borderRadius:8,padding:"8px 12px",fontSize:13}}>
+                        <option value="">Select a lender to assign...</option>
+                        {DB.lenders.filter(l=>l.status==="active").map(function(l) {
+                          return <option key={l.id} value={l.id}>{l.name} ({l.plan==="subscription"?"Sub":"PAYG"}) — Tier {rr.tier} {["A","B"].includes(rr.tier)?"✓":"⚠"}</option>;
+                        })}
+                      </select>
+                      <Btn small onClick={async function() {
+                        var sel = document.getElementById("lender-select-"+b.userId);
+                        var lenderId = sel ? sel.value : "";
+                        if (!lenderId) { showToast("Please select a lender first","error"); return; }
+                        var lender = DB.lenders.find(function(l){return l.id===lenderId;});
+                        try {
+                          // Update all pending applications for this borrower to assign to lender
+                          var apps = await SB.query("applications","borrower_id=eq."+b.id+"&status=eq.pending&select=id");
+                          for (var i=0; i<(apps||[]).length; i++) {
+                            await SB.update("applications",{id:apps[i].id},{lender_user_id:lenderId,lender_name:lender?.name||"",status:"new_lead"});
+                          }
+                          // If no pending apps exist, create one as a lead
+                          if (!apps || apps.length===0) {
+                            await SB.insert("applications",{
+                              borrower_id: b.id,
+                              lender_user_id: lenderId,
+                              lender_name: lender?.name||"",
+                              amount_cents: Math.round((b.salary||0)*100),
+                              term_months: 3,
+                              purpose: "Admin Assigned",
+                              tier_at_application: b.tier||"—",
+                              risk_score_at_application: b.riskScore||0,
+                              status: "new_lead",
+                            });
+                          }
+                          // Notify the lender
+                          await SB.insert("notifications",{
+                            user_id: lenderId,
+                            title: "New Borrower Assigned",
+                            message: b.name+" (Tier "+rr.tier+") has been assigned to you by admin. Review their profile and make a decision.",
+                            type: "warning",
+                          });
+                          showToast("✅ "+b.name+" assigned to "+lender?.name+" — lender notified");
+                        } catch(e){ showToast("Assignment error: "+e.message,"error"); }
+                      }} style={{background:DS.colors.accent,color:"#0A0F1E"}}>Assign →</Btn>
+                    </div>
+                    <p style={{fontSize:11,color:DS.colors.textMuted,marginTop:8}}>Only approved (KYC verified) borrowers can be assigned to lenders. The lender will see this borrower in their Applications queue.</p>
+                  </div>
+                )}
+                {b.kycStatus!=="verified" && (
+                  <div style={{padding:12,background:DS.colors.warningDim,border:`1px solid ${DS.colors.warning}33`,borderRadius:10}}>
+                    <p style={{fontSize:12,color:DS.colors.warning}}>⚠ Borrower must be KYC verified before being assigned to a lender. Use the Approve button above.</p>
+                  </div>
+                )}
+
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   {[["Email",b.email],["Phone",b.phone],["Employer",b.employer],["Since",b.assignedDate]].map(([l,v])=>(
                     <div key={l} style={{padding:"10px 14px",background:DS.colors.surfaceAlt,borderRadius:8}}>
