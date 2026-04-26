@@ -1161,7 +1161,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
                 {[
                   { l: "Platform Score", v: `${rr.finalScore}/100`, c: rr.tierColor },
                   { l: "Credit Tier", v: `Tier ${rr.tier}`, c: rr.tierColor },
-                  { l: "Max Loan", v: rr.maxLoanMultiplier > 0 ? `N$${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                  { l: "Max Loan", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 3 }}>{s.l}</p>
@@ -2251,8 +2251,8 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
                       {[
                         { label: "Risk Score", value: `${riskResult.finalScore}/100`, color: riskResult.tierColor },
-                        { label: "Core Income", value: `N$${(scorecard.avgCoreCredits/1000).toFixed(0)}k/mo`, color: DS.colors.accent },
-                        { label: "Max Loan", value: riskResult.maxLoanMultiplier > 0 ? `N$${Math.round((scorecard.avgCoreCredits - scorecard.totalDeductionAvg) * riskResult.maxLoanMultiplier).toLocaleString()}` : "Declined", color: riskResult.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                        { label: "Core Income", value: `N${(scorecard.avgCoreCredits/1000).toFixed(0)}k/mo`, color: DS.colors.accent },
+                        { label: "Max Loan", value: riskResult.maxLoanMultiplier > 0 ? `N${Math.round((scorecard.avgCoreCredits - scorecard.totalDeductionAvg) * riskResult.maxLoanMultiplier).toLocaleString()}` : "Declined", color: riskResult.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                         { label: "Interest Rate", value: riskResult.interestRate ? `${riskResult.interestRate}% p.a.` : "N/A", color: DS.colors.gold },
                       ].map((s,i) => (
                         <div key={i} style={{ padding: "10px 14px", background: DS.colors.surface, borderRadius: 10 }}>
@@ -2386,8 +2386,8 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10 }}>
               {[
                 { label: "Overall Score", value: `${result.finalScore}/100`, color: result.tierColor },
-                { label: "Core Income/mo", value: `N$${(sc.avgCoreCredits/1000).toFixed(0)}k`, color: DS.colors.accent },
-                { label: "Max Loan", value: result.maxLoanMultiplier > 0 ? `N$${Math.round((sc.avgCoreCredits - sc.totalDeductionAvg) * result.maxLoanMultiplier).toLocaleString()}` : "Declined", color: result.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                { label: "Core Income/mo", value: `N${(sc.avgCoreCredits/1000).toFixed(0)}k`, color: DS.colors.accent },
+                { label: "Max Loan", value: result.maxLoanMultiplier > 0 ? `N${Math.round((sc.avgCoreCredits - sc.totalDeductionAvg) * result.maxLoanMultiplier).toLocaleString()}` : "Declined", color: result.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                 { label: "Interest Rate", value: result.interestRate ? `${result.interestRate}% p.a.` : "N/A", color: DS.colors.gold },
                 { label: "Unpaids", value: sc.unpaidCount.toString(), color: sc.unpaidCount === 0 ? DS.colors.accent : DS.colors.danger },
                 { label: "Committed DTI", value: `${((sc.totalDeductionAvg/sc.avgCoreCredits)*100).toFixed(1)}%`, color: DS.colors.warning },
@@ -2461,10 +2461,10 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
                   <div style={{ display: "flex", gap: 16 }}>
                     {[
                       { label: "Risk Score", value: `${result.finalScore}/100` },
-                      { label: "Core Income", value: `N$${(b.scorecard.avgCoreCredits/1000).toFixed(0)}k/mo` },
+                      { label: "Core Income", value: `N${(b.scorecard.avgCoreCredits/1000).toFixed(0)}k/mo` },
                       { label: "Unpaids", value: b.scorecard.unpaidCount.toString() },
-                      { label: "Surplus", value: `N$${b.scorecard.avgSurplusDeficit.toLocaleString()}` },
-                      { label: "Max Loan", value: result.maxLoanMultiplier > 0 ? `N$${Math.round((b.scorecard.avgCoreCredits - b.scorecard.totalDeductionAvg) * result.maxLoanMultiplier).toLocaleString()}` : "Declined" },
+                      { label: "Surplus", value: `N${b.scorecard.avgSurplusDeficit.toLocaleString()}` },
+                      { label: "Max Loan", value: result.maxLoanMultiplier > 0 ? `N${Math.round((b.scorecard.avgCoreCredits - b.scorecard.totalDeductionAvg) * result.maxLoanMultiplier).toLocaleString()}` : "Declined" },
                     ].map((s,i)=>(
                       <div key={i}>
                         <p style={{ fontSize: 10, color: DS.colors.textMuted }}>{s.label}</p>
@@ -2704,7 +2704,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         <Card className="fade-in">
           <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Loan Details</h3>
           <Input label="Loan Amount (N$)" value={form.amount} onChange={v => setForm({ ...form, amount: v })}
-            type="number" placeholder="e.g. 5000" required hint={`Maximum: N$${borrower?.maxLoan ? Math.round(borrower.maxLoan).toLocaleString() : (borrower?.salary && borrower?.expenses ? Math.round(runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan).toLocaleString() : "—")} based on your profile`} />
+            type="number" placeholder="e.g. 5000" required hint={`Maximum: N${borrower?.maxLoan ? Math.round(borrower.maxLoan).toLocaleString() : (borrower?.salary && borrower?.expenses ? Math.round(runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan).toLocaleString() : "—")} based on your profile`} />
           <Select label="Repayment Term" value={form.term} onChange={v => setForm({ ...form, term: v })}
             options={[{ value: "1", label: "1 month" }, { value: "3", label: "3 months" }, { value: "6", label: "6 months" }, { value: "12", label: "12 months" }]} />
           <Select label="Loan Purpose" value={form.purpose} onChange={v => setForm({ ...form, purpose: v })} options={purposes} required />
@@ -2919,7 +2919,7 @@ const BorrowerStatus = ({ borrower, setView }) => {
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
                       Submitted {app.createdAt} ·
-                      {app.amount ? ` N$${(app.amount||0).toLocaleString()}` : " amount pending"} ·
+                      {app.amount ? ` N${(app.amount||0).toLocaleString()}` : " amount pending"} ·
                       {app.term ? ` ${app.term} months` : ""}
                     </p>
                     {lender && (
@@ -3415,7 +3415,7 @@ const LenderHome = ({ user, setView }) => {
         <Stat label="Active" value={active} color={DS.colors.accent} icon="✅" onClick={() => setView("lender-borrowers")} />
         <Stat label="New Leads" value={newLeads} color={DS.colors.gold} icon="🔔" sub="Awaiting review" onClick={() => setView("lender-apps")} />
         <Stat label="Declined" value={declined} color={DS.colors.danger} icon="❌" onClick={() => setView("lender-borrowers")} />
-        <Stat label="Total Disbursed" value={`N$${(totalDisbursed/1000).toFixed(0)}k`} color={DS.colors.info} icon="💰" onClick={() => setView("lender-scorecard")} />
+        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} color={DS.colors.info} icon="💰" onClick={() => setView("lender-scorecard")} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -3463,7 +3463,7 @@ const LenderHome = ({ user, setView }) => {
         <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Active Loan Book</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
-            { label: "Outstanding Balance", value: `N$${allB.flatMap(b=>b.loans).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
+            { label: "Outstanding Balance", value: `N${allB.flatMap(b=>b.loans).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
             { label: "Loans Disbursed", value: allB.flatMap(b=>b.loans).filter(l=>l.status==="approved"&&l.disbursed).length, color: DS.colors.accent, view: "lender-borrowers" },
             { label: "Fully Repaid", value: allB.flatMap(b=>b.loans).filter(l=>l.outstanding===0&&l.disbursed).length, color: DS.colors.info, view: "lender-borrowers" },
             { label: "Pending Disbursement", value: allB.flatMap(b=>b.loans).filter(l=>l.status==="pending").length, color: DS.colors.gold, view: "lender-apps" },
@@ -3531,7 +3531,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
 
   const handleDecision = (appId, decision, amount) => {
     setAppStatuses(prev => ({ ...prev, [appId]: decision }));
-    showToast(decision === "approved" ? `✅ N$${amount?.toLocaleString()} approved — borrower notified` : "Application declined — borrower notified.", decision === "approved" ? "success" : "error");
+    showToast(decision === "approved" ? `✅ N${amount?.toLocaleString()} approved — borrower notified` : "Application declined — borrower notified.", decision === "approved" ? "success" : "error");
     setSelectedApp(null);
     setAppTab("overview");
   };
@@ -3540,7 +3540,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     if (decision === "declined") {
       showConfirm && showConfirm({
         title: "Decline Application",
-        message: `Are you sure you want to decline the application from ${app.borrowerName} for N$${(app.amount||0).toLocaleString()}? This action cannot be undone.`,
+        message: `Are you sure you want to decline the application from ${app.borrowerName} for N${(app.amount||0).toLocaleString()}? This action cannot be undone.`,
         danger: true,
         onConfirm: () => handleDecision(app.id, "declined", app.amount),
       });
@@ -3639,11 +3639,11 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {/* Key metrics bar */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10, marginBottom: 20 }}>
           {[
-            { l: "Loan Requested", v: `N$${(app.amount||0).toLocaleString()}`, c: DS.colors.accent },
+            { l: "Loan Requested", v: `N${(app.amount||0).toLocaleString()}`, c: DS.colors.accent },
             { l: "Term", v: `${app.term} months`, c: DS.colors.textPrimary },
             { l: "Risk Score", v: `${app.riskScore}/100`, c: tierColor },
             { l: "DTI", v: app.dti, c: parseFloat(app.dti) > 45 ? DS.colors.warning : DS.colors.accent },
-            { l: "Monthly Salary", v: `N$${(app.salary||0).toLocaleString()}`, c: DS.colors.textPrimary },
+            { l: "Monthly Salary", v: `N${(app.salary||0).toLocaleString()}`, c: DS.colors.textPrimary },
           ].map((s, i) => (
             <div key={i} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, borderTop: `3px solid ${s.c}` }}>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -3690,8 +3690,8 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                   { l: "Phone", v: b.phone },
                   { l: "ID Number", v: b.idNumber },
                   { l: "Member Since", v: b.assignedDate },
-                  { l: "Monthly Expenses", v: `N$${(b.expenses||0).toLocaleString()}` },
-                  { l: "Disposable Income", v: `N$${(b.salary - b.expenses).toLocaleString()}` },
+                  { l: "Monthly Expenses", v: `N${(b.expenses||0).toLocaleString()}` },
+                  { l: "Disposable Income", v: `N${(b.salary - b.expenses).toLocaleString()}` },
                 ].map(([l, v]) => (
                   <div key={l} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{l}</p>
@@ -3706,10 +3706,10 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               <h4 style={{ fontWeight: 700, marginBottom: 12, fontSize: 14 }}>Proposed Repayment Structure</h4>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
                 {[
-                  { l: "Principal", v: `N$${(app.amount||0).toLocaleString()}`, c: DS.colors.accent },
+                  { l: "Principal", v: `N${(app.amount||0).toLocaleString()}`, c: DS.colors.accent },
                   { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
-                  { l: "Monthly Payment", v: rr.interestRate ? `N$${Math.round(app.amount * (1 + rr.interestRate / 100) / app.term).toLocaleString()}` : "N/A", c: DS.colors.info },
-                  { l: "Total Cost", v: rr.interestRate ? `N$${Math.round(app.amount * (1 + rr.interestRate / 100)).toLocaleString()}` : "N/A", c: DS.colors.warning },
+                  { l: "Monthly Payment", v: rr.interestRate ? `N${Math.round(app.amount * (1 + rr.interestRate / 100) / app.term).toLocaleString()}` : "N/A", c: DS.colors.info },
+                  { l: "Total Cost", v: rr.interestRate ? `N${Math.round(app.amount * (1 + rr.interestRate / 100)).toLocaleString()}` : "N/A", c: DS.colors.warning },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10, textAlign: "center" }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -3837,7 +3837,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
                   {[
-                    { l: "Max Loan", v: rr.maxLoanMultiplier > 0 ? `N$${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Max Loan", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
                     { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}× disposable`, c: DS.colors.info },
                   ].map((s, i) => (
@@ -3868,7 +3868,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                       <StatusBadge status={loan.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N$${loan.monthly.toLocaleString()}` : "N/A"}
+                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
                       {loan.disbursed ? ` · Disbursed: ${loan.disbursed}` : ""}
                       {loan.dueDate ? ` · Due: ${loan.dueDate}` : ""}
                     </p>
@@ -3877,7 +3877,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Outstanding</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: loan.outstanding > 0 ? DS.colors.warning : DS.colors.accent }}>
-                        {loan.outstanding > 0 ? `N$${loan.outstanding.toLocaleString()}` : "✓ Settled"}
+                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "✓ Settled"}
                       </p>
                     </div>
                   )}
@@ -4005,7 +4005,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                       {app.firstBorrower && <Badge label="⚠ First Borrower" color={DS.colors.warning} />}
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(5, auto)", gap: "4px 24px", width: "fit-content" }}>
-                      {[["Amount", `N$${(app.amount||0).toLocaleString()}`], ["Term", `${app.term}mo`], ["Purpose", app.purpose], ["Risk Score", `${app.riskScore}/100`], ["DTI", app.dti], ["Salary", `N$${(app.salary||0).toLocaleString()}`], ["Employer", app.employer], ["Docs", `${app.docs} files`], ["First Borrower", app.firstBorrower ? "Yes ⚠" : "No"]].map(([label, val]) => (
+                      {[["Amount", `N${(app.amount||0).toLocaleString()}`], ["Term", `${app.term}mo`], ["Purpose", app.purpose], ["Risk Score", `${app.riskScore}/100`], ["DTI", app.dti], ["Salary", `N${(app.salary||0).toLocaleString()}`], ["Employer", app.employer], ["Docs", `${app.docs} files`], ["First Borrower", app.firstBorrower ? "Yes ⚠" : "No"]].map(([label, val]) => (
                         <div key={label}><p style={{ fontSize: 10, color: DS.colors.textMuted }}>{label}</p><p style={{ fontSize: 13, fontWeight: 600, color: label === "DTI" && parseFloat(app.dti) > 45 ? DS.colors.warning : DS.colors.textPrimary }}>{val}</p></div>
                       ))}
                     </div>
@@ -4218,9 +4218,9 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {/* Summary ribbon */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
           {[
-            { l: "Total Loaned", v: `N$${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
-            { l: "Outstanding", v: totalOutstanding > 0 ? `N$${totalOutstanding.toLocaleString()}` : "✓ Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
-            { l: "Total Repaid", v: `N$${totalRepaid.toLocaleString()}`, c: DS.colors.info },
+            { l: "Total Loaned", v: `N${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
+            { l: "Outstanding", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "✓ Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
+            { l: "Total Repaid", v: `N${totalRepaid.toLocaleString()}`, c: DS.colors.info },
             { l: "Risk Score", v: `${rr.finalScore}/100`, c: rr.tierColor },
           ].map((s, i) => (
             <div key={i} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12 }}>
@@ -4254,11 +4254,11 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                   {[
-                    { l: "Monthly Salary", v: `N$${N${(b.salary||0).toLocaleString()}()}`, c: DS.colors.accent },
-                    { l: "Monthly Expenses", v: `N$${(b.expenses||0).toLocaleString()}`, c: DS.colors.warning },
-                    { l: "Disposable Income", v: `N$${(b.salary - b.expenses).toLocaleString()}`, c: DS.colors.info },
+                    { l: "Monthly Salary", v: `N${(b.salary||0).toLocaleString()}`, c: DS.colors.accent },
+                    { l: "Monthly Expenses", v: `N${(b.expenses||0).toLocaleString()}`, c: DS.colors.warning },
+                    { l: "Disposable Income", v: `N${(b.salary - b.expenses).toLocaleString()}`, c: DS.colors.info },
                     { l: "DTI Ratio", v: b.dti, c: parseFloat(b.dti) > 45 ? DS.colors.warning : DS.colors.accent },
-                    { l: "Max Loan (calculated)", v: rr.maxLoanMultiplier > 0 ? `N$${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Max Loan (calculated)", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
                   ].map((s, i) => (
                     <div key={i} style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
@@ -4398,7 +4398,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
                   {[
-                    { l: "Max Loan Amount", v: rr.maxLoanMultiplier > 0 ? `N$${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Max Loan Amount", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
                     { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}× disposable`, c: DS.colors.info },
                   ].map((s, i) => (
@@ -4424,9 +4424,9 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             {/* Loan summary */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
               {[
-                { l: "Total Disbursed", v: `N$${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
-                { l: "Total Repaid", v: `N$${totalRepaid.toLocaleString()}`, c: DS.colors.info },
-                { l: "Outstanding Balance", v: totalOutstanding > 0 ? `N$${totalOutstanding.toLocaleString()}` : "✓ All Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
+                { l: "Total Disbursed", v: `N${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
+                { l: "Total Repaid", v: `N${totalRepaid.toLocaleString()}`, c: DS.colors.info },
+                { l: "Outstanding Balance", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "✓ All Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
               ].map((s, i) => (
                 <div key={i} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12 }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -4444,7 +4444,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                       <StatusBadge status={loan.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N$${loan.monthly.toLocaleString()}` : "N/A"}
+                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
                       {loan.disbursed ? ` · Disbursed: ${loan.disbursed}` : ""}
                       {loan.dueDate ? ` · Due: ${loan.dueDate}` : ""}
                     </p>
@@ -4453,7 +4453,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Outstanding</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: loan.outstanding > 0 ? DS.colors.warning : DS.colors.accent }}>
-                        {loan.outstanding > 0 ? `N$${loan.outstanding.toLocaleString()}` : "✓ Settled"}
+                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "✓ Settled"}
                       </p>
                     </div>
                   )}
@@ -4578,11 +4578,11 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
                     {[
                       ["Employer", b.employer],
-                      ["Salary", `N$${N${(b.salary||0).toLocaleString()}()}`],
+                      ["Salary", `N${(b.salary||0).toLocaleString()}`],
                       ["DTI", b.dti],
                       ["Score", `${rr.finalScore}/100`],
                       ["Loans", (b.loans||[]).length],
-                      ["Outstanding", activeLoan ? `N$${activeLoan.outstanding.toLocaleString()}` : settled > 0 ? "✓ Settled" : "None"],
+                      ["Outstanding", activeLoan ? `N${activeLoan.outstanding.toLocaleString()}` : settled > 0 ? "✓ Settled" : "None"],
                       ["Docs", `${(b.documents||[]).length} files`],
                     ].map(([l, v]) => (
                       <div key={l}><p style={{ fontSize: 10, color: DS.colors.textMuted }}>{l}</p><p style={{ fontSize: 13, fontWeight: 600 }}>{v}</p></div>
@@ -4647,7 +4647,7 @@ const AdminAllApplications = ({ showToast }) => {
                 <td style={{ padding: "12px 14px", fontWeight: 600 }}>{app.borrowerName}</td>
                 <td style={{ padding: "12px 14px" }}><TierBadge tier={app.tier} /></td>
                 <td style={{ padding: "12px 14px", fontSize: 12, color: DS.colors.textMuted }}>Capital Micro</td>
-                <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", color: DS.colors.accent }}>{app.amount>0?`N$${(app.amount||0).toLocaleString()}`:"Declined"}</td>
+                <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", color: DS.colors.accent }}>{app.amount>0?`N${(app.amount||0).toLocaleString()}`:"Declined"}</td>
                 <td style={{ padding: "12px 14px", color: parseFloat(app.dti)>45?DS.colors.warning:DS.colors.textPrimary }}>{app.dti}</td>
                 <td style={{ padding: "12px 14px" }}><StatusBadge status={app.status==="new_lead"?"pending":app.status==="under_review"?"pending":app.status} /></td>
                 <td style={{ padding: "12px 14px" }}><Badge label={app.amlStatus} color={app.amlStatus==="clear"?DS.colors.accent:DS.colors.danger} /></td>
@@ -4798,7 +4798,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
       const resp = await fetch("https://api.anthropic.com/v1/messages", {
         method:"POST", headers:{"Content-Type":"application/json"},
         body: JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:600,
-          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N$${N${(b.salary||0).toLocaleString()}()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
+          messages:[{role:"user",content:`Admin credit review for ${b.name}. Score ${rr.finalScore}/100 Tier ${rr.tier}. Income N${(b.salary||0).toLocaleString()}/mo. DTI ${b.dti}. KYC: ${b.kycStatus}. AML: ${b.amlStatus}. Unpaids: ${sc.unpaidCount}. 3 paragraphs: 1) Profile 2) Risk flags 3) Admin recommendation. Concise.`}]})
       });
       const d = await resp.json();
       setAiInsight(d.content?.map(c=>c.text||"").join(""));
@@ -4844,7 +4844,7 @@ if (selected) {
             <p style={{fontSize:13,color:DS.colors.textMuted,marginTop:2}}>{b.employer} · ID: {b.idNumber} · {b.phone}</p>
           </div>
           <Btn small variant="ghost" onClick={()=>{
-            const txt=`ADMIN BORROWER REPORT\n${b.name}\nID: ${b.idNumber}\nEmployer: ${b.employer}\nSalary: N$${N${(b.salary||0).toLocaleString()}()}\nTier: ${b.tier}\nRisk: ${b.riskScore}/100\nKYC: ${b.kycStatus} | AML: ${b.amlStatus}\nStatus: ${b.status}`;
+            const txt=`ADMIN BORROWER REPORT\n${b.name}\nID: ${b.idNumber}\nEmployer: ${b.employer}\nSalary: N${(b.salary||0).toLocaleString()}\nTier: ${b.tier}\nRisk: ${b.riskScore}/100\nKYC: ${b.kycStatus} | AML: ${b.amlStatus}\nStatus: ${b.status}`;
             const blob=new Blob([txt],{type:"text/plain"});
             const url=URL.createObjectURL(blob);
             const a=document.createElement("a");a.href=url;a.download=`${b.name.replace(/\s+/g,"_")}.txt`;a.click();
@@ -4855,8 +4855,8 @@ if (selected) {
         {/* Summary ribbon */}
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:20}}>
           {[
-            {l:"Total Loaned",v:`N$${totalLoaned.toLocaleString()}`,c:DS.colors.accent},
-            {l:"Outstanding",v:totalOutstanding>0?`N$${totalOutstanding.toLocaleString()}`:"✓ Clear",c:totalOutstanding>0?DS.colors.warning:DS.colors.accent},
+            {l:"Total Loaned",v:`N${totalLoaned.toLocaleString()}`,c:DS.colors.accent},
+            {l:"Outstanding",v:totalOutstanding>0?`N${totalOutstanding.toLocaleString()}`:"✓ Clear",c:totalOutstanding>0?DS.colors.warning:DS.colors.accent},
             {l:"Risk Score",v:`${rr.finalScore}/100`,c:rr.tierColor},
             {l:"Lender",v:LENDER_DB.borrowers.find(x=>x.id===b.id)?"Capital Micro":"QuickCash",c:DS.colors.info},
           ].map((s,i)=>(
@@ -4887,11 +4887,11 @@ if (selected) {
               <div style={{display:"flex",flexDirection:"column",gap:12}}>
                 <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
                   {[
-                    {l:"Salary",v:`N$${N${(b.salary||0).toLocaleString()}()}`,c:DS.colors.accent},
-                    {l:"Expenses",v:`N$${(b.expenses||0).toLocaleString()}`,c:DS.colors.warning},
-                    {l:"Disposable",v:`N$${(b.salary-b.expenses).toLocaleString()}`,c:DS.colors.info},
+                    {l:"Salary",v:`N${(b.salary||0).toLocaleString()}`,c:DS.colors.accent},
+                    {l:"Expenses",v:`N${(b.expenses||0).toLocaleString()}`,c:DS.colors.warning},
+                    {l:"Disposable",v:`N${(b.salary-b.expenses).toLocaleString()}`,c:DS.colors.info},
                     {l:"DTI",v:b.dti,c:parseFloat(b.dti)>45?DS.colors.danger:DS.colors.accent},
-                    {l:"Max Loan",v:rr.maxLoanMultiplier>0?`N$${Math.round((b.salary-b.expenses)*rr.maxLoanMultiplier).toLocaleString()}`:"Declined",c:rr.maxLoanMultiplier>0?DS.colors.accent:DS.colors.danger},
+                    {l:"Max Loan",v:rr.maxLoanMultiplier>0?`N${Math.round((b.salary-b.expenses)*rr.maxLoanMultiplier).toLocaleString()}`:"Declined",c:rr.maxLoanMultiplier>0?DS.colors.accent:DS.colors.danger},
                     {l:"Interest Rate",v:rr.interestRate?`${rr.interestRate}% p.a.`:"N/A",c:DS.colors.gold},
                   ].map((s,i)=>(
                     <div key={i} style={{padding:14,background:DS.colors.surfaceAlt,borderRadius:10}}>
@@ -5019,11 +5019,11 @@ if (selected) {
                       <p style={{fontWeight:700,fontSize:15}}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
                       <StatusBadge status={loan.status}/>
                     </div>
-                    <p style={{fontSize:13,color:DS.colors.textSecondary}}>{loan.term} months · Rate: {loan.rate||"N/A"} · Monthly: {loan.monthly?`N$${loan.monthly.toLocaleString()}`:"N/A"}{loan.disbursed?` · Disbursed: ${loan.disbursed}`:""}</p>
+                    <p style={{fontSize:13,color:DS.colors.textSecondary}}>{loan.term} months · Rate: {loan.rate||"N/A"} · Monthly: {loan.monthly?`N${loan.monthly.toLocaleString()}`:"N/A"}{loan.disbursed?` · Disbursed: ${loan.disbursed}`:""}</p>
                   </div>
                   {loan.outstanding!==null&&(
                     <p style={{fontFamily:"'DM Mono',monospace",fontSize:18,fontWeight:700,color:loan.outstanding>0?DS.colors.warning:DS.colors.accent}}>
-                      {loan.outstanding>0?`N$${loan.outstanding.toLocaleString()}`:"✓ Settled"}
+                      {loan.outstanding>0?`N${loan.outstanding.toLocaleString()}`:"✓ Settled"}
                     </p>
                   )}
                 </div>
@@ -5210,7 +5210,7 @@ const AdminHome = ({ setView }) => {
         <Stat label="Total Borrowers" value={allB.length} icon="👥" color={DS.colors.textPrimary} onClick={() => setView("admin-borrowers")} />
         <Stat label="Active Lenders" value={DB.lenders.filter(l=>l.status==="active").length} icon="🏦" color={DS.colors.accent} onClick={() => setView("admin-lenders")} />
         <Stat label="New Leads" value={newLeads} icon="🔔" color={DS.colors.gold} sub="Awaiting lender review" onClick={() => setView("admin-apps")} />
-        <Stat label="Total Disbursed" value={`N$${(totalDisbursed/1000).toFixed(0)}k`} icon="💰" color={DS.colors.gold} onClick={() => setView("admin-reports")} />
+        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} icon="💰" color={DS.colors.gold} onClick={() => setView("admin-reports")} />
         <Stat label="AML Flags" value={amlFlagged} icon="🚨" color={DS.colors.danger} sub="Require review" onClick={() => setView("admin-reports")} />
         <Stat label="KYC Pending" value={kycPending} icon="🔐" color={DS.colors.warning} sub="Unverified borrowers" onClick={() => setView("admin-borrowers")} />
       </div>
@@ -5667,7 +5667,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Revenue Summary</h3>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {[
-                  { l: "Platform Revenue", v: `N$${(currentLender.revenue || 0).toLocaleString()}`, c: DS.colors.gold },
+                  { l: "Platform Revenue", v: `N${(currentLender.revenue || 0).toLocaleString()}`, c: DS.colors.gold },
                   { l: "Billing Model", v: currentLender.plan === "subscription" ? "Flat N$2,500/mo" : `N$125 × ${currentLender.leadsApproved} leads`, c: DS.colors.info },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: "14px 16px", background: DS.colors.surfaceAlt, borderRadius: 12 }}>
@@ -5806,7 +5806,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                           ["Approved", l.leadsApproved],
                           ["Declined", l.leadsDeclined],
                           ["Conversion", convRate ? convRate + "%" : "—"],
-                          ["Revenue", `N$${(l.revenue||0).toLocaleString()}`],
+                          ["Revenue", `N${(l.revenue||0).toLocaleString()}`],
                         ].map(([label, value]) => (
                           <div key={label}>
                             <p style={{ fontSize: 10, color: DS.colors.textMuted }}>{label}</p>
@@ -5975,7 +5975,7 @@ const LenderSettings = ({ user, showToast }) => {
             {[
               { label: "Qualifying Borrowers", value: qualifyingBorrowers.length, sub: `of ${LENDER_DB.borrowers.length} total`, color: DS.colors.accent },
               { label: "Accepted Tiers", value: (prefs.acceptedTiers || []).join(", "), sub: "Risk levels you accept", color: DS.colors.info },
-              { label: "Min. Salary", value: `N$${(prefs.minSalary || 0).toLocaleString()}`, sub: "Qualifying threshold", color: DS.colors.gold },
+              { label: "Min. Salary", value: `N${(prefs.minSalary || 0).toLocaleString()}`, sub: "Qualifying threshold", color: DS.colors.gold },
               { label: "Max DTI", value: `${((prefs.maxDTI || 0) * 100).toFixed(0)}%`, sub: "Debt-to-income limit", color: DS.colors.warning },
             ].map((s, i) => (
               <div key={i} style={{ padding: "14px 16px", background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12 }}>
@@ -5993,9 +5993,9 @@ const LenderSettings = ({ user, showToast }) => {
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>Choose which borrower risk tiers your institution will accept. Applications outside your selected tiers will not be routed to you.</p>
               <div style={{ display: "grid", gap: 10 }}>
                 {[
-                  { tier: "A", label: "Tier A — Low Risk", desc: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}%, salary ≥ N$${(rules.minSalary*2).toLocaleString()}. Best borrowers, lowest default risk.` },
-                  { tier: "B", label: "Tier B — Moderate Risk", desc: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}%, salary ≥ N$${rules.minSalary.toLocaleString()}. Good borrowers, manageable risk.` },
-                  { tier: "C", label: "Tier C — Elevated Risk", desc: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}%, salary ≥ N$${rules.minSalary.toLocaleString()}. Higher risk, reduced loan limits.` },
+                  { tier: "A", label: "Tier A — Low Risk", desc: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}%, salary ≥ N${(rules.minSalary*2).toLocaleString()}. Best borrowers, lowest default risk.` },
+                  { tier: "B", label: "Tier B — Moderate Risk", desc: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}%, salary ≥ N${rules.minSalary.toLocaleString()}. Good borrowers, manageable risk.` },
+                  { tier: "C", label: "Tier C — Elevated Risk", desc: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}%, salary ≥ N${rules.minSalary.toLocaleString()}. Higher risk, reduced loan limits.` },
                   { tier: "D", label: "Tier D — Decline", desc: "Does not meet minimum criteria. Accepting D-tier is only recommended for specialised high-risk lenders." },
                 ].map(item => {
                   const active = (prefs.acceptedTiers || []).includes(item.tier);
@@ -6539,9 +6539,9 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
             <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Current Tier Assignment Rules</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
               {[
-                { tier: "A", color: DS.colors.tierA, cond: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}% AND Salary ≥ N$${(rules.minSalary*2).toLocaleString()}`, mult: `${rules.maxLoanMultiplier.A}×`, rate: `${rules.interestRate.A}%`, label: "Low Risk" },
-                { tier: "B", color: DS.colors.tierB, cond: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}% AND Salary ≥ N$${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.B}×`, rate: `${rules.interestRate.B}%`, label: "Moderate" },
-                { tier: "C", color: DS.colors.tierC, cond: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}% AND Salary ≥ N$${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.C}×`, rate: `${rules.interestRate.C}%`, label: "Elevated" },
+                { tier: "A", color: DS.colors.tierA, cond: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}% AND Salary ≥ N${(rules.minSalary*2).toLocaleString()}`, mult: `${rules.maxLoanMultiplier.A}×`, rate: `${rules.interestRate.A}%`, label: "Low Risk" },
+                { tier: "B", color: DS.colors.tierB, cond: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}% AND Salary ≥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.B}×`, rate: `${rules.interestRate.B}%`, label: "Moderate" },
+                { tier: "C", color: DS.colors.tierC, cond: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}% AND Salary ≥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.C}×`, rate: `${rules.interestRate.C}%`, label: "Elevated" },
                 { tier: "D", color: DS.colors.tierD, cond: "Does not meet A, B, or C criteria — automatic decline", mult: "0×", rate: "N/A", label: "Decline" },
               ].map(item => (
                 <div key={item.tier} style={{ padding: 16, background: item.color + "0D", border: `1px solid ${item.color}33`, borderRadius: 14 }}>
@@ -6864,8 +6864,8 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   {[
-                    { l: "Disposable Income", v: `N$${simResult.disposable.toLocaleString()}`, c: simResult.disposable > 0 ? DS.colors.accent : DS.colors.danger },
-                    { l: "Maximum Loan", v: `N$${Math.round(simResult.maxLoan).toLocaleString()}`, c: simResult.maxLoan > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Disposable Income", v: `N${simResult.disposable.toLocaleString()}`, c: simResult.disposable > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Maximum Loan", v: `N${Math.round(simResult.maxLoan).toLocaleString()}`, c: simResult.maxLoan > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "DTI Ratio", v: `${(simResult.dti * 100).toFixed(1)}%`, c: simResult.dti > 0.45 ? DS.colors.danger : DS.colors.accent },
                     { l: "Interest Rate", v: simResult.rate ? `${simResult.rate}% p.a.` : "N/A", c: DS.colors.gold },
                   ].map((s, i) => (
@@ -6963,10 +6963,10 @@ const AdminReports = () => {
     <PageHeader title="Platform Reports" subtitle="Compliance, performance, and revenue analytics — live data" />
 
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 28 }}>
-      <Stat label="Total Platform Revenue" value={`N$${totalRevenue.toLocaleString()}`} icon="📈" color={DS.colors.gold} sub={`${activeLenders.length} active lenders`} />
+      <Stat label="Total Platform Revenue" value={`N${totalRevenue.toLocaleString()}`} icon="📈" color={DS.colors.gold} sub={`${activeLenders.length} active lenders`} />
       <Stat label="AML Flags (30d)" value={amlFlagged} icon="🚨" color={DS.colors.danger} sub="Require FIC review" />
       <Stat label="KYC Verified" value={kycVerified} icon="✅" color={DS.colors.accent} sub={`of ${allBorrowers.length} platform borrowers`} />
-      <Stat label="Avg. Loan Size" value={`N$${Math.round(avgLoan).toLocaleString()}`} icon="💰" color={DS.colors.info} sub="Approved loans" />
+      <Stat label="Avg. Loan Size" value={`N${Math.round(avgLoan).toLocaleString()}`} icon="💰" color={DS.colors.info} sub="Approved loans" />
     </div>
 
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
@@ -7100,7 +7100,7 @@ const AgentHome = ({ user, setView }) => {
         <Stat label="Total Captured" value={myBorrowers.length} icon="👥" onClick={() => setView("agent-borrowers")} />
         <Stat label="Approved" value={approved.length} color={DS.colors.accent} icon="✅" onClick={() => setView("agent-borrowers")} />
         <Stat label="Pending" value={pending.length} color={DS.colors.gold} icon="⏳" sub="Awaiting decision" onClick={() => setView("agent-borrowers")} />
-        <Stat label="Commission" value={`N$${(agent.commission || 0).toLocaleString()}`} color="#A78BFA" icon="💜" sub="This month" onClick={() => setView("agent-performance")} />
+        <Stat label="Commission" value={`N${(agent.commission || 0).toLocaleString()}`} color="#A78BFA" icon="💜" sub="This month" onClick={() => setView("agent-performance")} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -7135,7 +7135,7 @@ const AgentHome = ({ user, setView }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
             {[
               { l: "Conversion Rate", v: conv + "%", c: +conv > 60 ? DS.colors.accent : DS.colors.warning },
-              { l: "Avg Loan Size", v: myBorrowers.length ? `N$${Math.round(myBorrowers.reduce((s,b)=>s+(b.amount||0),0)/myBorrowers.length).toLocaleString()}` : "—", c: DS.colors.info },
+              { l: "Avg Loan Size", v: myBorrowers.length ? `N${Math.round(myBorrowers.reduce((s,b)=>s+(b.amount||0),0)/myBorrowers.length).toLocaleString()}` : "—", c: DS.colors.info },
             ].map((s,i) => (
               <div key={i} style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -7239,7 +7239,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
       <p style={{ color: DS.colors.textSecondary, fontSize: 15, lineHeight: 1.7, marginBottom: 32 }}><strong>{form.name}</strong>'s application has been submitted to Capital Micro Finance and will be reviewed within 24 hours.</p>
       <div style={{ padding: "16px 20px", background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 12, marginBottom: 24 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, textAlign: "left" }}>
-          {[["Borrower",form.name],["Tier",`Tier ${riskResult?.tier||"?"}`],["Amount",`N$${(+form.amount).toLocaleString()}`],["Reference","AG-"+Date.now().toString().slice(-6)]].map(([l,v])=>(
+          {[["Borrower",form.name],["Tier",`Tier ${riskResult?.tier||"?"}`],["Amount",`N${(+form.amount).toLocaleString()}`],["Reference","AG-"+Date.now().toString().slice(-6)]].map(([l,v])=>(
             <div key={l}><p style={{ fontSize: 11, color: DS.colors.textMuted }}>{l}</p><p style={{ fontWeight: 700 }}>{v}</p></div>
           ))}
         </div>
@@ -7325,8 +7325,8 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
               <div style={{ flex: 1, display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                 {[
                   { l: "DTI Ratio", v: (riskResult.dti * 100).toFixed(1) + "%" + (form.firstBorrower ? " (adj)" : ""), c: riskResult.dti > 0.45 ? DS.colors.danger : DS.colors.accent },
-                  { l: "Disposable", v: `N$${riskResult.disposable.toLocaleString()}/mo`, c: DS.colors.info },
-                  { l: "Max Loan", v: riskResult.maxLoan > 0 ? `N$${Math.round(riskResult.maxLoan).toLocaleString()}` : "Not eligible", c: riskResult.maxLoan > 0 ? DS.colors.accent : DS.colors.danger },
+                  { l: "Disposable", v: `N${riskResult.disposable.toLocaleString()}/mo`, c: DS.colors.info },
+                  { l: "Max Loan", v: riskResult.maxLoan > 0 ? `N${Math.round(riskResult.maxLoan).toLocaleString()}` : "Not eligible", c: riskResult.maxLoan > 0 ? DS.colors.accent : DS.colors.danger },
                   { l: "Interest Rate", v: riskResult.rate ? `${riskResult.rate}% p.a.` : "N/A", c: DS.colors.gold },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: "10px 12px", background: "rgba(0,0,0,.2)", borderRadius: 10 }}>
@@ -7364,7 +7364,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
                 ))}
               </div>
             </div>
-            <Input label="Loan Amount (N$)" value={form.amount} onChange={v => setForm({...form, amount: v})} type="number" placeholder="e.g. 8000" required hint={riskResult ? `Maximum: N$${Math.round(riskResult.maxLoan).toLocaleString()}` : ""} />
+            <Input label="Loan Amount (N$)" value={form.amount} onChange={v => setForm({...form, amount: v})} type="number" placeholder="e.g. 8000" required hint={riskResult ? `Maximum: N${Math.round(riskResult.maxLoan).toLocaleString()}` : ""} />
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>Repayment Term</label>
               <div style={{ display: "flex", gap: 8 }}>
@@ -7388,7 +7388,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
             )}
             <div style={{ display: "flex", gap: 10 }}>
               <Btn variant="ghost" onClick={() => setStep(3)}>← Back</Btn>
-              <Btn onClick={() => { if (!form.amount || !form.purpose) { showToast("Please fill in loan details", "error"); return; } if (riskResult && +form.amount > riskResult.maxLoan) { showToast(`Exceeds maximum of N$${Math.round(riskResult.maxLoan).toLocaleString()}`, "error"); return; } setStep(5); }} style={{ flex: 1 }}>Review & Submit →</Btn>
+              <Btn onClick={() => { if (!form.amount || !form.purpose) { showToast("Please fill in loan details", "error"); return; } if (riskResult && +form.amount > riskResult.maxLoan) { showToast(`Exceeds maximum of N${Math.round(riskResult.maxLoan).toLocaleString()}`, "error"); return; } setStep(5); }} style={{ flex: 1 }}>Review & Submit →</Btn>
             </div>
           </Card>
         )}
@@ -7404,10 +7404,10 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 {[
                   ["Borrower", form.name], ["ID Number", form.idNumber], ["Phone", form.phone],
-                  ["Employer", form.employer], ["Salary", `N$${(+form.salary).toLocaleString()}`],
-                  ["Expenses", `N$${(+form.expenses).toLocaleString()}`],
+                  ["Employer", form.employer], ["Salary", `N${(+form.salary).toLocaleString()}`],
+                  ["Expenses", `N${(+form.expenses).toLocaleString()}`],
                   ["Tier", `Tier ${riskResult?.tier}`], ["Score", `${riskResult?.finalScore}/100`],
-                  ["Amount", `N$${(+form.amount).toLocaleString()}`], ["Term", form.term + " months"],
+                  ["Amount", `N${(+form.amount).toLocaleString()}`], ["Term", form.term + " months"],
                   ["Purpose", form.purpose], ["Rate", `${riskResult?.rate}% p.a.`],
                 ].map(([l, v]) => (
                   <div key={l} style={{ padding: "8px 10px", background: DS.colors.surface, borderRadius: 8 }}>
@@ -7525,7 +7525,7 @@ const AgentPerformance = ({ user }) => {
           { l: "Total Captured", v: myBorrowers.length, c: DS.colors.textPrimary },
           { l: "Approved", v: approved.length, c: DS.colors.accent },
           { l: "Conversion Rate", v: conv + "%", c: +conv > 60 ? DS.colors.accent : DS.colors.warning },
-          { l: "Total Disbursed", v: `N$${totalDisbursed.toLocaleString()}`, c: DS.colors.gold },
+          { l: "Total Disbursed", v: `N${totalDisbursed.toLocaleString()}`, c: DS.colors.gold },
         ].map((s, i) => (
           <div key={i} style={{ padding:"16px 18px",background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:14,borderTop:`3px solid ${s.c}` }}>
             <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:4 }}>{s.l}</p>
@@ -7545,7 +7545,7 @@ const AgentPerformance = ({ user }) => {
           </div>
           {[
             ["Captured (all)", myBorrowers.length, "N$0"],
-            ["Approved & disbursed", approved.length, `N$${(approved.length * 50).toLocaleString()}`],
+            ["Approved & disbursed", approved.length, `N${(approved.length * 50).toLocaleString()}`],
             ["Pending (in review)", myBorrowers.filter(b=>b.status==="pending").length, "Pending"],
             ["Declined", myBorrowers.filter(b=>b.status==="declined").length, "N$0"],
           ].map(([l, count, val]) => (
@@ -7667,10 +7667,10 @@ const AdminWhatsApp = ({ showToast }) => {
                   ["Name", lead.name],
                   ["Phone", lead.phone],
                   ["Employer", lead.employer || "Not yet provided"],
-                  ["Salary", lead.salary ? `N$${(lead.salary||0).toLocaleString()}` : "Not yet provided"],
+                  ["Salary", lead.salary ? `N${(lead.salary||0).toLocaleString()}` : "Not yet provided"],
                   ["DTI", lead.dti || "Not yet assessed"],
                   ["Purpose", lead.purpose || "Not yet provided"],
-                  ["Amount", lead.amount ? `N$${lead.amount.toLocaleString()}` : "Not yet provided"],
+                  ["Amount", lead.amount ? `N${lead.amount.toLocaleString()}` : "Not yet provided"],
                   ["Assigned Lender", lender?.name || "Not yet routed"],
                 ].map(([l, v]) => (
                   <div key={l} style={{ display:"flex",justifyContent:"space-between",padding:"8px 12px",background:DS.colors.surfaceAlt,borderRadius:8 }}>
@@ -7810,7 +7810,7 @@ const AdminAgents = ({ showToast }) => {
           { l:"Total Agents",v:AGENT_DB.agents.length,c:DS.colors.textPrimary },
           { l:"Borrowers Captured",v:allBorrowers.length,c:"#A78BFA" },
           { l:"Approved via Agents",v:allBorrowers.filter(b=>b.status==="approved").length,c:DS.colors.accent },
-          { l:"Agent Commissions",v:`N$${(allBorrowers.filter(b=>b.status==="approved").length*50).toLocaleString()}`,c:DS.colors.gold },
+          { l:"Agent Commissions",v:`N${(allBorrowers.filter(b=>b.status==="approved").length*50).toLocaleString()}`,c:DS.colors.gold },
         ].map((s,i)=>(
           <div key={i} style={{ padding:"16px 18px",background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:14,borderTop:`3px solid ${s.c}` }}>
             <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:4 }}>{s.l}</p>
