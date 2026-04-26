@@ -4641,6 +4641,20 @@ const AdminAllApplications = ({ showToast }) => {
 // ══════════════════════════════════════════════════════════════════════════════
 
 const AdminBorrowers = ({ showToast, setView }) => {
+  const NULL_SCORECARD_ANSWERS = {
+    jobTenure: "6 – 12 months", incomeRegularity: "Mostly regular",
+    employerType: "SME / informal", accountAge: "< 12 months",
+    salaryInAccount: "Partial / inconsistent", accountUsage: "Active & stable",
+    negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
+    incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
+    dtiRatio: "30 – 50%", disposableIncome: "Moderate", loanBurden: "Low",
+    incomeMismatch: "None", docAuthenticity: "Verified",
+  };
+  const NULL_SCORECARD = {
+    period: "—", avgCoreCredits: 0, avgDebits: 0, avgSurplusDeficit: 0,
+    avgBalance: 0, totalDeductionAvg: 0, unpaidCount: 0, lowDays: 0,
+    negativeDays: 0, balanceHistory: [0, 0, 0], deductions: [], avgCredits: 0, name: "—",
+  };
   const [search, setSearch] = useState("");
   const [tierFilter, setTierFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -4748,8 +4762,14 @@ const AdminBorrowers = ({ showToast, setView }) => {
   };
 
   // ── BORROWER DETAIL ──
-  if (selected) {
-    const b = selected;
+if (selected) {
+    const b = {
+      ...selected,
+      loans: Array.isArray(selected.loans) ? selected.loans : [],
+      documents: Array.isArray(selected.documents) ? selected.documents : [],
+      scorecard: selected.scorecard || NULL_SCORECARD,
+      scorecardAnswers: selected.scorecardAnswers || NULL_SCORECARD_ANSWERS,
+    };
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
     const totalLoaned = b.loans.filter(l=>l.status==="approved").reduce((s,l)=>s+l.amount,0);
     const totalOutstanding = b.loans.reduce((s,l)=>s+(l.outstanding||0),0);
@@ -5065,7 +5085,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
           </tr></thead>
           <tbody>
             {filtered.map((b,i)=>{
-              const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers);
+              const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
               const lenderName = ["lb1","lb2","lb3","lb4","lb5"].includes(b.id)?"Capital Micro":"QuickCash";
               return (
                 <tr key={b.id} style={{borderTop:`1px solid ${DS.colors.border}`,background:i%2===1?DS.colors.surfaceAlt:"transparent",cursor:"pointer",transition:"background .15s"}}
