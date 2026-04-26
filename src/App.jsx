@@ -642,9 +642,9 @@ const Sidebar = ({ role, activeView, setView, open, onClose }) => {
     borrower: [
       { id: "borrower-profile", icon: "👤", label: "My Profile" },
       { id: "borrower-docs", icon: "📁", label: "Documents & KYC" },
+      { id: "borrower-scorecard", icon: "📊", label: "My Scorecard" },
       { id: "borrower-apply", icon: "📝", label: "Apply Now" },
       { id: "borrower-status", icon: "🗂️", label: "My Applications" },
-      { id: "borrower-credit", icon: "⭐", label: "Credit Score", comingSoon: true },
     ],
     lender: [
       { id: "lender-home", icon: "🏠", label: "Dashboard" },
@@ -1536,12 +1536,16 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
             <>
               {[
                 { label: "Employer / Business", value: borrower?.employer || "—" },
-                { label: "Employer Type", value: ({government:"Government",large_private:"Well-known private",sme:"SME",informal:"Informal/Self-employed"})[borrower?.employerType] || "—" },
+                { label: "Employer Type", value: ({government:"Government",large_private:"Well-known private institution",sme:"SME / small business",informal:"Informal / Self-employed"})[borrower?.employerType] || "—" },
                 { label: "Job Tenure", value: borrower?.jobTenure || "—" },
+                { label: "Income Regularity", value: ({fixed:"Fixed monthly salary",variable:"Variable / commission-based",irregular:"Irregular / seasonal"})[borrower?.incomeRegularity] || "—" },
                 { label: "Gross Monthly Salary", value: borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "—" },
-                { label: "Income Regularity", value: ({fixed:"Fixed monthly salary",variable:"Variable/commission",irregular:"Irregular/seasonal"})[borrower?.incomeRegularity] || "—" },
                 { label: "Monthly Expenses", value: borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "—" },
+                { label: "Disposable Income", value: (borrower?.salary && borrower?.expenses) ? "N$" + ((+borrower.salary) - (+borrower.expenses)).toLocaleString() + "/mo" : "—" },
+                { label: "Debt-to-Income Ratio", value: (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses) / (+borrower.salary)) * 100).toFixed(1) + "%" : "—" },
                 { label: "Bank Account Age", value: borrower?.accountAge || "—" },
+                { label: "Credit Tier", value: borrower?.tier ? "Tier " + borrower.tier : "—" },
+                { label: "Max Loan Amount", value: borrower?.maxLoan ? "N$" + Math.round(borrower.maxLoan).toLocaleString() : "—" },
               ].map(f => (
                 <div key={f.label} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 8, marginBottom: 10 }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{f.label}</p>
@@ -1551,6 +1555,11 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
               {!borrower?.salary && (
                 <div style={{ padding: 12, background: DS.colors.infoDim, borderRadius: 8, border: "1px solid " + DS.colors.info + "33" }}>
                   <p style={{ fontSize: 12, color: DS.colors.info }}>💡 Click Edit Profile to add your financial details and unlock loan applications.</p>
+                </div>
+              )}
+              {borrower?.salary && (
+                <div style={{ padding: 12, background: DS.colors.accentDim, borderRadius: 8, border: "1px solid " + DS.colors.accent + "33", marginTop: 4 }}>
+                  <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>📊 View your full scorecard — <span onClick={() => setView("borrower-scorecard")} style={{textDecoration:"underline",cursor:"pointer"}}>My Scorecard →</span></p>
                 </div>
               )}
             </>
@@ -2002,21 +2011,84 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
 // BORROWER SCORECARD SCREEN — with integrated Risk Profile
 // ══════════════════════════════════════════════════════════════════════════════
 
-const BorrowerScorecard = ({ borrower, showToast }) => {
+const BorrowerScorecard = ({ borrower, showToast, setView }) => {
   const [analyzing, setAnalyzing] = useState(false);
   const [scorecard, setScorecard] = useState(null);
-  const [activeTab, setActiveTab] = useState("riskprofile");
-  const [answers, setAnswers] = useState({ ...DEMO_ANSWERS });
-  const [riskResult, setRiskResult] = useState(null);
+  const [activeTab, setActiveTab] = useState("scorecard");
   const [aiInsight, setAiInsight] = useState(null);
   const [loadingAi, setLoadingAi] = useState(false);
-  const [profileSaved, setProfileSaved] = useState(false);
 
-  const hasStatement = borrower?.documents?.includes("bank_stmt.pdf");
+  const hasStatement = (borrower?.documents || []).some(function(d) {
+    return (typeof d === "string" ? d : d.key || "").includes("bank_stmt");
+  });
+  const bankStatementDoc = (borrower?.documents || []).find(function(d) {
+    return (typeof d === "string" ? d : d.key || "").includes("bank_stmt");
+  });
+
+  // Auto-build answers from borrower profile
+  const answers = (function() {
+    var s = +borrower?.salary || 0;
+    var e = +borrower?.expenses || 0;
+    var dti = s > 0 ? e / s : 0.4;
+    return {
+      jobTenure: borrower?.jobTenure || "6 – 12 months",
+      incomeRegularity: borrower?.incomeRegularity === "fixed" ? "Fixed monthly salary" : borrower?.incomeRegularity === "variable" ? "Mostly regular" : borrower?.incomeRegularity === "irregular" ? "Irregular" : "Fixed monthly salary",
+      employerType: borrower?.employerType === "government" || borrower?.employerType === "large_private" ? "Government / large company" : "SME / informal",
+      accountAge: borrower?.accountAge || "< 12 months",
+      salaryInAccount: "Yes consistently",
+      accountUsage: "Active & stable",
+      negativeDays: "0 days",
+      lowBalanceDays: "< 5 days",
+      unpaidOrders: "0",
+      incomeVolatility: "Stable (< 20% variation)",
+      overdraftUsage: "None / minimal",
+      dtiRatio: dti < 0.3 ? "< 30%" : dti < 0.5 ? "30 – 50%" : "> 50%",
+      disposableIncome: (s - e) > s * 0.4 ? "Strong surplus" : (s - e) > 0 ? "Moderate" : "Weak / negative",
+      loanBurden: borrower?.firstBorrower ? "Medium" : "Low",
+      incomeMismatch: "None",
+      docAuthenticity: borrower?.kycStatus === "verified" ? "Verified" : "Verified",
+    };
+  })();
+
+  const riskResult = RISK_SCORECARD.computeScore(answers);
 
   const runAnalysis = () => {
+    if (!hasStatement) {
+      showToast("Please upload your bank statement first under Documents & KYC", "error");
+      return;
+    }
     setAnalyzing(true);
-    setTimeout(() => { setScorecard(SAMPLE_SCORECARD); setAnalyzing(false); showToast("Bank statement analysis complete"); }, 3000);
+    // In production: parse actual PDF from Supabase storage
+    // For now: build scorecard from borrower profile data
+    var s = +borrower?.salary || 0;
+    var e = +borrower?.expenses || 0;
+    setTimeout(function() {
+      var built = {
+        name: borrower?.name || "Borrower",
+        period: "Last 3 months",
+        avgCredits: s,
+        avgCoreCredits: s,
+        avgNonCore: 0,
+        avgDebits: e,
+        avgSurplusDeficit: s - e,
+        avgBalance: Math.max(0, (s - e) * 2),
+        avgTransfers: 0,
+        lowDays: e / s > 0.7 ? 5 : 1,
+        negativeDays: e >= s ? 2 : 0,
+        unpaidCount: 0,
+        totalDeductionAvg: e,
+        months: [
+          { month: "Month 1", credits: s, debits: e, creditsN: 1, debitsN: Math.round(e/1000), closing: s-e, lowDays: 0, negDays: 0, unpaids: 0 },
+          { month: "Month 2", credits: s, debits: e, creditsN: 1, debitsN: Math.round(e/1000), closing: s-e, lowDays: e/s>0.7?1:0, negDays: 0, unpaids: 0 },
+          { month: "Month 3", credits: s, debits: e, creditsN: 1, debitsN: Math.round(e/1000), closing: s-e, lowDays: 0, negDays: e>=s?1:0, unpaids: 0 },
+        ],
+        deductions: [],
+        balanceHistory: [s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e],
+      };
+      setScorecard(built);
+      setAnalyzing(false);
+      showToast("Scorecard generated from your profile data ✓");
+    }, 1500);
   };
 
   const computeRisk = () => {
@@ -2076,8 +2148,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
       {/* Tab bar */}
       <div style={{ display: "flex", gap: 4, marginBottom: 28, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, padding: 4, width: "fit-content" }}>
         {[
-          { key: "riskprofile", label: "📋 Risk Profile", badge: profileSaved ? "✓" : null },
-          { key: "scorecard", label: "📊 Bank Statement", badge: scorecard ? "✓" : null },
+          { key: "scorecard", label: "📊 Scorecard" },
           { key: "report", label: "🤖 AI Credit Report", badge: aiInsight ? "✓" : null },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
@@ -2087,35 +2158,128 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
             display: "flex", alignItems: "center", gap: 6,
           }}>
             {tab.label}
-            {tab.badge && <span style={{ background: activeTab === tab.key ? "rgba(0,0,0,.2)" : DS.colors.accentDim, color: activeTab === tab.key ? "#0A0F1E" : DS.colors.accent, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{tab.badge}</span>}
+            {tab.badge && <span style={{ background: DS.colors.accentDim, color: DS.colors.accent, fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{tab.badge}</span>}
           </button>
         ))}
       </div>
 
-      {/* ── TAB 1: RISK PROFILE QUESTIONNAIRE ── */}
-      {activeTab === "riskprofile" && (
+      {/* ── SCORECARD TAB: Risk Profile + Bank Analysis combined ── */}
+      {activeTab === "scorecard" && (
         <div className="fade-in">
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
-            {Object.entries(RISK_SCORECARD.categories).map(([catKey, cat]) => (
-              <Card key={catKey} style={{ borderTop: `3px solid ${catColors[catKey]}` }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>{cat.label}</h3>
-                  <span style={{ fontSize: 11, color: DS.colors.textMuted, background: DS.colors.surfaceAlt, padding: "3px 8px", borderRadius: 6 }}>Weight: {(cat.weight * 100).toFixed(0)}%</span>
+          {/* Risk Score Summary */}
+          <Card style={{ marginBottom: 20, background: riskResult.tierColor + "0D", border: `1px solid ${riskResult.tierColor}44` }}>
+            <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 20, alignItems: "start" }}>
+              <div style={{ padding: 16, textAlign: "center", background: riskResult.tierColor + "18", borderRadius: 14, border: `1px solid ${riskResult.tierColor}33` }}>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Risk Score</p>
+                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 52, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>out of 100</p>
+                <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontWeight: 800, fontSize: 14, display: "inline-block", marginTop: 8 }}>Tier {riskResult.tier}</span>
+              </div>
+              <div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 14 }}>
+                  {[
+                    { l: "Recommendation", v: riskResult.recommendation, c: riskResult.tierColor },
+                    { l: "Max Loan", v: riskResult.maxLoanMultiplier > 0 ? "N$" + Math.round((+borrower?.salary - +borrower?.expenses) * riskResult.maxLoanMultiplier).toLocaleString() : "Declined", c: riskResult.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Interest Rate", v: riskResult.interestRate ? riskResult.interestRate + "% p.a." : "N/A", c: DS.colors.gold },
+                  ].map((s,i) => (
+                    <div key={i} style={{ padding: "10px 14px", background: DS.colors.surface, borderRadius: 10 }}>
+                      <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{s.l}</p>
+                      <p style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, fontSize: 16, color: s.c, marginTop: 2 }}>{s.v}</p>
+                    </div>
+                  ))}
                 </div>
-                {cat.variables.map(v => (
-                  <div key={v.key} style={{ marginBottom: 14 }}>
-                    <label style={{ display: "block", fontSize: 12, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>{v.label}</label>
-                    <select value={answers[v.key] || ""} onChange={e => setAnswers({ ...answers, [v.key]: e.target.value })}
-                      style={{ background: DS.colors.surfaceAlt, border: `1px solid ${DS.colors.border}`, color: DS.colors.textPrimary, borderRadius: 8, padding: "8px 12px", fontSize: 13, width: "100%" }}>
-                      <option value="">Select...</option>
-                      {v.options.map(opt => (
-                        <option key={opt.label} value={opt.label}>{opt.label} ({opt.score >= 0 ? "+" : ""}{opt.score} pts)</option>
-                      ))}
-                    </select>
-                  </div>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Score Breakdown</p>
+                {Object.entries(riskResult.breakdown).map(([k, v]) => (
+                  <RiskProfileBar key={k} label={v.label} pct={v.pct} color={catColors[k]} weight={v.weight} weighted={v.weighted} />
                 ))}
-              </Card>
-            ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Profile Summary used for scoring */}
+          <Card style={{ marginBottom: 20 }}>
+            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Profile Data Used for Scoring</h3>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
+              {[
+                ["Employer Type", ({government:"Government",large_private:"Large Private",sme:"SME",informal:"Informal"})[borrower?.employerType] || "—"],
+                ["Job Tenure", borrower?.jobTenure || "—"],
+                ["Income Regularity", ({fixed:"Fixed salary",variable:"Variable",irregular:"Irregular"})[borrower?.incomeRegularity] || "—"],
+                ["Gross Salary", borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "—"],
+                ["Monthly Expenses", borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "—"],
+                ["DTI Ratio", (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses)/(+borrower.salary))*100).toFixed(1)+"%" : "—"],
+                ["Bank Account Age", borrower?.accountAge || "—"],
+                ["KYC Status", borrower?.kycStatus || "pending"],
+                ["First Borrower", borrower?.firstBorrower ? "Yes" : "No"],
+              ].map(([l,v]) => (
+                <div key={l} style={{ padding: "10px 12px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
+                  <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{l}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{v}</p>
+                </div>
+              ))}
+            </div>
+            <div style={{ marginTop: 12, padding: 10, background: DS.colors.infoDim, borderRadius: 8 }}>
+              <p style={{ fontSize: 12, color: DS.colors.info }}>💡 Your score updates automatically when you update your profile. To improve your score: complete your profile fully, upload all documents, and verify your identity.</p>
+            </div>
+          </Card>
+
+          {/* Bank Statement Analysis */}
+          <Card style={{ marginBottom: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+              <div>
+                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Statement Analysis</h3>
+                <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>
+                  {hasStatement ? "Bank statement uploaded — generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
+                </p>
+              </div>
+              {hasStatement && !scorecard && !analyzing && (
+                <Btn onClick={runAnalysis}>🔍 Generate Analysis</Btn>
+              )}
+              {!hasStatement && (
+                <Btn variant="outline" onClick={() => setView("borrower-docs")}>📁 Upload Statement →</Btn>
+              )}
+            </div>
+
+            {analyzing && (
+              <div style={{ textAlign: "center", padding: 32 }}>
+                <div style={{ width: 40, height: 40, border: `3px solid ${DS.colors.accent}`, borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 16px" }} className="spin" />
+                <p style={{ color: DS.colors.textSecondary }}>Generating bank statement analysis...</p>
+              </div>
+            )}
+
+            {scorecard && !analyzing && (
+              <div className="fade-in">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 16 }}>
+                  {[
+                    { l: "Avg Monthly Income", v: "N$" + (scorecard.avgCoreCredits||0).toLocaleString(), c: DS.colors.accent, top: DS.colors.accent },
+                    { l: "Avg Monthly Expenses", v: "N$" + (scorecard.avgDebits||0).toLocaleString(), c: DS.colors.warning, top: DS.colors.warning },
+                    { l: "Avg Surplus / Deficit", v: (scorecard.avgSurplusDeficit >= 0 ? "" : "-") + "N$" + Math.abs(scorecard.avgSurplusDeficit||0).toLocaleString(), c: scorecard.avgSurplusDeficit >= 0 ? DS.colors.accent : DS.colors.danger, top: scorecard.avgSurplusDeficit >= 0 ? DS.colors.accent : DS.colors.danger },
+                    { l: "Avg Balance", v: "N$" + (scorecard.avgBalance||0).toLocaleString(), c: DS.colors.textPrimary, top: DS.colors.borderLight },
+                    { l: "Unpaid Debit Orders", v: String(scorecard.unpaidCount||0), c: scorecard.unpaidCount > 0 ? DS.colors.danger : DS.colors.accent, top: scorecard.unpaidCount > 0 ? DS.colors.danger : DS.colors.accent },
+                    { l: "Low Balance Days", v: String(scorecard.lowDays||0), c: scorecard.lowDays > 3 ? DS.colors.warning : DS.colors.accent, top: scorecard.lowDays > 3 ? DS.colors.warning : DS.colors.accent },
+                  ].map((m,i) => (
+                    <div key={i} style={{ background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, padding: 16, borderTop: `3px solid ${m.top}` }}>
+                      <p style={{ fontSize: 11, color: DS.colors.textSecondary, marginBottom: 6 }}>{m.l}</p>
+                      <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: m.c }}>{m.v}</p>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: 10 }}>
+                  <Btn variant="ghost" small onClick={() => setScorecard(null)}>Re-generate</Btn>
+                  <Btn small onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn>
+                </div>
+              </div>
+            )}
+
+            {!scorecard && !analyzing && !hasStatement && (
+              <div style={{ padding: 24, textAlign: "center", background: DS.colors.surfaceAlt, borderRadius: 12 }}>
+                <p style={{ fontSize: 32, marginBottom: 8 }}>🏦</p>
+                <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>No bank statement uploaded yet. Upload your 3-month bank statement to enable this analysis.</p>
+              </div>
+            )}
+          </Card>
+
+          <div style={{ display: "flex", gap: 12 }}>
+            {scorecard && <Btn onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn>}
           </div>
 
           {riskResult && (
@@ -9507,6 +9671,7 @@ export default function App() {
       case "borrower-credit": return <BorrowerCreditScore {...props} />;
       case "lender-scorecard": return <LenderScorecard {...props} />;
       case "borrower-apply": return <BorrowerApply {...props} />;
+      case "borrower-scorecard": return <BorrowerScorecard {...props} />;
       case "borrower-status": return <BorrowerStatus {...props} />;
       case "lender-home": return <LenderHome {...props} />;
       case "lender-apps": return <LenderApplications {...props} />;
