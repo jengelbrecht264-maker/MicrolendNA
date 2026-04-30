@@ -81,7 +81,8 @@ const SB = {
       method: "POST", headers: this._headers(), body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || res.statusText); }
-    return res.json();
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   },
 
   async update(table, match, data) {
@@ -90,7 +91,9 @@ const SB = {
       method: "PATCH", headers: this._headers(), body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || res.statusText); }
-    return res.json();
+    // Supabase PATCH may return 204 No Content — handle empty body safely
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   },
 
   async upsert(table, data) {
@@ -4168,62 +4171,76 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     : [];
 
   const handleDecision = async (appId, decision, amount) => {
-    var app = apps.find(function(a) { return a.id === appId; });
-    if (!app) { showToast("Application not found. Refresh and try again.", "error"); return; }
-    // Optimistically update UI immediately
-    setAppStatuses(prev => ({ ...prev, [appId]: decision }));
+    // Convert to string for safe comparison — Supabase UUIDs are always strings
+    var idStr = String(appId);
+    var app = apps.find(function(a) { return String(a.id) === idStr; });
+    if (!app) {
+      showToast("Application not found. Please refresh the page and try again.", "error");
+      return;
+    }
+    // Lock the UI immediately — prevents double-clicking
+    setAppStatuses(prev => ({ ...prev, [idStr]: decision }));
     try {
-      // Persist status to Supabase
-      await SB.update("applications", { id: appId }, {
+      // Update status in Supabase
+      await SB.update("applications", { id: idStr }, {
         status: decision,
         decided_at: new Date().toISOString(),
         decided_by: user?.id || null,
       });
-      // Notify borrower
+
+      // Notify borrower (non-blocking — failure doesn't affect decision)
       if (app.borrowerUserId) {
-        try {
-          await SB.insert("notifications", {
-            user_id: app.borrowerUserId,
-            title: decision === "approved" ? "Loan Approved! 🎉" : "Loan Application Update",
-            message: decision === "approved"
-              ? "Your loan of N$" + (amount || app.amount || 0).toLocaleString() + " has been approved. Your lender will contact you within 24 hours."
-              : "Your loan application has been reviewed and was not approved at this time. Contact support for details.",
-            type: decision === "approved" ? "success" : "warning",
-            read: false,
-          });
-        } catch(ne) { console.log("Notification:", ne.message); }
+        SB.insert("notifications", {
+          user_id: app.borrowerUserId,
+          title: decision === "approved" ? "Loan Approved! 🎉" : "Loan Application Update",
+          message: decision === "approved"
+            ? "Your loan of N$" + (amount || app.amount || 0).toLocaleString() + " has been approved. Your lender will contact you within 24 hours."
+            : "Your loan application has been reviewed and was not approved at this time. Contact support for more details.",
+          type: decision === "approved" ? "success" : "warning",
+          read: false,
+        }).catch(function(ne) { console.log("Notification error (non-fatal):", ne.message); });
       }
+
       showToast(
         decision === "approved"
           ? "✅ N$" + (amount || app.amount || 0).toLocaleString() + " approved — borrower notified"
           : "Application declined — borrower notified.",
         decision === "approved" ? "success" : "error"
       );
-      // Refresh list THEN clear selection so UI updates correctly
-      await loadAppsFromDB();
+
+      // Refresh list, then clear panel
+      try { await loadAppsFromDB(); } catch(re) { console.log("Refresh error:", re.message); }
       setSelectedApp(null);
       setAppTab("overview");
+
     } catch(e) {
-      // Roll back optimistic update on failure
-      setAppStatuses(prev => ({ ...prev, [appId]: app.status }));
-      showToast("Error saving decision: " + (e.message || "Please try again."), "error");
-      console.log("Decision save error:", e);
+      // Roll back UI on failure and show error
+      setAppStatuses(prev => {
+        var next = Object.assign({}, prev);
+        delete next[idStr];
+        return next;
+      });
+      var msg = e.message || "Unknown error";
+      showToast("Could not save decision: " + msg, "error");
+      console.error("handleDecision error:", e);
     }
   };
 
-  const confirmDecision = (app, decision) => {
-    if (!app || !app.id) { showToast("No application selected.", "error"); return; }
+  const confirmDecision = function(app, decision) {
+    if (!app || !app.id) {
+      showToast("No application selected.", "error");
+      return;
+    }
     if (decision === "declined") {
-      // Use showConfirm if available, else fall back to native confirm
       if (typeof showConfirm === "function") {
         showConfirm({
           title: "Decline Application",
-          message: "Are you sure you want to decline the application from " + app.borrowerName + " for N$" + (app.amount||0).toLocaleString() + "? This action cannot be undone.",
+          message: "Decline the application from " + (app.borrowerName || "this borrower") + " for N$" + (app.amount || 0).toLocaleString() + "? This cannot be undone.",
           danger: true,
-          onConfirm: () => handleDecision(app.id, "declined", app.amount),
+          onConfirm: function() { handleDecision(app.id, "declined", app.amount); },
         });
       } else {
-        if (window.confirm("Decline this application from " + app.borrowerName + "?")) {
+        if (window.confirm("Decline this application?")) {
           handleDecision(app.id, "declined", app.amount);
         }
       }
@@ -4296,7 +4313,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
   const rr = RISK_SCORECARD.computeScore(_answers || NULL_SCORECARD_ANSWERS);
     const tierColor = DS.colors[`tier${app.tier}`];
     const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
-    const decided = appStatuses[app.id];
+    const decided = appStatuses[String(app.id)];
 
     const tabs = [
       { key: "overview", label: "Overview" },
