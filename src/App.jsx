@@ -5538,6 +5538,38 @@ const AdminBorrowers = ({ showToast, setView }) => {
   const [loadingAi, setLoadingAi] = useState(false);
   const [sbBorrowers, setSbBorrowers] = useState([]);
   const [loadingBorrowers, setLoadingBorrowers] = useState(true);
+  const [sbLenders, setSbLenders] = useState([]);
+
+  // Load approved lenders from Supabase for assign dropdown
+  useEffect(function() {
+    (async function() {
+      try {
+        var lpRows = await SB.query("lender_profiles", "status=eq.active&select=user_id,name,email,plan_type,status");
+        // Also load pending so admin can see them — filter in UI
+        var allLpRows = await SB.query("lender_profiles", "select=user_id,name,email,plan_type,status");
+        var profRows = await SB.query("profiles", "role=eq.lender&select=id,name,email");
+        var profMap = {};
+        (profRows || []).forEach(function(p) { profMap[p.id] = p; });
+        var mapped = (allLpRows || []).map(function(lp) {
+          var prof = profMap[lp.user_id] || {};
+          return {
+            id: lp.user_id,
+            name: lp.name || prof.name || "Unknown Lender",
+            email: lp.email || prof.email || "",
+            plan: lp.plan_type || "payasyougo",
+            status: lp.status || "pending_review",
+          };
+        });
+        // Merge with DB.lenders seed data
+        var sbIds = new Set(mapped.map(function(l) { return l.id; }));
+        var seedLenders = DB.lenders.filter(function(l) { return !sbIds.has(l.id); });
+        setSbLenders([...mapped, ...seedLenders]);
+      } catch(e) {
+        console.log("Load lenders for assign dropdown:", e.message);
+        setSbLenders([...DB.lenders]);
+      }
+    })();
+  }, []);
 
   // Load borrowers from Supabase on mount
   useEffect(function() {
@@ -5823,9 +5855,12 @@ const AdminBorrowers = ({ showToast, setView }) => {
                         id={"lender-select-"+b.userId}
                         style={{flex:1,minWidth:200,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,color:DS.colors.textPrimary,borderRadius:8,padding:"8px 12px",fontSize:13}}>
                         <option value="">Select a lender to assign...</option>
-                        {DB.lenders.filter(l=>l.status==="active").map(function(l) {
+                        {sbLenders.filter(function(l){return l.status==="active";}).map(function(l) {
                           return <option key={l.id} value={l.id}>{l.name} ({l.plan==="subscription"?"Sub":"PAYG"}) — Tier {rr.tier} {["A","B"].includes(rr.tier)?"✓":"⚠"}</option>;
                         })}
+                        {sbLenders.filter(function(l){return l.status==="active";}).length === 0 && (
+                          <option disabled value="">No approved lenders yet — approve lenders in the Lenders tab first</option>
+                        )}
                       </select>
                       <Btn small onClick={async function() {
                         var sel = document.getElementById("lender-select-"+b.userId);
@@ -5849,7 +5884,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                           return;
                         }
 
-                        var lender = DB.lenders.find(function(l){return l.id===lenderId;});
+                        var lender = sbLenders.find(function(l){return l.id===lenderId;}) || DB.lenders.find(function(l){return l.id===lenderId;});
                         try {
                           // Update all pending/new_lead applications for this borrower
                           var existingApps = await SB.query(
@@ -6355,10 +6390,66 @@ const AdminLenders = ({ showToast, showConfirm }) => {
   const [selected, setSelected] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
   const [addOpen, setAddOpen] = useState(false);
-  const [editOpen, setEditOpen] = useState(null); // holds lender being edited
+  const [editOpen, setEditOpen] = useState(null);
   const [filterStatus, setFilterStatus] = useState("all");
   const [form, setForm] = useState({ name: "", email: "", contactPerson: "", phone: "", regNumber: "", namfisaLicense: "", licenseExpiry: "", plan: "payasyougo", notes: "" });
   const [editForm, setEditForm] = useState({});
+  const [loadingLenders, setLoadingLenders] = useState(true);
+
+  // Load lenders from Supabase on mount — merge with DB.lenders seed data
+  useEffect(function() {
+    (async function() {
+      try {
+        // Load from lender_profiles table
+        var lpRows = await SB.query("lender_profiles", "select=*&order=registered_at.desc");
+        // Load matching profiles for name/email
+        var profRows = await SB.query("profiles", "role=eq.lender&select=id,name,email,phone");
+        var profMap = {};
+        (profRows || []).forEach(function(p) { profMap[p.id] = p; });
+
+        var fromDB = (lpRows || []).map(function(lp) {
+          var prof = profMap[lp.user_id] || {};
+          var dd = {};
+          try { dd = typeof lp.due_diligence === "string" ? JSON.parse(lp.due_diligence) : (lp.due_diligence || {}); } catch(e) {}
+          return {
+            id: lp.user_id || lp.id,
+            lpId: lp.id,
+            userId: lp.user_id,
+            name: lp.name || prof.name || "Unknown",
+            email: lp.email || prof.email || "",
+            contactPerson: lp.contact_person || lp.name || prof.name || "",
+            phone: lp.phone || prof.phone || "",
+            regNumber: lp.reg_number || "",
+            namfisaLicense: lp.namfisa_license || "",
+            licenseExpiry: lp.license_expiry || "",
+            plan: lp.plan_type || "payasyougo",
+            status: lp.status || "pending_review",
+            registeredAt: lp.registered_at ? lp.registered_at.slice(0,10) : "—",
+            approvedAt: lp.approved_at ? lp.approved_at.slice(0,10) : null,
+            approvedBy: lp.approved_by || null,
+            notes: lp.notes || "",
+            dueDiligence: dd,
+            leadsTotal: lp.leads_total || 0,
+            leadsApproved: lp.leads_approved || 0,
+            leadsDeclined: lp.leads_declined || 0,
+            leadsPending: lp.leads_pending || 0,
+            revenue: lp.revenue || 0,
+            fromSupabase: true,
+          };
+        });
+
+        // Merge: Supabase records take priority; keep DB.lenders seed data for demo lenders not in DB
+        var sbIds = new Set(fromDB.map(function(l) { return l.id; }));
+        var seedOnly = DB.lenders.filter(function(l) { return !sbIds.has(l.id); });
+        setLenders([...fromDB, ...seedOnly]);
+      } catch(e) {
+        console.log("Load lenders from Supabase:", e.message);
+        // Fall back to seed data only
+        setLenders([...DB.lenders]);
+      }
+      setLoadingLenders(false);
+    })();
+  }, []);
 
   const statusColors = {
     active: DS.colors.accent,
@@ -6382,36 +6473,62 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     DB.lenders.forEach((l, i) => { if (l.id === id) Object.assign(DB.lenders[i], changes); });
   };
 
-  const approveLender = (l) => {
-    updateLender(l.id, { status: "active", approvedAt: new Date().toISOString().slice(0, 10), approvedBy: "System Admin" });
-    showToast(`✅ ${l.name} approved — credentials sent and access granted`);
-    setSelected(s => s?.id === l.id ? { ...s, status: "active", approvedAt: new Date().toISOString().slice(0, 10) } : s);
+  const persistLenderStatus = async (l, changes) => {
+    // Persist to Supabase lender_profiles if this is a real DB record
+    if (l.userId || l.lpId) {
+      try {
+        var matchKey = l.lpId ? { id: l.lpId } : { user_id: l.userId };
+        var dbChanges = {};
+        if (changes.status)     dbChanges.status      = changes.status;
+        if (changes.approvedAt) dbChanges.approved_at = changes.approvedAt;
+        if (changes.approvedBy) dbChanges.approved_by = changes.approvedBy;
+        if (changes.notes)      dbChanges.notes        = changes.notes;
+        if (changes.dueDiligence) dbChanges.due_diligence = JSON.stringify(changes.dueDiligence);
+        await SB.update("lender_profiles", matchKey, dbChanges);
+      } catch(e) { console.log("Persist lender status:", e.message); }
+    }
   };
 
-  const rejectLender = (l, reason) => {
-    updateLender(l.id, { status: "rejected", notes: (l.notes || "") + `\nRejected: ${reason}` });
-    showToast(`${l.name} rejected — notified via email`, "error");
-    setSelected(s => s?.id === l.id ? { ...s, status: "rejected" } : s);
+  const approveLender = async (l) => {
+    var changes = { status: "active", approvedAt: new Date().toISOString().slice(0, 10), approvedBy: "System Admin" };
+    updateLender(l.id, changes);
+    await persistLenderStatus(l, changes);
+    showToast(`✅ ${l.name} approved — lender can now log in and receive applications`);
+    setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
-  const suspendLender = (l) => {
-    updateLender(l.id, { status: "suspended" });
-    showToast(`${l.name} suspended — access revoked`, "error");
-    setSelected(s => s?.id === l.id ? { ...s, status: "suspended" } : s);
+  const rejectLender = async (l, reason) => {
+    var changes = { status: "rejected", notes: (l.notes || "") + "
+Rejected: " + (reason || "Due diligence failed") };
+    updateLender(l.id, changes);
+    await persistLenderStatus(l, changes);
+    showToast(l.name + " rejected — notified via email", "error");
+    setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
-  const reactivateLender = (l) => {
-    updateLender(l.id, { status: "active" });
-    showToast(`${l.name} reactivated — access restored`);
-    setSelected(s => s?.id === l.id ? { ...s, status: "active" } : s);
+  const suspendLender = async (l) => {
+    var changes = { status: "suspended" };
+    updateLender(l.id, changes);
+    await persistLenderStatus(l, changes);
+    showToast(l.name + " suspended — access revoked", "error");
+    setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
-  const toggleDD = (lenderId, key) => {
+  const reactivateLender = async (l) => {
+    var changes = { status: "active" };
+    updateLender(l.id, changes);
+    await persistLenderStatus(l, changes);
+    showToast(l.name + " reactivated — access restored");
+    setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
+  };
+
+  const toggleDD = async (lenderId, key) => {
     const lender = lenders.find(l => l.id === lenderId);
     if (!lender) return;
     const updatedDD = { ...lender.dueDiligence, [key]: !lender.dueDiligence?.[key] };
     updateLender(lenderId, { dueDiligence: updatedDD });
     setSelected(s => s?.id === lenderId ? { ...s, dueDiligence: updatedDD } : s);
+    await persistLenderStatus(lender, { dueDiligence: updatedDD });
   };
 
   const addLender = () => {
@@ -9083,7 +9200,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
     });
   };
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     setError("");
     if (!name.trim()) { setError("Please enter your full name"); return; }
     if (!email.trim() || !email.includes("@")) { setError("Please enter a valid email address"); return; }
@@ -9092,26 +9209,73 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
     if (!/[0-9]/.test(password)) { setError("Password must contain at least one number"); return; }
 
     setLoading(true);
-    SB.signUp(email, password, { name: name, role: role }).then(function(data) {
-      setLoading(false);
-      if (data.user && data.access_token) {
-        // Auto-logged in after signup
-        var user = { id: data.user.id, email: email, name: name, role: role, twoFAEnabled: false };
-        if (role === "borrower") {
-          onLogin(user);
-        } else {
-          setTab("login"); setEmail(""); setPassword(""); setName("");
-          setError("");
+    try {
+      var data = await SB.signUp(email, password, { name: name, role: role });
+      var uid = data.user && data.user.id;
+
+      if (uid) {
+        // ── Insert into profiles table (required for role-based login) ──
+        try {
+          await SB.upsert("profiles", {
+            id: uid,
+            email: email,
+            name: name,
+            role: role,
+          });
+        } catch(pe) { console.log("profiles insert:", pe.message); }
+
+        // ── If lender, also insert into lender_profiles (pending_review) ──
+        if (role === "lender") {
+          try {
+            await SB.upsert("lender_profiles", {
+              user_id: uid,
+              email: email,
+              name: name,
+              contact_person: name,
+              status: "pending_review",
+              plan_type: "payasyougo",
+              registered_at: new Date().toISOString(),
+              due_diligence: JSON.stringify({
+                namfisaVerified: false,
+                regVerified: false,
+                directorCheck: false,
+                amlCheck: false,
+                bankAccountVerified: false,
+                contractSigned: false,
+              }),
+            });
+          } catch(lpe) { console.log("lender_profiles insert:", lpe.message); }
         }
-      } else if (data.user && !data.access_token) {
-        // Email confirmation required
-        setTab("login"); setEmail(""); setPassword(""); setName("");
+
+        // ── If borrower and auto-logged in, proceed to portal ──
+        if (data.access_token) {
+          var userObj = { id: uid, email: email, name: name, role: role, twoFAEnabled: false };
+          if (role === "borrower") {
+            setLoading(false);
+            onLogin(userObj);
+            return;
+          } else {
+            // Lender registered — send to login with success message
+            setLoading(false);
+            setTab("login"); setEmail(""); setPassword(""); setName("");
+            setError("Account created! Your account is pending admin approval. You will be notified once approved.");
+            return;
+          }
+        }
+      }
+
+      // Email confirmation required (no access_token)
+      setLoading(false);
+      setTab("login"); setEmail(""); setPassword(""); setName("");
+      if (role === "lender") {
+        setError("Account created! Check your email to confirm. Once confirmed, an admin will review and approve your lender account.");
+      } else {
         setError("Account created! Check your email to confirm, then log in.");
       }
-    }).catch(function(err) {
+    } catch(err) {
       setLoading(false);
       setError(err.message || "Registration failed");
-    });
+    }
   };
 
   const handleKeyDown = (e, action) => { if (e.key === "Enter") action(); };
@@ -9922,6 +10086,28 @@ export default function App() {
       } catch (e) { console.log("Login load error:", e); }
       navigate("borrower-profile");
     } else if (u.role === "lender") {
+      // Ensure lender_profiles row exists (backfill for lenders who registered before this fix)
+      (async function() {
+        try {
+          var existing = await SB.query("lender_profiles", "user_id=eq." + u.id + "&select=id");
+          if (!existing || existing.length === 0) {
+            await SB.upsert("lender_profiles", {
+              user_id: u.id,
+              email: u.email,
+              name: u.name,
+              contact_person: u.name,
+              status: "pending_review",
+              plan_type: "payasyougo",
+              registered_at: new Date().toISOString(),
+              due_diligence: JSON.stringify({
+                namfisaVerified: false, regVerified: false, directorCheck: false,
+                amlCheck: false, bankAccountVerified: false, contractSigned: false,
+              }),
+            });
+            console.log("lender_profiles row created for existing lender:", u.id);
+          }
+        } catch(e) { console.log("Lender profile backfill:", e.message); }
+      })();
       navigate("lender-home");
     } else if (u.role === "agent") {
       navigate("agent-home");
