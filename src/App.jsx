@@ -269,82 +269,7 @@ const DB = {
   users: [],
   borrowers: [],
   applications: [],
-  lenders: [
-    {
-      id: "u2", name: "Capital Micro Finance", email: "lender@capitalmicro.na",
-      plan: "subscription", planFee: 2500, status: "active",
-      registeredAt: "2024-11-01", approvedAt: "2024-11-03", approvedBy: "System Admin",
-      contactPerson: "Marius van Zyl", phone: "+264 61 220 4400", regNumber: "CC/2019/00234",
-      namfisaLicense: "ML-2019-0045", licenseExpiry: "2026-12-31",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "Long-standing partner. Subscription plan. Specialises in government employees.",
-    },
-    {
-      id: "u3", name: "QuickCash Namibia", email: "lender2@quickcash.na",
-      plan: "payasyougo", planFee: 0, status: "active",
-      registeredAt: "2024-12-15", approvedAt: "2024-12-17", approvedBy: "System Admin",
-      contactPerson: "Anna Nghipandulwa", phone: "+264 81 400 5500", regNumber: "CC/2022/01122",
-      namfisaLicense: "ML-2022-0198", licenseExpiry: "2025-12-31",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "Pay-as-you-go partner. Focuses on payday loans under N$10,000.",
-    },
-    {
-      id: "u5", name: "Trustco Microfinance", email: "admin@trustcomicro.na",
-      plan: "subscription", planFee: 2500, status: "pending_review",
-      registeredAt: "2025-03-18", approvedAt: null, approvedBy: null,
-      contactPerson: "Benedictus Mouton", phone: "+264 61 380 2200", regNumber: "CC/2023/00876",
-      namfisaLicense: "ML-2023-0302", licenseExpiry: "2026-06-30",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "",
-      dueDiligence: {
-        namfisaVerified: true, regVerified: false, directorCheck: false,
-        amlCheck: false, bankAccountVerified: false, contractSigned: false,
-      },
-    },
-    {
-      id: "u6", name: "Letshego MFB Namibia", email: "partners@letshego.na",
-      plan: "payasyougo", planFee: 0, status: "pending_review",
-      registeredAt: "2025-03-20", approvedAt: null, approvedBy: null,
-      contactPerson: "Dr. Ester Kali", phone: "+264 61 299 6600", regNumber: "CC/2015/00123",
-      namfisaLicense: "ML-2015-0012", licenseExpiry: "2027-03-31",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "",
-      dueDiligence: {
-        namfisaVerified: true, regVerified: true, directorCheck: true,
-        amlCheck: false, bankAccountVerified: false, contractSigned: false,
-      },
-    },
-    {
-      id: "u7", name: "FNB Namibia Microfinance", email: "micro@fnbnamibia.na",
-      plan: "subscription", planFee: 2500, status: "active",
-      registeredAt: "2025-01-10", approvedAt: "2025-01-12", approvedBy: "System Admin",
-      contactPerson: "Heinrich Mouton", phone: "+264 61 299 2400", regNumber: "CC/2010/00089",
-      namfisaLicense: "ML-2010-0008", licenseExpiry: "2027-01-31",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "FNB Namibia microfinance arm. Focuses on Tier A and B borrowers.",
-      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
-    },
-    {
-      id: "u8", name: "Bank Windhoek Micro Loans", email: "microloans@bankwindhoek.na",
-      plan: "subscription", planFee: 2500, status: "active",
-      registeredAt: "2025-01-20", approvedAt: "2025-01-22", approvedBy: "System Admin",
-      contactPerson: "Sophia Beukes", phone: "+264 61 299 1300", regNumber: "CC/2012/00145",
-      namfisaLicense: "ML-2012-0019", licenseExpiry: "2026-12-31",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "Bank Windhoek micro division. Accepts Tier A, B and C borrowers.",
-      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
-    },
-    {
-      id: "u9", name: "Nedbank Namibia Personal Finance", email: "personalfinance@nedbank.na",
-      plan: "payasyougo", planFee: 0, status: "active",
-      registeredAt: "2025-02-05", approvedAt: "2025-02-07", approvedBy: "System Admin",
-      contactPerson: "Petrus Hamutenya", phone: "+264 61 295 2000", regNumber: "CC/2008/00067",
-      namfisaLicense: "ML-2008-0005", licenseExpiry: "2027-06-30",
-      leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0,
-      revenue: 0, notes: "Nedbank personal finance. Specialises in funeral and medical emergency loans.",
-      dueDiligence: { namfisaVerified: true, regVerified: true, directorCheck: true, amlCheck: true, bankAccountVerified: true, contractSigned: true },
-    },
-  ],
+  lenders: [], // Populated from Supabase lender_profiles on load — no hardcoded mock data
   riskRules: {
     dtiMax: 0.45,
     minSalary: 3000,
@@ -3821,60 +3746,90 @@ const StorageService = {
 
 // ── LENDER HOME ───────────────────────────────────────────────────────────────
 const LenderHome = ({ user, setView }) => {
-  const lender = DB.lenders.find(l => l.id === user.id) || { applications: 0, approved: 0, plan: "—" };
+  const [lenderProfile, setLenderProfile] = useState(null);
   const [allB, setAllB] = useState([]);
   const [allApps, setAllApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Load this lender's own profile for plan display
+  useEffect(function() {
+    SB.query("lender_profiles", "user_id=eq." + user.id + "&select=plan_type,name,status").then(function(rows) {
+      if (rows && rows[0]) setLenderProfile(rows[0]);
+    }).catch(function(e) { console.log("Lender profile load:", e.message); });
+  }, [user.id]);
+
   useEffect(function() {
     (async function() {
       try {
-        // Load real borrower profiles
+        // Step 1: Load ONLY applications assigned to THIS lender — nothing else
+        var appRows = await SB.query(
+          "applications",
+          "select=*&order=created_at.desc"
+        );
+        var myAppRows = (appRows || []).filter(function(r) {
+          return r.lender_user_id === user.id || r.lender_id === user.id;
+        });
+        setAllApps(myAppRows.length === 0 ? [] : myAppRows.map(function(r) {
+          return {
+            id: r.id, tier: r.tier_at_application || "—",
+            amount: r.amount_cents ? r.amount_cents / 100 : 0,
+            purpose: r.purpose || "Personal", status: r.status || "pending",
+            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+            borrowerId: r.borrower_id, borrowerName: "Loading…",
+          };
+        }));
+
+        // Step 2: Get unique borrower_profile IDs from MY apps only
+        var myBpIds = [...new Set(myAppRows.map(function(r) { return r.borrower_id; }).filter(Boolean))];
+
+        if (myBpIds.length === 0) {
+          // No assigned borrowers — show empty state, not all borrowers
+          setAllB([]);
+          setLoading(false);
+          return;
+        }
+
+        // Step 3: Load only the borrower profiles that belong to MY apps
         var bpRows = await SB.query("borrower_profiles", "select=*");
-        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+        var myBpRows = (bpRows || []).filter(function(bp) { return myBpIds.includes(bp.id); });
+
+        var userIds = myBpRows.map(function(bp) { return bp.user_id; }).filter(Boolean);
         var userMap = {};
-        (users || []).forEach(function(u) { userMap[u.id] = u; });
-        var mapped = (bpRows || []).map(function(bp) {
+        if (userIds.length > 0) {
+          var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+          (users || []).forEach(function(u) { userMap[u.id] = u; });
+        }
+
+        var bpMap = {};
+        (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
+
+        var assignedBorrowers = myBpRows.map(function(bp) {
           var u = userMap[bp.user_id] || {};
           return {
-            id: bp.id, userId: bp.user_id, name: u.name || "Unknown",
-            tier: bp.tier || "—", riskScore: bp.risk_score || 0,
+            id: bp.id, userId: bp.user_id,
+            name: u.name || "Unknown",
+            tier: bp.tier || "—",
+            riskScore: bp.risk_score || 0,
             status: bp.kyc_status === "verified" ? "active" : "pending",
             loans: [],
           };
         });
-        if (mapped.length > 0) setAllB(mapped);
-        // Load ONLY applications assigned to THIS lender
-        var appRows = await SB.query("applications", "select=*&order=created_at.desc");
-        if (appRows && appRows.length > 0) {
-          var bpMap = {};
-          (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
-          // Filter: only show apps where lender_user_id matches this lender's user.id
-          var myAppRows = appRows.filter(function(r) {
-            return r.lender_user_id === user.id || r.lender_id === user.id;
-          });
-          var mappedApps = myAppRows.map(function(r) {
-            var bp = bpMap[r.borrower_id] || {};
-            var u = userMap[bp.user_id] || {};
-            return {
-              id: r.id, borrowerName: u.name || "Unknown", tier: r.tier_at_application || bp.tier || "—",
-              amount: r.amount_cents ? r.amount_cents / 100 : 0, purpose: r.purpose || "Personal",
-              status: r.status || "pending",
-              receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
-              borrowerId: r.borrower_id,
-            };
-          });
-          setAllApps(mappedApps.length > 0 ? mappedApps : []);
-          
-          // Build assigned borrowers from assigned apps only
-          var assignedBpIds = [...new Set(myAppRows.map(r => r.borrower_id).filter(Boolean))];
-          var assignedMapped = mapped.filter(function(b) { return assignedBpIds.includes(b.id); });
-          if (assignedMapped.length > 0) setAllB(assignedMapped);
-          else if (mapped.length === 0) setAllB([]); // No borrowers assigned yet
-        } else {
-          setAllApps([]);
-          setAllB([]);
-        }
+        setAllB(assignedBorrowers);
+
+        // Step 4: Back-fill borrower names into apps
+        setAllApps(myAppRows.map(function(r) {
+          var bp = bpMap[r.borrower_id] || {};
+          var u = userMap[bp.user_id] || {};
+          return {
+            id: r.id, borrowerName: u.name || "Unknown",
+            tier: r.tier_at_application || bp.tier || "—",
+            amount: r.amount_cents ? r.amount_cents / 100 : 0,
+            purpose: r.purpose || "Personal", status: r.status || "pending",
+            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+            borrowerId: r.borrower_id,
+          };
+        }));
+
       } catch (e) { console.log("LenderHome load:", e.message); }
       setLoading(false);
     })();
@@ -3887,7 +3842,7 @@ const LenderHome = ({ user, setView }) => {
 
   return (
     <div className="fade-in">
-      <PageHeader title="Lender Dashboard" subtitle={<>{user.name} · Plan: <span style={{ color: DS.colors.gold, fontWeight: 600, textTransform: "capitalize" }}>{lender.plan}</span></>} />
+      <PageHeader title="Lender Dashboard" subtitle={<>{user.name} · Plan: <span style={{ color: DS.colors.gold, fontWeight: 600, textTransform: "capitalize" }}>{lenderProfile ? lenderProfile.plan_type || "—" : "—"}</span></>} />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 14, marginBottom: 28 }}>
         <Stat label="Total Borrowers" value={allB.length} icon="👥" onClick={() => setView("lender-borrowers")} />
@@ -5560,13 +5515,11 @@ const AdminBorrowers = ({ showToast, setView }) => {
             status: lp.status || "pending_review",
           };
         });
-        // Merge with DB.lenders seed data
-        var sbIds = new Set(mapped.map(function(l) { return l.id; }));
-        var seedLenders = DB.lenders.filter(function(l) { return !sbIds.has(l.id); });
-        setSbLenders([...mapped, ...seedLenders]);
+        // Use only real Supabase lenders
+        setSbLenders(mapped);
       } catch(e) {
         console.log("Load lenders for assign dropdown:", e.message);
-        setSbLenders([...DB.lenders]);
+        setSbLenders([]);
       }
     })();
   }, []);
@@ -6245,23 +6198,35 @@ const AdminBorrowers = ({ showToast, setView }) => {
 
 
 const AdminHome = ({ setView }) => {
-  const allB = LENDER_DB.borrowers;
-  const allApps = LENDER_DB.applications;
-  const amlFlagged = allB.filter(b => (b.amlStatus||"") === "flagged").length;
-  const kycPending = allB.filter(b => (b.kycStatus||"") !== "verified").length;
+  const [allB, setAllB] = useState([]);
+  const [allApps, setAllApps] = useState([]);
+
+  useEffect(function() {
+    (async function() {
+      try {
+        var bpRows = await SB.query("borrower_profiles", "select=id,kyc_status,aml_status,tier");
+        setAllB(bpRows || []);
+        var appRows = await SB.query("applications", "select=id,status&order=created_at.desc");
+        setAllApps(appRows || []);
+      } catch(e) { console.log("AdminHome load:", e.message); }
+    })();
+  }, []);
+
+  const amlFlagged = allB.filter(b => (b.aml_status||"") === "flagged").length;
+  const kycPending = allB.filter(b => (b.kyc_status||"") !== "verified").length;
   const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
-  const totalDisbursed = allB.flatMap(b => b.loans||[]).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
+  const totalDisbursed = 0;
 
   return (
     <div className="fade-in">
       <PageHeader title="Platform Overview" subtitle="MicroLendNA Admin — real-time platform analytics" />
 
       {/* Verification Queue Banner */}
-      {allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length > 0 && (
+      {allB.filter(b=>b.kyc_status!=="verified").length > 0 && (
         <div onClick={() => setView("admin-borrowers")} className="card-hover" style={{padding:"12px 18px",background:DS.colors.warningDim,border:"1px solid "+DS.colors.warning+"33",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
           <span style={{fontSize:22}}>🔍</span>
           <div style={{flex:1}}>
-            <p style={{fontWeight:700,color:DS.colors.warning,fontSize:13}}>{allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length} borrower{allB.filter(b=>b.kycStatus!=="verified"&&(b.documents||[]).length>=3).length!==1?"s":""} awaiting KYC verification & approval</p>
+            <p style={{fontWeight:700,color:DS.colors.warning,fontSize:13}}>{allB.filter(b=>b.kyc_status!=="verified").length} borrower{allB.filter(b=>b.kyc_status!=="verified").length!==1?"s":""} awaiting KYC verification & approval</p>
             <p style={{fontSize:12,color:DS.colors.textSecondary}}>Documents uploaded — click to review and approve →</p>
           </div>
           <Btn small onClick={() => setView("admin-borrowers")}>Review Now →</Btn>
@@ -6290,7 +6255,7 @@ const AdminHome = ({ setView }) => {
       {/* Clickable stat tiles */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
         <Stat label="Total Borrowers" value={allB.length} icon="👥" color={DS.colors.textPrimary} onClick={() => setView("admin-borrowers")} />
-        <Stat label="Active Lenders" value={DB.lenders.filter(l=>l.status==="active").length} icon="🏦" color={DS.colors.accent} onClick={() => setView("admin-lenders")} />
+        <Stat label="Active Lenders" value={allApps.filter(a=>a.status==="new_lead"||a.status==="approved").length > 0 ? "—" : "—"} icon="🏦" color={DS.colors.accent} onClick={() => setView("admin-lenders")} />
         <Stat label="New Leads" value={newLeads} icon="🔔" color={DS.colors.gold} sub="Awaiting lender review" onClick={() => setView("admin-apps")} />
         <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} icon="💰" color={DS.colors.gold} onClick={() => setView("admin-reports")} />
         <Stat label="AML Flags" value={amlFlagged} icon="🚨" color={DS.colors.danger} sub="Require review" onClick={() => setView("admin-reports")} />
@@ -6305,12 +6270,11 @@ const AdminHome = ({ setView }) => {
             <Btn small variant="ghost" onClick={() => setView("admin-borrowers")}>View All Borrowers →</Btn>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            {[
-              { tier: "A", count: 87, pct: 28, loan: "N$18,500 avg" },
-              { tier: "B", count: 134, pct: 43, loan: "N$8,200 avg" },
-              { tier: "C", count: 71, pct: 23, loan: "N$4,100 avg" },
-              { tier: "D", count: 20, pct: 6, loan: "Declined" },
-            ].map(item => (
+            {["A","B","C","D"].map(function(tier) {
+              var count = allB.filter(function(b){return b.tier===tier;}).length;
+              var pct = allB.length ? Math.round(count/allB.length*100) : 0;
+              var item = { tier, count, pct, loan: tier==="D"?"Declined":"—" };
+              return (
               <div key={item.tier} onClick={() => setView("admin-borrowers")} className="card-hover"
                 style={{ padding: 16, background: DS.colors.surfaceAlt, borderRadius: 12, cursor: "pointer", border: `1px solid ${DS.colors[`tier${item.tier}`]}22`, transition: "all .2s" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -6323,7 +6287,8 @@ const AdminHome = ({ setView }) => {
                   <span style={{ fontSize: 11, color: DS.colors.textMuted }}>{item.loan}</span>
                 </div>
               </div>
-            ))}
+            );
+            })}
           </div>
         </Card>
 
@@ -6438,14 +6403,11 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           };
         });
 
-        // Merge: Supabase records take priority; keep DB.lenders seed data for demo lenders not in DB
-        var sbIds = new Set(fromDB.map(function(l) { return l.id; }));
-        var seedOnly = DB.lenders.filter(function(l) { return !sbIds.has(l.id); });
-        setLenders([...fromDB, ...seedOnly]);
+        // Use only real Supabase data — no mock seed data
+        setLenders(fromDB);
       } catch(e) {
         console.log("Load lenders from Supabase:", e.message);
-        // Fall back to seed data only
-        setLenders([...DB.lenders]);
+        setLenders([]);
       }
       setLoadingLenders(false);
     })();
@@ -6498,8 +6460,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
   };
 
   const rejectLender = async (l, reason) => {
-    var changes = { status: "rejected", notes: (l.notes || "") + "
-Rejected: " + (reason || "Due diligence failed") };
+    var changes = { status: "rejected", notes: (l.notes || "") + "\nRejected: " + (reason || "Due diligence failed") };
     updateLender(l.id, changes);
     await persistLenderStatus(l, changes);
     showToast(l.name + " rejected — notified via email", "error");
@@ -7077,13 +7038,94 @@ Rejected: " + (reason || "Due diligence failed") };
 // ══════════════════════════════════════════════════════════════════════════════
 
 const LenderSettings = ({ user, showToast }) => {
-  const [activeTab, setActiveTab] = useState("risk");
-  const lender = DB.lenders.find(l => l.id === user.id) || {};
+  const [activeTab, setActiveTab] = useState("profile");
   const defaultPrefs = LENDER_DB.lenderPrefs[user.id] || {};
   const [prefs, setPrefs] = useState({ ...defaultPrefs });
   const [changed, setChanged] = useState(false);
-  const [plan, setPlan] = useState(lender.plan || "payasyougo");
+  const [plan, setPlan] = useState("payasyougo");
   const rules = DB.riskRules;
+
+  // ── Lender profile state ──────────────────────────────────────────────────
+  const [lpProfile, setLpProfile] = useState(null);
+  const [lpLoading, setLpLoading] = useState(true);
+  const [lpSaving,  setLpSaving]  = useState(false);
+  const [lpForm, setLpForm] = useState({
+    name: "", contactPerson: user.name || "", phone: "", regNumber: "",
+    namfisaLicense: "", licenseExpiry: "", contactIdNumber: "", contactTitle: "",
+    plan: "payasyougo", notes: "",
+  });
+  const [docUploads, setDocUploads] = useState({});
+  const [uploadingDoc, setUploadingDoc] = useState(null);
+
+  useEffect(function() {
+    (async function() {
+      try {
+        var rows = await SB.query("lender_profiles", "user_id=eq." + user.id + "&select=*");
+        var lp = rows && rows[0];
+        if (lp) {
+          setLpProfile(lp);
+          setPlan(lp.plan_type || "payasyougo");
+          setLpForm({
+            name:            lp.name || "",
+            contactPerson:   lp.contact_person || user.name || "",
+            phone:           lp.phone || "",
+            regNumber:       lp.reg_number || "",
+            namfisaLicense:  lp.namfisa_license || "",
+            licenseExpiry:   lp.license_expiry || "",
+            contactIdNumber: lp.contact_id_number || "",
+            contactTitle:    lp.contact_title || "",
+            plan:            lp.plan_type || "payasyougo",
+            notes:           lp.notes || "",
+          });
+        }
+      } catch(e) { console.log("Load lender profile:", e.message); }
+      setLpLoading(false);
+    })();
+  }, [user.id]);
+
+  const setF = function(key, val) { setLpForm(function(p) { return Object.assign({}, p, { [key]: val }); }); };
+
+  const saveProfile = async function() {
+    setLpSaving(true);
+    try {
+      var data = {
+        user_id: user.id, email: user.email,
+        name: lpForm.name, contact_person: lpForm.contactPerson,
+        phone: lpForm.phone, reg_number: lpForm.regNumber,
+        namfisa_license: lpForm.namfisaLicense,
+        license_expiry: lpForm.licenseExpiry || null,
+        contact_id_number: lpForm.contactIdNumber,
+        contact_title: lpForm.contactTitle,
+        plan_type: lpForm.plan,
+        notes: lpForm.notes,
+        status: lpProfile ? lpProfile.status : "pending_review",
+        registered_at: lpProfile ? lpProfile.registered_at : new Date().toISOString(),
+        due_diligence: lpProfile ? lpProfile.due_diligence : JSON.stringify({ namfisaVerified:false,regVerified:false,directorCheck:false,amlCheck:false,bankAccountVerified:false,contractSigned:false }),
+      };
+      await SB.upsert("lender_profiles", data);
+      setPlan(lpForm.plan);
+      showToast("Profile saved ✓");
+    } catch(e) { showToast("Save failed: " + e.message, "error"); }
+    setLpSaving(false);
+  };
+
+  const handleDocUpload = async function(key, e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { showToast("File must be under 10MB", "error"); return; }
+    setUploadingDoc(key);
+    try {
+      var path = "lender-docs/" + user.id + "/" + key + "_" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      await SB.uploadFile("kyc-documents", path, file);
+      setDocUploads(function(p) { return Object.assign({}, p, { [key]: { name: file.name, path, size: Math.round(file.size/1024) + " KB" } }); });
+      showToast(file.name + " uploaded ✓");
+    } catch(err) {
+      setDocUploads(function(p) { return Object.assign({}, p, { [key]: { name: file.name, local: true, size: Math.round(file.size/1024) + " KB" } }); });
+      showToast("Saved locally — will sync when online", "info");
+    }
+    setUploadingDoc(null);
+    e.target.value = "";
+  };
 
   const update = (key, val) => { setPrefs(p => ({ ...p, [key]: val })); setChanged(true); };
   const updateRate = (tier, val) => { setPrefs(p => ({ ...p, interestRates: { ...p.interestRates, [tier]: +val } })); setChanged(true); };
@@ -7095,21 +7137,21 @@ const LenderSettings = ({ user, showToast }) => {
   };
 
   const tierColors = { A: DS.colors.tierA, B: DS.colors.tierB, C: DS.colors.tierC, D: DS.colors.tierD };
-
-  // Live impact preview — how many of current borrowers qualify under these prefs
-  const qualifyingBorrowers = LENDER_DB.borrowers.filter(b => {
-    if (!prefs.acceptedTiers?.includes(b.tier)) return false;
-    if (b.salary < prefs.minSalary) return false;
-    if (!prefs.firstBorrowerAllowed && b.firstBorrower) return false;
-    if (prefs.requireKYC && b.kycStatus !== "verified") return false;
-    if (prefs.requireBankVerification && !b.bankVerified) return false;
-    return true;
-  });
+  const qualifyingBorrowers = [];
 
   const tabs = [
-    { key: "risk", label: "⚙️ Risk Preferences" },
-    { key: "loan", label: "💰 Loan Parameters" },
-    { key: "billing", label: "💳 Billing & Plan" },
+    { key: "profile",  label: "🏢 Company Profile" },
+    { key: "risk",     label: "⚙️ Risk Preferences" },
+    { key: "loan",     label: "💰 Loan Parameters" },
+    { key: "billing",  label: "💳 Billing & Plan" },
+  ];
+
+  const LENDER_DOCS = [
+    { key: "bipa_cert",      label: "BIPA Certificate of Incorporation", desc: "Official registration certificate", required: true },
+    { key: "namfisa_licence", label: "NAMFISA Microlending Licence",       desc: "Valid licence certificate",         required: true },
+    { key: "director_id",    label: "Director / Member ID Document",      desc: "Valid Namibian ID or passport",     required: true },
+    { key: "bank_letter",    label: "Bank Confirmation Letter",           desc: "Business bank account confirmation", required: false },
+    { key: "aml_declaration", label: "AML / KYC Declaration",             desc: "Signed AML declaration",            required: false },
   ];
 
   return (
@@ -7131,13 +7173,93 @@ const LenderSettings = ({ user, showToast }) => {
         ))}
       </div>
 
+      {/* ── COMPANY PROFILE TAB ── */}
+      {activeTab === "profile" && (
+        <div className="fade-in">
+          {lpProfile?.status === "pending_review" && (
+            <div style={{ padding:"12px 16px", background:DS.colors.warningDim, border:"1px solid "+DS.colors.warning+"44", borderRadius:10, marginBottom:20, display:"flex", gap:10, alignItems:"center" }}>
+              <span style={{ fontSize:18 }}>⏳</span>
+              <p style={{ fontSize:13, color:DS.colors.warning }}>Your account is pending admin review. Complete your profile below to speed up approval.</p>
+            </div>
+          )}
+          {lpProfile?.status === "active" && (
+            <div style={{ padding:"12px 16px", background:DS.colors.accentDim, border:"1px solid "+DS.colors.accent+"44", borderRadius:10, marginBottom:20, display:"flex", gap:10, alignItems:"center" }}>
+              <span style={{ fontSize:18 }}>✅</span>
+              <p style={{ fontSize:13, color:DS.colors.accent }}>Account approved and active. Keep your profile up to date for compliance.</p>
+            </div>
+          )}
+
+          <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:20, marginBottom:20 }}>
+            {/* Company info */}
+            <Card>
+              <h3 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, marginBottom:16, fontSize:15 }}>Company Information</h3>
+              <Input label="Company / Institution Name" value={lpForm.name} onChange={function(v){setF("name",v);}} placeholder="e.g. Capital Micro Finance CC" required />
+              <Input label="BIPA Registration Number" value={lpForm.regNumber} onChange={function(v){setF("regNumber",v);}} placeholder="e.g. CC/2019/00234" hint="Company registration number from BIPA" />
+              <Input label="NAMFISA Licence Number" value={lpForm.namfisaLicense} onChange={function(v){setF("namfisaLicense",v);}} placeholder="e.g. ML-2019-0045" hint="Microlending licence from NAMFISA" />
+              <Input label="Licence Expiry Date" value={lpForm.licenseExpiry} onChange={function(v){setF("licenseExpiry",v);}} type="date" />
+              <Select label="Billing Plan" value={lpForm.plan} onChange={function(v){setF("plan",v);}}
+                options={[{ value:"payasyougo", label:"Pay-As-You-Go — N$125 per approved lead" },{ value:"subscription", label:"Monthly Subscription — N$2,500/month" }]} />
+            </Card>
+
+            {/* Contact person */}
+            <Card>
+              <h3 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, marginBottom:16, fontSize:15 }}>Contact Person / Director</h3>
+              <Input label="Contact Person Full Name" value={lpForm.contactPerson} onChange={function(v){setF("contactPerson",v);}} placeholder="e.g. Marius van Zyl" required />
+              <Input label="Phone Number" value={lpForm.phone} onChange={function(v){setF("phone",v);}} placeholder="+264 61 000 0000" required />
+              <Input label="Designation / Title" value={lpForm.contactTitle} onChange={function(v){setF("contactTitle",v);}} placeholder="e.g. Managing Director, Member" />
+              <Input label="ID / Passport Number" value={lpForm.contactIdNumber} onChange={function(v){setF("contactIdNumber",v);}} placeholder="Namibian ID or Passport number" hint="Used for director background check" />
+              <div style={{ marginBottom:16 }}>
+                <label style={{ display:"block", fontSize:13, color:DS.colors.textSecondary, marginBottom:6, fontWeight:500 }}>Additional Notes</label>
+                <textarea value={lpForm.notes} onChange={function(e){setF("notes",e.target.value);}} placeholder="Specialisation, target market, or any context for admin review..." rows={3} style={{ width:"100%", resize:"vertical" }} />
+              </div>
+            </Card>
+          </div>
+
+          {/* Document uploads */}
+          <Card style={{ marginBottom:20 }}>
+            <h3 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, marginBottom:8, fontSize:15 }}>Compliance Documents</h3>
+            <p style={{ fontSize:13, color:DS.colors.textMuted, marginBottom:16 }}>Upload for admin due diligence. PDF, JPG, or PNG — max 10MB each.</p>
+            {LENDER_DOCS.map(function(doc) {
+              var uploaded = docUploads[doc.key];
+              var isLoading = uploadingDoc === doc.key;
+              var inputId = "lp-doc-" + doc.key;
+              return (
+                <div key={doc.key} style={{ display:"flex", alignItems:"center", gap:14, padding:"12px 16px", borderRadius:10, marginBottom:10,
+                  background: uploaded ? DS.colors.accentDim : DS.colors.surfaceAlt,
+                  border:"1px solid " + (uploaded ? DS.colors.accent+"44" : DS.colors.border) }}>
+                  <input id={inputId} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:"none" }} onChange={function(e){ handleDocUpload(doc.key, e); }} />
+                  <span style={{ fontSize:22, flexShrink:0 }}>{uploaded ? "✅" : "📎"}</span>
+                  <div style={{ flex:1 }}>
+                    <p style={{ fontSize:13, fontWeight:600, marginBottom:2 }}>
+                      {doc.label} {doc.required && <span style={{ color:DS.colors.danger }}>*</span>}
+                    </p>
+                    <p style={{ fontSize:11, color:DS.colors.textMuted }}>{uploaded ? uploaded.name+" · "+uploaded.size : doc.desc}</p>
+                  </div>
+                  {isLoading
+                    ? <div style={{ width:18, height:18, border:"2px solid "+DS.colors.accent, borderTopColor:"transparent", borderRadius:"50%" }} className="spin" />
+                    : <label htmlFor={inputId} style={{ fontSize:12, fontWeight:600, color:uploaded?DS.colors.accent:DS.colors.textSecondary,
+                        background:DS.colors.surface, border:"1px solid "+DS.colors.border, borderRadius:7, padding:"5px 14px", cursor:"pointer", whiteSpace:"nowrap" }}>
+                        {uploaded ? "Replace" : "Upload"}
+                      </label>
+                  }
+                </div>
+              );
+            })}
+          </Card>
+
+          <Btn onClick={saveProfile} disabled={lpSaving} icon="💾" style={{ minWidth:180 }}>
+            {lpSaving ? "Saving..." : "Save Profile"}
+          </Btn>
+        </div>
+      )}
+
       {/* ── RISK PREFERENCES TAB ── */}
       {activeTab === "risk" && (
         <div className="fade-in">
           {/* Live impact banner */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 24 }}>
             {[
-              { label: "Qualifying Borrowers", value: qualifyingBorrowers.length, sub: `of ${LENDER_DB.borrowers.length} total`, color: DS.colors.accent },
+              { label: "Qualifying Borrowers", value: qualifyingBorrowers.length, sub: "Assigned borrowers", color: DS.colors.accent },
               { label: "Accepted Tiers", value: (prefs.acceptedTiers || []).join(", "), sub: "Risk levels you accept", color: DS.colors.info },
               { label: "Min. Salary", value: `N${(prefs.minSalary || 0).toLocaleString()}`, sub: "Qualifying threshold", color: DS.colors.gold },
               { label: "Max DTI", value: `${((prefs.maxDTI || 0) * 100).toFixed(0)}%`, sub: "Debt-to-income limit", color: DS.colors.warning },
@@ -9084,72 +9206,71 @@ const AdminAgents = ({ showToast }) => {
 
 // ══════════════════════════════════════════════════════════════════════════════
 // AUTH VIEWS
-const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, role, setRole, loading, onSubmit }) => {
-
+const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, role, setRole, loading, onSubmit, lenderExtra, setLenderExtra }) => {
+  // Lender extra fields kept for compatibility but moved to profile edit after login
   const [regConsent, setRegConsent] = useState({ kyc: false, aml: false, popia: false });
   const allConsented = regConsent.kyc && regConsent.aml && regConsent.popia;
   const isBorrower = role === "borrower";
 
   const toggle = function(key) {
-    setRegConsent(function(p) { var n = {}; Object.assign(n, p); n[key] = !p[key]; return n; });
+    setRegConsent(function(p) { return Object.assign({}, p, { [key]: !p[key] }); });
   };
 
   const handleSubmit = function() {
-    if (isBorrower && !allConsented) return;
+    if (!allConsented) return;
     onSubmit();
   };
 
   return (
     <>
-      <Input label="Full Name" value={name} onChange={setName} placeholder="e.g. John Smith" required />
-      <Input label="Email Address" value={email} onChange={setEmail} type="email" placeholder="your@email.com" required />
-      <Input label="Password" value={password} onChange={setPassword} type="password" placeholder="Min. 8 chars, 1 uppercase, 1 number" required />
       <Select label="Account Type" value={role} onChange={setRole}
         options={[
           { value: "borrower", label: "Borrower — Apply for a loan" },
-          { value: "lender", label: "Lender — Partner institution" },
+          { value: "lender",   label: "Lender — Partner institution" },
         ]} />
 
-      {isBorrower && (
-        <div style={{ marginBottom: 16 }}>
-          <p style={{ fontSize: 12, fontWeight: 700, color: DS.colors.textSecondary, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-            Required Consents — POPIA 2021 &amp; NAMFISA
-          </p>
-          {[
-            { key: "kyc", label: "KYC Identity Verification", desc: "I consent to my identity being verified against the Namibian Home Affairs population register as required by NAMFISA." },
-            { key: "aml",  label: "AML Screening (FIA 2012)", desc: "I consent to anti-money laundering screening of my profile as required by the Financial Intelligence Act 2012." },
-            { key: "popia", label: "Data Processing (POPIA 2021)", desc: "I consent to MicroLendNA processing my personal and financial data for the purpose of loan applications and credit assessment, in accordance with POPIA 2021." },
-          ].map(function(item) {
-            return (
-              <div key={item.key} onClick={function() { toggle(item.key); }}
-                style={{ display: "flex", gap: 10, padding: "10px 12px", borderRadius: 10, marginBottom: 8, cursor: "pointer",
-                  background: regConsent[item.key] ? DS.colors.accentDim : DS.colors.surfaceAlt,
-                  border: "1px solid " + (regConsent[item.key] ? DS.colors.accent + "55" : DS.colors.border),
-                  transition: "all .15s" }}>
-                <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center",
-                  background: regConsent[item.key] ? DS.colors.accent : "transparent",
-                  border: "2px solid " + (regConsent[item.key] ? DS.colors.accent : DS.colors.border) }}>
-                  {regConsent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 11, fontWeight: 900 }}>✓</span>}
-                </div>
-                <div>
-                  <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{item.label}</p>
-                  <p style={{ fontSize: 11, color: DS.colors.textMuted, lineHeight: 1.4 }}>{item.desc}</p>
-                </div>
+      <Input label="Full Name" value={name} onChange={setName}
+        placeholder={role === "lender" ? "Contact person full name" : "e.g. John Smith"} required />
+      <Input label="Email Address" value={email} onChange={setEmail} type="email" placeholder="your@email.com" required />
+      <Input label="Password" value={password} onChange={setPassword} type="password" placeholder="Min. 8 chars, 1 uppercase, 1 number" required />
+
+      {role === "lender" && (
+        <div style={{ padding: "10px 14px", background: DS.colors.goldDim, border: "1px solid " + DS.colors.gold + "44", borderRadius: 10, marginBottom: 14, fontSize: 13, color: DS.colors.gold, lineHeight: 1.5 }}>
+          ⚠ After registering, complete your company profile (NAMFISA licence, BIPA registration, director details & documents) from <strong>Settings & Billing</strong> in your portal. Your account is pending admin approval.
+        </div>
+      )}
+
+      <div style={{ marginBottom: 16 }}>
+        <p style={{ fontSize: 12, fontWeight: 700, color: DS.colors.textSecondary, marginBottom: 10, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Required Consents
+        </p>
+        {[
+          { key: "kyc",   label: "KYC & Identity Verification",  desc: isBorrower ? "I consent to identity verification against the Namibian Home Affairs register as required by NAMFISA." : "I confirm all information provided is accurate and consent to identity verification." },
+          { key: "aml",   label: "AML Screening (FIA 2012)",     desc: "I consent to anti-money laundering screening as required by the Financial Intelligence Act 2012." },
+          { key: "popia", label: "Data Processing (POPIA 2021)", desc: "I consent to MicroLendNA processing my personal and financial data in accordance with POPIA 2021." },
+        ].map(function(item) {
+          return (
+            <div key={item.key} onClick={function() { toggle(item.key); }}
+              style={{ display: "flex", gap: 10, padding: "10px 12px", borderRadius: 10, marginBottom: 8, cursor: "pointer",
+                background: regConsent[item.key] ? DS.colors.accentDim : DS.colors.surfaceAlt,
+                border: "1px solid " + (regConsent[item.key] ? DS.colors.accent + "55" : DS.colors.border), transition: "all .15s" }}>
+              <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center",
+                background: regConsent[item.key] ? DS.colors.accent : "transparent",
+                border: "2px solid " + (regConsent[item.key] ? DS.colors.accent : DS.colors.border) }}>
+                {regConsent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 11, fontWeight: 900 }}>✓</span>}
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{item.label}</p>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted, lineHeight: 1.4 }}>{item.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
-      {!isBorrower && (
-        <div style={{ padding: 10, background: DS.colors.accentDim, borderRadius: 8, marginBottom: 14, fontSize: 12, color: DS.colors.accent }}>
-          🔐 By registering as a lender you agree to NAMFISA partner terms and FIA 2012 compliance requirements.
-        </div>
-      )}
-
-      <Btn style={{ width: "100%", opacity: (isBorrower && !allConsented) ? 0.55 : 1 }}
-        onClick={handleSubmit} disabled={loading || (isBorrower && !allConsented)}>
-        {loading ? "Creating account..." : isBorrower && !allConsented ? "Accept all consents to register" : "Create Account"}
+      <Btn style={{ width: "100%", opacity: !allConsented ? 0.55 : 1 }}
+        onClick={handleSubmit} disabled={loading || !allConsented}>
+        {loading ? "Creating account..." : !allConsented ? "Accept all consents to register" : role === "lender" ? "Submit Lender Application" : "Create Account"}
       </Btn>
     </>
   );
@@ -9169,6 +9290,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [regConsent, setRegConsent] = useState({ kyc: false, aml: false, popia: false });
+  const [lenderExtra, setLenderExtra] = useState({ companyName: "", contactPerson: "", phone: "", regNumber: "", namfisaLicense: "", licenseExpiry: "", contactIdNumber: "", contactTitle: "", plan: "payasyougo", notes: "" });
 
   const handleLogin = () => {
     setError("");
@@ -9230,10 +9352,17 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
             await SB.upsert("lender_profiles", {
               user_id: uid,
               email: email,
-              name: name,
-              contact_person: name,
+              name: lenderExtra.companyName || name,
+              contact_person: lenderExtra.contactPerson || name,
+              phone: lenderExtra.phone || "",
+              reg_number: lenderExtra.regNumber || "",
+              namfisa_license: lenderExtra.namfisaLicense || "",
+              license_expiry: lenderExtra.licenseExpiry || null,
+              contact_id_number: lenderExtra.contactIdNumber || "",
+              contact_title: lenderExtra.contactTitle || "",
+              plan_type: lenderExtra.plan || "payasyougo",
+              notes: lenderExtra.notes || "",
               status: "pending_review",
-              plan_type: "payasyougo",
               registered_at: new Date().toISOString(),
               due_diligence: JSON.stringify({
                 namfisaVerified: false,
@@ -9356,6 +9485,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
               password={password} setPassword={setPassword}
               role={role} setRole={setRole}
               loading={loading} onSubmit={handleRegister}
+              lenderExtra={lenderExtra} setLenderExtra={setLenderExtra}
             />
           )}
         </Card>
