@@ -156,49 +156,49 @@ const SB = {
 // ── DESIGN SYSTEM ──────────────────────────────────────────────────────────────
 const DS = {
   colors: {
-    bg: "#0A0F1E",
-    surface: "#111827",
-    surfaceAlt: "#161D2F",
-    border: "#1E2D45",
-    borderLight: "#253552",
-    accent: "#00C896",
-    accentDim: "#00C89622",
-    accentHover: "#00E5AD",
-    gold: "#F5A623",
-    goldDim: "#F5A62322",
-    danger: "#FF4D6D",
-    dangerDim: "#FF4D6D22",
-    warning: "#FFB347",
-    warningDim: "#FFB34722",
-    info: "#4DA6FF",
-    infoDim: "#4DA6FF22",
-    textPrimary: "#F0F4FF",
-    textSecondary: "#8899BB",
-    textMuted: "#4A5878",
-    tierA: "#00C896",
-    tierB: "#4DA6FF",
-    tierC: "#FFB347",
-    tierD: "#FF4D6D",
+    bg: "#f7f9fc",
+    surface: "#ffffff",
+    surfaceAlt: "#eef2f8",
+    border: "#e2e8f0",
+    borderLight: "#cbd5e1",
+    accent: "#0d9e6e",
+    accentDim: "#0d9e6e18",
+    accentHover: "#0bb860",
+    gold: "#b45309",
+    goldDim: "#b4530918",
+    danger: "#dc2626",
+    dangerDim: "#dc262618",
+    warning: "#d97706",
+    warningDim: "#d9770618",
+    info: "#1a56db",
+    infoDim: "#1a56db18",
+    textPrimary: "#0f172a",
+    textSecondary: "#475569",
+    textMuted: "#94a3b8",
+    tierA: "#0d9e6e",
+    tierB: "#1a56db",
+    tierC: "#d97706",
+    tierD: "#dc2626",
   },
 };
 
 // ── GLOBAL STYLES ─────────────────────────────────────────────────────────────
 const GlobalStyles = () => (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=DM+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
     html{scroll-behavior:smooth}
-    body{background:#0A0F1E;color:#F0F4FF;font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
-    ::-webkit-scrollbar{width:5px;background:#0A0F1E}
-    ::-webkit-scrollbar-thumb{background:#253552;border-radius:4px}
-    ::-webkit-scrollbar-thumb:hover{background:#2e4166}
-    input,select,textarea{background:#111827;border:1px solid #1E2D45;color:#F0F4FF;border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:14px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s}
+    body{background:#f7f9fc;color:#0f172a;font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+    ::-webkit-scrollbar{width:5px;background:#f7f9fc}
+    ::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:#94a3b8}
+    input,select,textarea{background:#ffffff;border:1px solid #e2e8f0;color:#0f172a;border-radius:8px;padding:10px 14px;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;width:100%;transition:border-color .2s,box-shadow .2s}
     input:focus,select:focus,textarea:focus{border-color:#00C896;box-shadow:0 0 0 3px #00C89618}
-    input:hover:not(:focus),select:hover:not(:focus){border-color:#253552}
+    input:hover:not(:focus),select:hover:not(:focus){border-color:#94a3b8}
     input[type="checkbox"]{width:auto;accent-color:#00C896}
     input[type="range"]{width:100%}
-    select option{background:#111827}
-    button{cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s}
+    select option{background:#ffffff}
+    button{cursor:pointer;font-family:'Plus Jakarta Sans',sans-serif;transition:all .18s}
     button:focus-visible{outline:2px solid #00C896;outline-offset:2px}
     a{color:inherit;text-decoration:none}
     .fade-in{animation:fadeIn .35s ease both}
@@ -208,18 +208,34 @@ const GlobalStyles = () => (
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes bounceIn{0%{transform:scale(.92);opacity:0}60%{transform:scale(1.03)}100%{transform:scale(1);opacity:1}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    @keyframes gradBorder{0%,100%{opacity:.6}50%{opacity:1}}
     .spin{animation:spin .9s linear infinite}
     .pulse{animation:pulse 2s ease-in-out infinite}
-    .shimmer{background:linear-gradient(90deg,#111827 25%,#1e2d45 50%,#111827 75%);background-size:200% 100%;animation:shimmer 1.6s infinite}
+    .float{animation:float 6s ease-in-out infinite}
+    .shimmer{background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%);background-size:200% 100%;animation:shimmer 1.6s infinite}
     @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
     .card-hover{transition:transform .2s,border-color .2s,box-shadow .2s}
-    .card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+    .card-hover:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(15,23,42,.1)}
     .btn-primary:hover{background:#00E5AD!important;box-shadow:0 4px 20px #00C89644}
     .btn-outline:hover{background:#00C89614!important}
     .btn-danger:hover{background:#ff2d50!important}
-    .btn-ghost:hover{background:#1E2D4555!important;color:#F0F4FF!important}
+    .btn-ghost:hover{background:#e2e8f088!important;color:#0f172a!important}
     .nav-btn:hover{background:#00C89614!important;color:#00C896!important}
     .sidebar-collapse{display:none}
+    .fade-up{animation:fadeUp .65s cubic-bezier(.25,1,.5,1) both}
+    .delay-1{animation-delay:.1s}.delay-2{animation-delay:.2s}.delay-3{animation-delay:.3s}.delay-4{animation-delay:.4s}.delay-5{animation-delay:.5s}
+    .benefit-card{transition:transform .25s,border-color .25s,box-shadow .25s!important}
+    .benefit-card:hover{transform:translateY(-4px)!important;border-color:#0d9e6e55!important;box-shadow:0 12px 40px rgba(13,158,110,.1)!important}
+    .step-card{transition:border-color .2s,box-shadow .2s!important}
+    .step-card:hover{border-color:#0d9e6e55!important;box-shadow:0 8px 32px rgba(13,158,110,.08)!important}
+    .step-card:hover .step-icon{transform:scale(1.08)!important}
+    .ticker-inner{display:inline-flex;animation:ticker 32s linear infinite}
+    .nav-link{color:#64748b;font-size:14px;font-weight:500;text-decoration:none;transition:color .2s;cursor:pointer;padding:6px 0;border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+    .nav-link:hover,.nav-link.active{color:#0f172a;border-bottom-color:#0d9e6e}
+    .hp-nav-scrolled{box-shadow:0 4px 32px rgba(15,23,42,.1);background:rgba(255,255,255,.98)!important;backdrop-filter:blur(16px)!important}
     @media(max-width:768px){
       .sidebar-desktop{display:none!important}
       .sidebar-collapse{display:flex}
@@ -228,9 +244,16 @@ const GlobalStyles = () => (
       .grid-2{grid-template-columns:1fr!important}
       .grid-3{grid-template-columns:1fr 1fr!important}
       .hide-mobile{display:none!important}
+      .hp-hero-grid{grid-template-columns:1fr!important}
+      .hp-benefits-grid{grid-template-columns:1fr!important}
+      .hp-tiers-grid{grid-template-columns:1fr 1fr!important}
+      .hp-plans-grid{grid-template-columns:1fr!important}
+      .hp-compliance-grid{grid-template-columns:1fr 1fr!important}
+      .hp-footer-row{flex-direction:column!important;text-align:center!important}
     }
     @media(max-width:480px){
       .grid-3{grid-template-columns:1fr!important}
+      .hp-tiers-grid{grid-template-columns:1fr!important}
     }
     .tooltip{position:relative}
     .tooltip:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#0f172a;color:#e2e8f0;font-size:11px;padding:4px 8px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:999;border:1px solid #1E2D45}
@@ -384,7 +407,7 @@ const Btn = ({ children, variant = "primary", onClick, style = {}, disabled = fa
         ...variants[variant],
         padding: small ? "6px 14px" : "10px 20px",
         borderRadius: 8,
-        fontFamily: "'DM Sans',sans-serif",
+        fontFamily: "'Plus Jakarta Sans',sans-serif",
         fontWeight: 600,
         fontSize: small ? 13 : 14,
         cursor: disabled ? "not-allowed" : "pointer",
@@ -480,7 +503,7 @@ const Stat = ({ label, value, sub, color, icon, onClick, badge }) => (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
       <div style={{ flex: 1 }}>
         <p style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 600, letterSpacing: "0.06em", textTransform: "uppercase" }}>{label}</p>
-        <p style={{ fontSize: 28, fontFamily: "'Syne',sans-serif", fontWeight: 800, color: color || DS.colors.textPrimary, marginTop: 6, lineHeight: 1 }}>{value}</p>
+        <p style={{ fontSize: 28, fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, color: color || DS.colors.textPrimary, marginTop: 6, lineHeight: 1 }}>{value}</p>
         {sub && <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{sub}</p>}
         {badge && <div style={{ marginTop: 8 }}>{badge}</div>}
       </div>
@@ -506,7 +529,7 @@ const Modal = ({ open, onClose, title, children, width = 560 }) => {
       <div style={{ background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 16, width: "100%", maxWidth: width, maxHeight: "90vh", overflowY: "auto", padding: 28 }}
         onClick={e => e.stopPropagation()} className="fade-in">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-          <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 700 }}>{title}</h2>
+          <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 20, fontWeight: 700 }}>{title}</h2>
           <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>×</button>
         </div>
         {children}
@@ -571,7 +594,7 @@ const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, set
         <div style={{ width: 32, height: 32, background: DS.colors.accent, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ fontSize: 16, fontWeight: 800, color: "#0A0F1E" }}>₦</span>
         </div>
-        <span className="hide-mobile" style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>
+        <span className="hide-mobile" style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>
           MicroLend<span style={{ color: DS.colors.accent }}>NA</span>
         </span>
       </div>
@@ -618,7 +641,7 @@ const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, set
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 34, height: 34, background: `linear-gradient(135deg, ${roleColor[user?.role] || DS.colors.accent}44, ${roleColor[user?.role] || DS.colors.accent}22)`, border: `2px solid ${roleColor[user?.role] || DS.colors.accent}55`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, fontFamily: "'Syne',sans-serif", color: roleColor[user?.role] || DS.colors.accent }}>
+          <div style={{ width: 34, height: 34, background: `linear-gradient(135deg, ${roleColor[user?.role] || DS.colors.accent}44, ${roleColor[user?.role] || DS.colors.accent}22)`, border: `2px solid ${roleColor[user?.role] || DS.colors.accent}55`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, fontFamily: "'Space Grotesk',sans-serif", color: roleColor[user?.role] || DS.colors.accent }}>
             {user?.name?.[0]?.toUpperCase() || "?"}
           </div>
           <div className="hide-mobile">
@@ -747,7 +770,7 @@ const Sidebar = ({ role, activeView, setView, open, onClose }) => {
           <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.6)", zIndex: 300, backdropFilter: "blur(2px)" }} />
           <aside style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 260, background: DS.colors.surface, borderRight: `1px solid ${DS.colors.border}`, zIndex: 400, overflowY: "auto", animation: "slideIn .2s ease" }}>
             <div style={{ padding: "16px 14px", borderBottom: `1px solid ${DS.colors.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16 }}>MicroLend<span style={{ color: DS.colors.accent }}>NA</span></span>
+              <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 16 }}>MicroLend<span style={{ color: DS.colors.accent }}>NA</span></span>
               <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>×</button>
             </div>
             {sidebarContent}
@@ -1189,7 +1212,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
           <div style={{ width: 72, height: 72, background: DS.colors.goldDim, border: `2px solid ${DS.colors.gold}55`, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, flexShrink: 0 }}>⭐</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
-              <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold, letterSpacing: "-0.02em" }}>Credit Score & Profile Report</h1>
+              <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold, letterSpacing: "-0.02em" }}>Credit Score & Profile Report</h1>
               <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.1em", background: DS.colors.goldDim, color: DS.colors.gold, border: `1px solid ${DS.colors.gold}55`, borderRadius: 6, padding: "3px 10px", textTransform: "uppercase" }}>Coming Soon</span>
             </div>
             <p style={{ fontSize: 16, color: DS.colors.textSecondary, lineHeight: 1.6, maxWidth: 580 }}>
@@ -1217,7 +1240,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
         <Card style={{ marginBottom: 28, border: `1px solid ${DS.colors.gold}33` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Your Current Risk Score Preview</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Your Current Risk Score Preview</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>Based on your profile — your full credit score will be more comprehensive</p>
             </div>
             <div style={{ padding: "4px 12px", background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 8, fontSize: 12, color: DS.colors.gold, fontWeight: 600 }}>Preview Only</div>
@@ -1225,7 +1248,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 16 }}>
             <div style={{ padding: 16, background: "rgba(0,0,0,.2)", borderRadius: 14, textAlign: "center", border: `1px solid ${rr.tierColor}33` }}>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Risk Score</p>
-              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
+              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
               <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>out of 100</p>
               <span style={{ background: rr.tierColor + "22", color: rr.tierColor, border: `1px solid ${rr.tierColor}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 8 }}>Tier {rr.tier}</span>
             </div>
@@ -1251,13 +1274,13 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
       )}
 
       {/* What's included */}
-      <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20, marginBottom: 16 }}>What You Get</h2>
+      <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 20, marginBottom: 16 }}>What You Get</h2>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 32 }}>
         {features.map((f, i) => (
           <Card key={i} style={{ border: `1px solid ${DS.colors.border}` }}>
             <div style={{ fontSize: 28, marginBottom: 10 }}>{f.icon}</div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-              <h4 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14 }}>{f.title}</h4>
+              <h4 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 14 }}>{f.title}</h4>
             </div>
             {f.tag && <span style={{ fontSize: 10, fontWeight: 700, background: DS.colors.infoDim, color: DS.colors.info, border: `1px solid ${DS.colors.info}33`, borderRadius: 4, padding: "1px 7px", display: "inline-block", marginBottom: 8 }}>{f.tag}</span>}
             <p style={{ fontSize: 13, color: DS.colors.textSecondary, lineHeight: 1.6 }}>{f.desc}</p>
@@ -1266,7 +1289,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
       </div>
 
       {/* Pricing */}
-      <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20, marginBottom: 16 }}>Pricing</h2>
+      <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 20, marginBottom: 16 }}>Pricing</h2>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 28 }}>
         {pricingTiers.map((tier, i) => (
           <div key={i} style={{ padding: 28, background: DS.colors.surface, border: `2px solid ${tier.color}44`, borderRadius: 20, position: "relative", boxShadow: i === 1 ? `0 0 40px ${DS.colors.gold}15` : "none" }}>
@@ -1274,9 +1297,9 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
               <span style={{ position: "absolute", top: 16, right: 16, background: DS.colors.gold, color: "#0A0F1E", fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100 }}>{tier.badge}</span>
             )}
             <div style={{ fontSize: 28, marginBottom: 10 }}>{tier.icon}</div>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{tier.name}</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{tier.name}</h3>
             <div style={{ marginBottom: 20 }}>
-              <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 38, fontWeight: 800, color: tier.color }}>{tier.price}</span>
+              <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 38, fontWeight: 800, color: tier.color }}>{tier.price}</span>
               <span style={{ fontSize: 13, color: DS.colors.textMuted, marginLeft: 6 }}>{tier.period}</span>
             </div>
             <ul style={{ listStyle: "none", marginBottom: 24 }}>
@@ -1295,7 +1318,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
 
       {/* Why it matters */}
       <Card style={{ background: DS.colors.surfaceAlt, border: `1px solid ${DS.colors.border}` }}>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 12 }}>Why Your Credit Score Matters in Namibia</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 12 }}>Why Your Credit Score Matters in Namibia</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           {[
             { title: "Access Better Interest Rates", body: "A strong credit score unlocks lower interest rates from banks and lenders — potentially saving thousands of dollars over the life of a loan." },
@@ -1445,7 +1468,7 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
       {/* ── Personal + Financial info ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Personal Information</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Personal Information</h3>
           {[
             { label: "Full Name", value: user.name },
             { label: "Email Address", value: user.email },
@@ -1492,7 +1515,7 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
         </Card>
 
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Financial & Employment Information</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Financial & Employment Information</h3>
           {editMode ? (
             <>
               <Input label="Employer / Business Name" value={form.employer} onChange={v => setForm({ ...form, employer: v })}
@@ -1574,7 +1597,7 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
           <div style={{ width: 52, height: 52, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>⭐</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, color: DS.colors.gold }}>Full Credit Score & Profile Report</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: DS.colors.gold }}>Full Credit Score & Profile Report</h3>
               <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", background: DS.colors.goldDim, color: DS.colors.gold, border: `1px solid ${DS.colors.gold}55`, borderRadius: 4, padding: "2px 7px", textTransform: "uppercase" }}>Coming Soon</span>
             </div>
             <p style={{ fontSize: 13, color: DS.colors.textSecondary, lineHeight: 1.5 }}>
@@ -1809,7 +1832,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ fontSize: 24 }}>🪪</span>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Identity Verification</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Identity Verification</h3>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Namibian Home Affairs lookup</p>
               </div>
             </div>
@@ -1834,7 +1857,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <span style={{ fontSize: 24 }}>🏦</span>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Account Verification</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Account Verification</h3>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Instant EFT penny test</p>
               </div>
             </div>
@@ -1855,7 +1878,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
       </div>
 
       {/* Document Upload Grid */}
-      <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Document Upload</h3>
+      <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Document Upload</h3>
       <div style={{ display: "grid", gap: 10 }}>
         {docs.map(function(doc) {
           var isUploaded = uploaded.includes(doc.key + ".pdf");
@@ -2142,7 +2165,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 6 }}>Statement Analysis & Risk Profile</h1>
+      <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 6 }}>Statement Analysis & Risk Profile</h1>
       <p style={{ color: DS.colors.textSecondary, marginBottom: 20 }}>Complete your risk scorecard and analyse your bank statement for a lender-ready credit report</p>
 
       {/* Tab bar */}
@@ -2171,7 +2194,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
             <div style={{ display: "grid", gridTemplateColumns: "140px 1fr", gap: 20, alignItems: "start" }}>
               <div style={{ padding: 16, textAlign: "center", background: riskResult.tierColor + "18", borderRadius: 14, border: `1px solid ${riskResult.tierColor}33` }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>Risk Score</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 52, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 52, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>out of 100</p>
                 <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontWeight: 800, fontSize: 14, display: "inline-block", marginTop: 8 }}>Tier {riskResult.tier}</span>
               </div>
@@ -2198,7 +2221,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
 
           {/* Profile Summary used for scoring */}
           <Card style={{ marginBottom: 20 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Profile Data Used for Scoring</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Profile Data Used for Scoring</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
               {[
                 ["Employer Type", ({government:"Government",large_private:"Large Private",sme:"SME",informal:"Informal"})[borrower?.employerType] || "—"],
@@ -2226,7 +2249,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
           <Card style={{ marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Statement Analysis</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Statement Analysis</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>
                   {hasStatement ? "Bank statement uploaded — generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
                 </p>
@@ -2287,10 +2310,10 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <div style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: 20, alignItems: "start" }}>
                 <div style={{ padding: 20, textAlign: "center", background: riskResult.tierColor + "0D", borderRadius: 14, border: `1px solid ${riskResult.tierColor}33` }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>Risk Score</p>
-                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 52, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
+                  <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 52, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>out of 100</p>
                   <div style={{ marginTop: 12, padding: "6px 0", borderTop: `1px solid ${riskResult.tierColor}22` }}>
-                    <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 14 }}>
+                    <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 14 }}>
                       {riskResult.recommendation}
                     </span>
                   </div>
@@ -2313,7 +2336,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     </div>
                     <div style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8, textAlign: "center" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Credit Tier</p>
-                      <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28, color: riskResult.tierColor }}>Tier {riskResult.tier}</p>
+                      <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 28, color: riskResult.tierColor }}>Tier {riskResult.tier}</p>
                     </div>
                   </div>
                 </div>
@@ -2337,13 +2360,13 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               {analyzing ? (
                 <>
                   <div style={{ width: 48, height: 48, border: `3px solid ${DS.colors.accent}`, borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 20px" }} className="spin" />
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8 }}>Analysing Statement...</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Analysing Statement...</h3>
                   <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Reading transactions · Categorising debit orders · Computing ratios</p>
                 </>
               ) : (
                 <>
                   <span style={{ fontSize: 52, display: "block", marginBottom: 16 }}>🏦</span>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8 }}>Generate Bank Statement Scorecard</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Generate Bank Statement Scorecard</h3>
                   <p style={{ color: DS.colors.textSecondary, fontSize: 14, maxWidth: 440, margin: "0 auto 24px", lineHeight: 1.6 }}>
                     {hasStatement ? "Statement uploaded. Run analysis to extract transactions, categorise debit orders, and compute conduct ratios." : "Upload your 3-month bank statement in the Documents section, or run a demo analysis below."}
                   </p>
@@ -2358,7 +2381,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <Card style={{ marginBottom: 20, padding: "18px 24px", background: "#0f172a", border: `1px solid ${DS.colors.border}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                   <div>
-                    <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, color: "#F0F4FF" }}>Bank Statement Scorecard</h2>
+                    <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: "#F0F4FF" }}>Bank Statement Scorecard</h2>
                     <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>Financial analysis — <strong style={{ color: "#e2e8f0" }}>{scorecard.name}</strong> · Acct: {scorecard.account} · {scorecard.bank}</p>
                   </div>
                   <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#e2e8f0", fontWeight: 500 }}>
@@ -2503,7 +2526,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
           {!riskResult || !scorecard ? (
             <Card style={{ textAlign: "center", padding: 40 }}>
               <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>⚠️</span>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8 }}>Complete Both Sections First</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Complete Both Sections First</h3>
               <p style={{ color: DS.colors.textSecondary, marginBottom: 20 }}>You need a completed Risk Profile and Bank Statement analysis before generating the AI credit report.</p>
               <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
                 {!riskResult && <Btn onClick={() => setActiveTab("riskprofile")}>Complete Risk Profile</Btn>}
@@ -2516,14 +2539,14 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <Card style={{ marginBottom: 20, background: riskResult.tierColor + "0D", border: `1px solid ${riskResult.tierColor}44` }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
                   <div style={{ padding: "16px 24px", textAlign: "center", background: riskResult.tierColor + "0D", borderRadius: 14, border: `1px solid ${riskResult.tierColor}33`, flexShrink: 0 }}>
-                    <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 44, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
+                    <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 44, fontWeight: 800, color: riskResult.tierColor, lineHeight: 1 }}>{riskResult.finalScore}</p>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted }}>/100</p>
                     <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 8 }}>Tier {riskResult.tier}</span>
                   </div>
                   <div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 12 }}>
-                      <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800 }}>{scorecard.name}</h2>
-                      <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 16 }}>Tier {riskResult.tier}</span>
+                      <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800 }}>{scorecard.name}</h2>
+                      <span style={{ background: riskResult.tierColor + "22", color: riskResult.tierColor, border: `1px solid ${riskResult.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 16 }}>Tier {riskResult.tier}</span>
                       <span style={{ background: riskResult.recommendation === "Approve" ? DS.colors.accentDim : riskResult.recommendation === "Caution" ? DS.colors.warningDim : DS.colors.dangerDim, color: riskResult.recommendation === "Approve" ? DS.colors.accent : riskResult.recommendation === "Caution" ? DS.colors.warning : DS.colors.danger, border: "none", borderRadius: 8, padding: "4px 14px", fontWeight: 700, fontSize: 13 }}>{riskResult.recommendation}</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
@@ -2561,7 +2584,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <div>
-                    <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>🤖 AI Credit Memo <span style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 400 }}>Powered by Claude AI</span></h3>
+                    <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>🤖 AI Credit Memo <span style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 400 }}>Powered by Claude AI</span></h3>
                     <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Automated analysis combining risk scorecard + bank statement data</p>
                   </div>
                   {!aiInsight && !loadingAi && <Btn onClick={getAiInsight} small>Generate Report</Btn>}
@@ -2576,7 +2599,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     </div>
                   </div>
                 ) : aiInsight ? (
-                  <div style={{ whiteSpace: "pre-wrap", fontSize: 14, color: DS.colors.textSecondary, lineHeight: 1.9, fontFamily: "'DM Sans',sans-serif", borderTop: `1px solid ${DS.colors.border}`, paddingTop: 16 }}>{aiInsight}</div>
+                  <div style={{ whiteSpace: "pre-wrap", fontSize: 14, color: DS.colors.textSecondary, lineHeight: 1.9, fontFamily: "'Plus Jakarta Sans',sans-serif", borderTop: `1px solid ${DS.colors.border}`, paddingTop: 16 }}>{aiInsight}</div>
                 ) : (
                   <div style={{ padding: "20px 0", textAlign: "center" }}>
                     <p style={{ color: DS.colors.textMuted, fontSize: 14 }}>Click "Generate Report" to produce an AI-written credit memo combining your risk scorecard and bank statement analysis.</p>
@@ -2639,7 +2662,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
       <div className="fade-in">
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
           <Btn variant="ghost" small onClick={() => { setSelected(null); setAiInsight(null); }}>← All Scorecards</Btn>
-          <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 700, flex: 1 }}>{sc.name}</h1>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700, flex: 1 }}>{sc.name}</h1>
           <TierBadge tier={selected.tier} /><StatusBadge status={selected.status} />
         </div>
 
@@ -2647,7 +2670,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
         <Card style={{ marginBottom: 20, background: result.tierColor + "0D", border: `1px solid ${result.tierColor}44` }}>
           <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
             <div style={{ padding: "14px 20px", textAlign: "center", background: result.tierColor + "0D", borderRadius: 14, border: `1px solid ${result.tierColor}33`, flexShrink: 0, minWidth: 120 }}>
-              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 44, fontWeight: 800, color: result.tierColor, lineHeight: 1 }}>{result.finalScore}</p>
+              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 44, fontWeight: 800, color: result.tierColor, lineHeight: 1 }}>{result.finalScore}</p>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>/100</p>
               <span style={{ background: result.tierColor + "22", color: result.tierColor, border: `1px solid ${result.tierColor}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 8 }}>{result.recommendation}</span>
             </div>
@@ -2685,7 +2708,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
         {/* AI Report */}
         <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33`, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>🤖 AI Credit Recommendation</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>🤖 AI Credit Recommendation</h3>
             {!aiInsight && !loadingAi && <Btn small onClick={() => getAiInsight(selected)}>Generate</Btn>}
           </div>
           {loadingAi ? (
@@ -2711,7 +2734,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
 
   return (
     <div className="fade-in">
-      <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 6 }}>Borrower Scorecards</h1>
+      <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 6 }}>Borrower Scorecards</h1>
       <p style={{ color: DS.colors.textSecondary, marginBottom: 28 }}>Risk-scored borrower profiles — all pre-screened via 5-category scorecard</p>
       <div style={{ display: "grid", gap: 12 }}>
         {borrowers.map(b => {
@@ -2719,7 +2742,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
           return (
             <Card key={b.id} style={{ border: `1px solid ${tierColors[b.tier]}33` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier] }}>{(b.name||"?")[0]}</div>
+                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier] }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
                     <p style={{ fontWeight: 700, fontSize: 15 }}>{b.name}</p>
@@ -2806,7 +2829,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
       <PageHeader title="Apply for a Loan" subtitle="Your account needs to be approved before you can apply" />
       <Card style={{ textAlign: "center", padding: "48px 32px" }}>
         <div style={{ fontSize: 52, marginBottom: 16, opacity: 0.7 }}>🔒</div>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Account Pending Approval</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Account Pending Approval</h3>
         <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6, maxWidth: 420, margin: "0 auto", marginBottom: 20 }}>
           Your account is awaiting admin verification. Please make sure your profile is complete and your documents are uploaded. An admin will review and approve your account — you'll be notified once approved.
         </p>
@@ -3003,7 +3026,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 
       {step === 1 && (
         <Card className="fade-in">
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Eligibility Check</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Eligibility Check</h3>
           {borrower ? (
             <>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
@@ -3058,7 +3081,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 
       {step === 2 && (
         <Card className="fade-in">
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Loan Details</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Loan Details</h3>
           <Input label="Loan Amount (N$)" value={form.amount} onChange={v => setForm({ ...form, amount: v })}
             type="number" placeholder="e.g. 5000" required hint={`Maximum: N${borrower?.maxLoan ? Math.round(borrower.maxLoan).toLocaleString() : (borrower?.salary && borrower?.expenses ? Math.round(runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan).toLocaleString() : "—")} based on your profile`} />
           <Select label="Repayment Term" value={form.term} onChange={v => setForm({ ...form, term: v })}
@@ -3138,7 +3161,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
       {step === 3 && !result && (
         <Card className="fade-in" style={{ textAlign: "center", padding: 48 }}>
           <div className="spin" style={{ width: 48, height: 48, border: `3px solid ${DS.colors.border}`, borderTop: `3px solid ${DS.colors.accent}`, borderRadius: "50%", margin: "0 auto 20px" }} />
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Submitting Application...</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Submitting Application...</h3>
           <p style={{ color: DS.colors.textSecondary, fontSize: 13 }}>Matching with lenders and saving to database</p>
         </Card>
       )}
@@ -3146,7 +3169,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
       {(step === 3 && result || step === 4) && result && (
         <Card className="fade-in" style={{ textAlign: "center" }}>
           <div style={{ fontSize: 56, marginBottom: 14 }}>🎉</div>
-          <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 8 }}>Application Submitted!</h2>
+          <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 8 }}>Application Submitted!</h2>
           <p style={{ color: DS.colors.textSecondary, marginBottom: 24, fontSize: 14 }}>
             {result.lender && result.lender !== "Pending assignment"
               ? "Your application has been sent to " + result.lender + " for review."
@@ -3286,7 +3309,7 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
                   <div>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 6 }}>
-                      <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 15 }}>
+                      <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 15 }}>
                         Application #{(app.id || "").toString().slice(-8).toUpperCase()}
                       </span>
                       <StatusBadge status={app.status === "new_lead" ? "pending" : app.status} />
@@ -3700,7 +3723,7 @@ const LenderHome = ({ user, setView }) => {
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Tier Distribution</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Tier Distribution</h3>
           {["A","B","C","D"].map(tier => {
             const count = allB.filter(b => b.tier === tier).length;
             return (
@@ -3718,7 +3741,7 @@ const LenderHome = ({ user, setView }) => {
 
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>New Leads Queue</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>New Leads Queue</h3>
             {newLeads > 0 && <Btn small onClick={() => setView("lender-apps")}>View All →</Btn>}
           </div>
           {allApps.filter(a => a.status === "new_lead" || a.status === "pending").length === 0 && (
@@ -3743,7 +3766,7 @@ const LenderHome = ({ user, setView }) => {
 
       {/* Loan book summary */}
       <Card>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Active Loan Book</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Active Loan Book</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12 }}>
           {[
             { label: "Outstanding Balance", value: `N${(allB.flatMap(b=>b.loans||[]).filter(l=>l.status==="approved"&&l.outstanding>0).reduce((s,l)=>s+l.outstanding,0)||0).toLocaleString()}`, color: DS.colors.warning, view: "lender-borrowers" },
@@ -4136,7 +4159,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           <Btn variant="ghost" small onClick={() => { setSelectedApp(null); setAiInsight(null); setAppTab("overview"); }}>← Applications</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 20, fontWeight: 700 }}>{app.borrowerName}</h1>
+              <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 20, fontWeight: 700 }}>{app.borrowerName}</h1>
               <TierBadge tier={app.tier} />
               <span style={{ background: app.status === "new_lead" ? DS.colors.goldDim : DS.colors.infoDim, color: app.status === "new_lead" ? DS.colors.gold : DS.colors.info, fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20 }}>
                 {app.status === "new_lead" ? "🔔 New Lead" : "🔍 Under Review"}
@@ -4201,7 +4224,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Risk Score</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>/100</p>
                 <span style={{ background: rr.tierColor + "22", color: rr.tierColor, border: `1px solid ${rr.tierColor}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 10 }}>Tier {rr.tier}</span>
               </div>
@@ -4262,7 +4285,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {appTab === "documents" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents</h3>
               <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as ZIP")}>⬇ Download All (ZIP)</Btn>
             </div>
             <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
@@ -4323,7 +4346,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {appTab === "scorecard" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Analysis — {b?.scorecard.period}</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Analysis — {b?.scorecard.period}</h3>
               <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>⬇ Download PDF</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
@@ -4368,13 +4391,13 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {appTab === "riskprofile" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
               <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr.breakdown).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${app.borrowerName.replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Risk Score</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>/100</p>
                 <span style={{ background: rr.tierColor + "22", color: rr.tierColor, border: `1px solid ${rr.tierColor}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 10 }}>{rr.recommendation}</span>
               </div>
@@ -4412,7 +4435,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {appTab === "history" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Loan History — {b.name}</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Loan History — {b.name}</h3>
               <Btn small variant="ghost" onClick={() => showToast("Loan history exported")}>⬇ Export</Btn>
             </div>
             {(b?.loans || []).map(loan => (
@@ -4463,7 +4486,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Recommendation</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Recommendation</h3>
                   <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Automated analysis for this specific loan application</p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -4502,7 +4525,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
     <div className="fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Applications</h1>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Applications</h1>
           <p style={{ color: DS.colors.textSecondary }}>New leads and applications under review — pre-screened, risk-scored, KYC verified</p>
         </div>
         <div style={{ display: "flex", gap: 4, padding: 4, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10 }}>
@@ -4518,17 +4541,17 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
         <div style={{ padding: 18, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}33`, borderRadius: 12 }}>
           <p style={{ fontSize: 12, color: DS.colors.gold, fontWeight: 600, marginBottom: 4 }}>🔔 New Leads</p>
-          <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold }}>{apps.filter(a => a.status === "new_lead").length}</p>
+          <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold }}>{apps.filter(a => a.status === "new_lead").length}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Awaiting your decision</p>
         </div>
         <div style={{ padding: 18, background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 12 }}>
           <p style={{ fontSize: 12, color: DS.colors.info, fontWeight: 600, marginBottom: 4 }}>🔍 Under Review</p>
-          <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.info }}>{apps.filter(a => a.status === "under_review").length}</p>
+          <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.info }}>{apps.filter(a => a.status === "under_review").length}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Being evaluated</p>
         </div>
         <div style={{ padding: 18, background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 12 }}>
           <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600, marginBottom: 4 }}>💰 Total Requested</p>
-          <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.accent }}>N${filtered.reduce((s, a) => s + a.amount, 0).toLocaleString()}</p>
+          <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.accent }}>N${filtered.reduce((s, a) => s + a.amount, 0).toLocaleString()}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Open applications value</p>
         </div>
       </div>
@@ -4547,7 +4570,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               )}
               <div style={{ padding: 20 }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                  <div style={{ width: 48, height: 48, background: tierColor + "22", border: `2px solid ${tierColor}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColor, flexShrink: 0 }}>{app.borrowerName[0]}</div>
+                  <div style={{ width: 48, height: 48, background: tierColor + "22", border: `2px solid ${tierColor}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: tierColor, flexShrink: 0 }}>{app.borrowerName[0]}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
                       <p style={{ fontWeight: 700, fontSize: 16 }}>{app.borrowerName}</p>
@@ -4585,7 +4608,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {!loadingApps && apps.length === 0 && (
           <Card style={{ textAlign: "center", padding: 56 }}>
             <p style={{ fontSize: 52, marginBottom: 16 }}>📬</p>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8, fontSize: 20 }}>No Applications Assigned Yet</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8, fontSize: 20 }}>No Applications Assigned Yet</h3>
             <p style={{ color: DS.colors.textMuted, fontSize: 14, maxWidth: 420, margin: "0 auto", lineHeight: 1.6 }}>
               The admin will review borrower profiles and route approved applications to you. You will receive a notification when an application is assigned.
             </p>
@@ -4594,7 +4617,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         {!loadingApps && apps.length > 0 && filtered.filter(a => !appStatuses[a.id]).length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
             <p style={{ fontSize: 40, marginBottom: 12 }}>📭</p>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 8 }}>No applications here</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>No applications here</h3>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>
               {filter === "new_lead" ? "No new leads in this filter." : filter === "under_review" ? "No applications under review." : "All applications have been processed."}
             </p>
@@ -4784,7 +4807,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           <Btn variant="ghost" small onClick={() => { setSelectedBorrower(null); setActiveTab("overview"); setAiInsight(null); }}>← Borrowers</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 700 }}>{b.name}</h1>
+              <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700 }}>{b.name}</h1>
               <TierBadge tier={b.tier} />
               <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: statusColors[b.status] + "22", color: statusColors[b.status] || DS.colors.textMuted, textTransform: "capitalize" }}>{b.status}</span>
               {b.amlStatus === "flagged" && <Badge label="⚠ AML Flag" color={DS.colors.danger} />}
@@ -4825,7 +4848,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Risk Score</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>/100</p>
                 <div style={{ marginTop: 12, paddingTop: 10, borderTop: `1px solid ${rr.tierColor}22` }}>
                   <span style={{ background: rr.tierColor + "22", color: rr.tierColor, border: `1px solid ${rr.tierColor}44`, borderRadius: 8, padding: "4px 14px", fontWeight: 800, fontSize: 14 }}>{rr.recommendation}</span>
@@ -4874,7 +4897,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {activeTab === "documents" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents — {b.name}</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents — {b.name}</h3>
               <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as encrypted ZIP")}>⬇ Download All (ZIP)</Btn>
             </div>
             <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
@@ -4908,7 +4931,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {activeTab === "scorecard" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Scorecard — {b.scorecard.period}</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Scorecard — {b.scorecard.period}</h3>
               <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>⬇ Download PDF</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
@@ -4953,13 +4976,13 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {activeTab === "riskprofile" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
               <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr.breakdown).map(([k, v]) => `${v.label}: ${v.pct.toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.05em" }}>Risk Score</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 48, fontWeight: 800, color: rr.tierColor, lineHeight: 1 }}>{rr.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>/100</p>
                 <span style={{ background: rr.tierColor + "22", color: rr.tierColor, border: `1px solid ${rr.tierColor}44`, borderRadius: 8, padding: "4px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 10 }}>{rr.recommendation}</span>
               </div>
@@ -4997,7 +5020,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {activeTab === "history" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Complete Loan History — {b.name}</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Complete Loan History — {b.name}</h3>
               <Btn small variant="ghost" onClick={() => { const txt = `LOAN HISTORY — ${b.name}\n${"=".repeat(40)}\n${(b.loans||[]).map(l => [`Loan: NAD ${l.amount} — ${l.purpose}`, `Status: ${l.status} | Term: ${l.term} months | Rate: ${l.rate || "N/A"}`, `Monthly: ${l.monthly ? "NAD " + l.monthly.toLocaleString() : "N/A"} | Disbursed: ${l.disbursed || "N/A"}`, `Outstanding: ${l.outstanding !== null ? "NAD " + (l.outstanding || 0).toLocaleString() : "N/A"}`, `Repayments: ${(l.repayments||[]).length > 0 ? (l.repayments||[]).map(r => r.date + " NAD " + r.amount + " " + r.status).join(", ") : "None"}`, ""].join("\n")).join("\n")}`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `loan_history_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Loan history exported"); }}>⬇ Export History</Btn>
             </div>
 
@@ -5066,7 +5089,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Memo — {b.name}</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Memo — {b.name}</h3>
                   <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Combines risk scorecard, bank statement, and full loan history</p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
@@ -5099,7 +5122,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
     <div className="fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
-          <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Borrowers</h1>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Borrowers</h1>
           <p style={{ color: DS.colors.textSecondary }}>All borrowers — active, inactive, approved, declined. Full profiles, documents & history.</p>
         </div>
         <Btn small variant="ghost" onClick={downloadCSV}>⬇ Export CSV</Btn>
@@ -5115,7 +5138,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         ].map((s, i) => (
           <div key={i} onClick={() => setStatusFilter(s.filter)} style={{ padding: 16, background: statusFilter === s.filter ? s.color + "22" : DS.colors.surface, border: `1px solid ${statusFilter === s.filter ? s.color + "55" : DS.colors.border}`, borderRadius: 12, cursor: "pointer", transition: "all .2s" }}>
             <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 800, color: s.color }}>{s.count}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 800, color: s.color }}>{s.count}</p>
           </div>
         ))}
       </div>
@@ -5146,7 +5169,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             <Card key={b.id} style={{ padding: 0, overflow: "hidden", opacity: b.status === "declined" ? 0.85 : 1 }}>
               <div style={{ height: 3, background: b.status === "active" ? DS.colors.accent : b.status === "declined" ? DS.colors.danger : DS.colors.textMuted }} />
               <div style={{ padding: "16px 20px", display: "flex", alignItems: "center", gap: 16 }}>
-                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier], flexShrink: 0 }}>{(b.name||"?")[0]}</div>
+                <div style={{ width: 48, height: 48, background: tierColors[b.tier] + "22", border: `2px solid ${tierColors[b.tier]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: tierColors[b.tier], flexShrink: 0 }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 6 }}>
                     <p style={{ fontWeight: 700, fontSize: 15 }}>{b.name}</p>
@@ -5187,14 +5210,14 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {!loadingBorr && allBorrowers.length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
             <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers assigned yet</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers assigned yet</p>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Admin will assign approved borrowers to you. Check Applications for new leads.</p>
           </Card>
         )}
         {!loadingBorr && allBorrowers.length > 0 && filtered.length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
             <p style={{ fontSize: 36, marginBottom: 12 }}>🔍</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers match</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers match</p>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Try adjusting your search or filter criteria.</p>
           </Card>
         )}
@@ -5470,7 +5493,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
           <Btn variant="ghost" small onClick={()=>{setSelected(null);setActiveTab("overview");setAiInsight(null);}}>← All Borrowers</Btn>
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
-              <h1 style={{fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700}}>{b.name}</h1>
+              <h1 style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:22,fontWeight:700}}>{b.name}</h1>
               <TierBadge tier={b.tier} />
               <span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span>
               {b.amlStatus==="flagged"&&<Badge label="⚠ AML Flag" color={DS.colors.danger}/>}
@@ -5549,7 +5572,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             <div style={{display:"grid",gridTemplateColumns:"150px 1fr",gap:20,marginBottom:20}}>
               <div style={{padding:20,textAlign:"center",background:rr.tierColor+"0D",border:`1px solid ${rr.tierColor}33`,borderRadius:14}}>
                 <p style={{fontSize:11,color:DS.colors.textMuted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.06em"}}>Risk Score</p>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:52,fontWeight:800,color:rr.tierColor,lineHeight:1}}>{rr.finalScore}</p>
+                <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:52,fontWeight:800,color:rr.tierColor,lineHeight:1}}>{rr.finalScore}</p>
                 <p style={{fontSize:11,color:DS.colors.textMuted,marginTop:4}}>out of 100</p>
                 <span style={{background:rr.tierColor+"22",color:rr.tierColor,border:`1px solid ${rr.tierColor}44`,borderRadius:8,padding:"4px 14px",fontWeight:800,fontSize:14,display:"inline-block",marginTop:10}}>{rr.recommendation}</span>
               </div>
@@ -5656,7 +5679,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 {activeTab==="documents"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents — {b.name}</h3>
+              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents — {b.name}</h3>
               <span style={{fontSize:13,color:DS.colors.textMuted}}>{(b.documents||[]).length} document{(b.documents||[]).length!==1?"s":""} on file</span>
             </div>
             {(b.documents||[]).length === 0 && (
@@ -5727,7 +5750,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 {activeTab==="scorecard"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>Bank Statement — {b.scorecard.period}</h3>
+              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>Bank Statement — {b.scorecard.period}</h3>
               <Btn small variant="ghost" onClick={()=>showToast("Scorecard PDF downloaded")}>⬇ Download</Btn>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
@@ -5754,7 +5777,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             <div style={{display:"grid",gridTemplateColumns:"150px 1fr",gap:20}}>
               <div style={{padding:20,textAlign:"center",background:rr.tierColor+"0D",border:`1px solid ${rr.tierColor}33`,borderRadius:14}}>
                 <p style={{fontSize:11,color:DS.colors.textMuted,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.06em"}}>Risk Score</p>
-                <p style={{fontFamily:"'Syne',sans-serif",fontSize:52,fontWeight:800,color:rr.tierColor,lineHeight:1}}>{rr.finalScore}</p>
+                <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:52,fontWeight:800,color:rr.tierColor,lineHeight:1}}>{rr.finalScore}</p>
                 <p style={{fontSize:11,color:DS.colors.textMuted,marginTop:4}}>out of 100</p>
                 <span style={{background:rr.tierColor+"22",color:rr.tierColor,border:`1px solid ${rr.tierColor}44`,borderRadius:8,padding:"4px 12px",fontWeight:800,fontSize:13,display:"inline-block",marginTop:10}}>{rr.recommendation}</span>
               </div>
@@ -5777,7 +5800,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
         {/* Loan History */}
         {activeTab==="history"&&(
           <div className="fade-in">
-            <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16,marginBottom:16}}>Loan History</h3>
+            <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16,marginBottom:16}}>Loan History</h3>
             {(b.loans||[]).map(loan=>(
               <Card key={loan.id} style={{marginBottom:14,borderLeft:`4px solid ${loan.status==="approved"?DS.colors.accent:loan.status==="pending"?DS.colors.gold:DS.colors.danger}`}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
@@ -5805,7 +5828,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             <Card style={{background:"#080d1a",border:`1px solid ${DS.colors.accent}33`}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
                 <div>
-                  <h3 style={{fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:16}}>🤖 AI Admin Credit Memo</h3>
+                  <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>🤖 AI Admin Credit Memo</h3>
                   <p style={{fontSize:12,color:DS.colors.textMuted,marginTop:2}}>Platform-level risk assessment combining all available data</p>
                 </div>
                 <div style={{display:"flex",gap:8}}>
@@ -5855,7 +5878,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
           <div key={i} onClick={()=>{if(s.filter)setStatusFilter(s.filter);if(s.kycF)setKycFilter("pending");}}
             style={{padding:"14px 16px",background:DS.colors.surface,border:`1px solid ${s.filter||s.kycF?s.color+"44":DS.colors.border}`,borderRadius:12,cursor:s.filter||s.kycF?"pointer":"default",transition:"all .2s",borderTop:`3px solid ${s.color}`}}>
             <p style={{fontSize:11,color:DS.colors.textMuted,marginBottom:4}}>{s.label}</p>
-            <p style={{fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:s.color}}>{s.value}</p>
+            <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:24,fontWeight:800,color:s.color}}>{s.value}</p>
             {(s.filter||s.kycF)&&<p style={{fontSize:10,color:s.color,marginTop:4,fontWeight:600}}>Click to filter →</p>}
           </div>
         ))}
@@ -5931,7 +5954,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
         {filtered.length===0&&(
           <div style={{padding:"40px",textAlign:"center",color:DS.colors.textMuted}}>
             <p style={{fontSize:32,marginBottom:10}}>🔍</p>
-            <p style={{fontFamily:"'Syne',sans-serif",fontWeight:700,marginBottom:6}}>No borrowers match</p>
+            <p style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,marginBottom:6}}>No borrowers match</p>
             <p style={{fontSize:13}}>Adjust your filters to see more results.</p>
           </div>
         )}
@@ -5998,7 +6021,7 @@ const AdminHome = ({ setView }) => {
         {/* Tier Breakdown — clickable rows */}
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>Platform Tier Breakdown <span style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 400 }}>— all 312 registered borrowers</span></h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Platform Tier Breakdown <span style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 400 }}>— all 312 registered borrowers</span></h3>
             <Btn small variant="ghost" onClick={() => setView("admin-borrowers")}>View All Borrowers →</Btn>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
@@ -6012,7 +6035,7 @@ const AdminHome = ({ setView }) => {
                 style={{ padding: 16, background: DS.colors.surfaceAlt, borderRadius: 12, cursor: "pointer", border: `1px solid ${DS.colors[`tier${item.tier}`]}22`, transition: "all .2s" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                   <TierBadge tier={item.tier} />
-                  <span style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Syne',sans-serif", color: DS.colors[`tier${item.tier}`] }}>{item.count}</span>
+                  <span style={{ fontSize: 22, fontWeight: 800, fontFamily: "'Space Grotesk',sans-serif", color: DS.colors[`tier${item.tier}`] }}>{item.count}</span>
                 </div>
                 <ProgressBar value={item.pct} max={100} color={DS.colors[`tier${item.tier}`]} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
@@ -6027,7 +6050,7 @@ const AdminHome = ({ setView }) => {
         {/* Lenders — clickable */}
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>Partner Lenders</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Partner Lenders</h3>
             <Btn small variant="ghost" onClick={() => setView("admin-lenders")}>Manage →</Btn>
           </div>
           {DB.lenders.map(l => (
@@ -6045,7 +6068,7 @@ const AdminHome = ({ setView }) => {
           ))}
           <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 10, marginTop: 8 }}>
             <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Total Platform Revenue</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>N${DB.lenders.filter(l=>l.status==="active").reduce((s,l)=>s+(l.revenue||0),0).toLocaleString()}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>N${DB.lenders.filter(l=>l.status==="active").reduce((s,l)=>s+(l.revenue||0),0).toLocaleString()}</p>
           </div>
         </Card>
       </div>
@@ -6053,7 +6076,7 @@ const AdminHome = ({ setView }) => {
       {/* Recent Applications — clickable */}
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700 }}>Recent Applications</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Recent Applications</h3>
           <Btn small variant="ghost" onClick={() => setView("admin-apps")}>View All →</Btn>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
@@ -6206,7 +6229,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <Btn variant="ghost" small onClick={() => { setSelected(null); setActiveTab("overview"); }}>← Lenders</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-              <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 700 }}>{currentLender.name}</h1>
+              <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700 }}>{currentLender.name}</h1>
               <span style={{ fontSize: 11, fontWeight: 700, padding: "3px 12px", borderRadius: 20, background: (statusColors[currentLender.status] || DS.colors.textMuted) + "22", color: statusColors[currentLender.status] || DS.colors.textMuted }}>
                 {statusLabels[currentLender.status] || currentLender.status}
               </span>
@@ -6259,7 +6282,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <div className="fade-in">
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
               <Card>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Company Information</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Company Information</h3>
                 <div style={{ display: "grid", gap: 10 }}>
                   {[
                     ["Company Name", currentLender.name],
@@ -6284,7 +6307,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 {/* Lead performance mini */}
                 <Card>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Lead Summary</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Lead Summary</h3>
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 14 }}>
                     {[
                       { l: "Total Leads Sent", v: currentLender.leadsTotal, c: DS.colors.textPrimary },
@@ -6320,8 +6343,8 @@ const AdminLenders = ({ showToast, showConfirm }) => {
 
                 {/* Revenue */}
                 <Card>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Revenue Generated</h3>
-                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 36, fontWeight: 800, color: DS.colors.gold }}>N${(currentLender.revenue || 0).toLocaleString()}</p>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Revenue Generated</h3>
+                  <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color: DS.colors.gold }}>N${(currentLender.revenue || 0).toLocaleString()}</p>
                   <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{currentLender.plan === "subscription" ? "Monthly subscription revenue" : `${currentLender.leadsApproved} leads × N$125`}</p>
                 </Card>
               </div>
@@ -6329,7 +6352,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
 
             {/* Quick actions */}
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Admin Actions</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Admin Actions</h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
                 <Btn small variant="outline" onClick={() => { setEditForm({ name: currentLender.name, email: currentLender.email, contactPerson: currentLender.contactPerson, phone: currentLender.phone, regNumber: currentLender.regNumber, namfisaLicense: currentLender.namfisaLicense, licenseExpiry: currentLender.licenseExpiry, plan: currentLender.plan }); setEditOpen(currentLender); }}>✏️ Edit Details</Btn>
                 <Btn small variant="ghost" onClick={() => showToast("Password reset email sent to " + currentLender.email)}>🔑 Reset Password</Btn>
@@ -6351,12 +6374,12 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16 }}>Due Diligence Checklist</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Due Diligence Checklist</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 4 }}>Complete all checks before approving this lender. NAMFISA requires all 6 checks for compliance.</p>
               </div>
               <div style={{ padding: "10px 18px", background: ddComplete(currentLender.dueDiligence) ? DS.colors.accentDim : DS.colors.surfaceAlt, borderRadius: 10, textAlign: "center" }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Progress</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: ddComplete(currentLender.dueDiligence) ? DS.colors.accent : DS.colors.gold }}>{ddCount(currentLender.dueDiligence)}/6</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: ddComplete(currentLender.dueDiligence) ? DS.colors.accent : DS.colors.gold }}>{ddCount(currentLender.dueDiligence)}/6</p>
               </div>
             </div>
 
@@ -6410,13 +6433,13 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                     <p style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.05em" }}>{s.l}</p>
                     <span style={{ fontSize: 18, opacity: .6 }}>{s.icon}</span>
                   </div>
-                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: s.c }}>{s.v}</p>
+                  <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: s.c }}>{s.v}</p>
                 </div>
               ))}
             </div>
 
             <Card style={{ marginBottom: 20 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Lead Outcome Breakdown</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Lead Outcome Breakdown</h3>
               {currentLender.leadsTotal === 0 ? (
                 <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>No leads have been sent yet.</p>
               ) : (
@@ -6443,7 +6466,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             </Card>
 
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Revenue Summary</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Revenue Summary</h3>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {[
                   { l: "Platform Revenue", v: `N${(currentLender.revenue || 0).toLocaleString()}`, c: DS.colors.gold },
@@ -6463,7 +6486,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
         {activeTab === "notes" && (
           <div className="fade-in">
             <Card style={{ marginBottom: 20 }}>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Admin Notes</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Admin Notes</h3>
               <textarea
                 defaultValue={currentLender.notes || ""}
                 onBlur={e => { updateLender(currentLender.id, { notes: e.target.value }); showToast("Notes saved"); }}
@@ -6474,7 +6497,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             </Card>
 
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Communication Log</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Communication Log</h3>
               {[
                 { type: "email", msg: "Welcome email + credentials sent", date: currentLender.approvedAt || currentLender.registeredAt, by: "System" },
                 { type: "system", msg: "Account created — pending due diligence", date: currentLender.registeredAt, by: "System" },
@@ -6528,7 +6551,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <div key={i} onClick={() => setFilterStatus(s.filter)} className="card-hover"
             style={{ padding: "14px 18px", background: DS.colors.surface, border: `2px solid ${filterStatus === s.filter ? s.color + "66" : DS.colors.border}`, borderRadius: 14, cursor: "pointer", transition: "all .2s", borderTop: `3px solid ${s.color}` }}>
             <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</p>
             {filterStatus === s.filter && <p style={{ fontSize: 10, color: s.color, marginTop: 4, fontWeight: 600 }}>Active filter ✓</p>}
           </div>
         ))}
@@ -6565,7 +6588,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <div style={{ height: 4, background: statusColors[l.status] || DS.colors.textMuted }} />
               <div style={{ padding: "18px 20px", display: "flex", alignItems: "center", gap: 18 }}>
                 {/* Avatar */}
-                <div style={{ width: 48, height: 48, background: (statusColors[l.status] || DS.colors.textMuted) + "22", border: `2px solid ${(statusColors[l.status] || DS.colors.textMuted)}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18, color: statusColors[l.status] || DS.colors.textMuted, flexShrink: 0 }}>{l.name[0]}</div>
+                <div style={{ width: 48, height: 48, background: (statusColors[l.status] || DS.colors.textMuted) + "22", border: `2px solid ${(statusColors[l.status] || DS.colors.textMuted)}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: statusColors[l.status] || DS.colors.textMuted, flexShrink: 0 }}>{l.name[0]}</div>
 
                 {/* Main info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -6759,7 +6782,7 @@ const LenderSettings = ({ user, showToast }) => {
             ].map((s, i) => (
               <div key={i} style={{ padding: "14px 16px", background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: s.color }}>{s.value}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>{s.sub}</p>
               </div>
             ))}
@@ -6768,7 +6791,7 @@ const LenderSettings = ({ user, showToast }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             {/* Accepted Tiers */}
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Accepted Risk Tiers</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Accepted Risk Tiers</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>Choose which borrower risk tiers your institution will accept. Applications outside your selected tiers will not be routed to you.</p>
               <div style={{ display: "grid", gap: 10 }}>
                 {[
@@ -6816,7 +6839,7 @@ const LenderSettings = ({ user, showToast }) => {
             {/* Risk Qualifiers */}
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Qualifying Criteria</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Qualifying Criteria</h3>
 
                 <div style={{ marginBottom: 18 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -6863,8 +6886,8 @@ const LenderSettings = ({ user, showToast }) => {
               {/* Auto-approve threshold */}
               <Card style={{ border: `1px solid ${DS.colors.accent}33` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Auto-Approve Threshold</h3>
-                  <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>{prefs.autoApproveThreshold || 90}</span>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Auto-Approve Threshold</h3>
+                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>{prefs.autoApproveThreshold || 90}</span>
                 </div>
                 <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginBottom: 12, lineHeight: 1.5 }}>Applications with a risk score at or above this threshold will be automatically approved without manual review. Set to 100 to always require manual review.</p>
                 <input type="range" min="60" max="100" step="1" value={prefs.autoApproveThreshold || 90}
@@ -6880,7 +6903,7 @@ const LenderSettings = ({ user, showToast }) => {
 
           {/* Preferred Loan Purposes */}
           <Card style={{ marginTop: 20 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Preferred Loan Purposes</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Preferred Loan Purposes</h3>
             <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Select the loan purposes you prefer to fund. Leads matching these purposes are prioritised in your queue.</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {["Medical", "Education", "Home", "Business", "Funeral", "Vehicle Repair", "Other"].map(purpose => {
@@ -6917,7 +6940,7 @@ const LenderSettings = ({ user, showToast }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* Loan amounts */}
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Loan Amount Range</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Loan Amount Range</h3>
 
               <div style={{ marginBottom: 20 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -6957,7 +6980,7 @@ const LenderSettings = ({ user, showToast }) => {
 
             {/* First borrower */}
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>First-Time Borrower Limits</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>First-Time Borrower Limits</h3>
               <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginBottom: 16, lineHeight: 1.5 }}>Set a separate maximum loan cap for first-time borrowers regardless of their calculated eligibility.</p>
               <div style={{ marginBottom: 16 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -6977,7 +7000,7 @@ const LenderSettings = ({ user, showToast }) => {
 
           {/* Interest Rates per Tier */}
           <Card style={{ marginBottom: 20 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Your Interest Rates by Tier</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>Your Interest Rates by Tier</h3>
             <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Set the annual interest rate you charge for each risk tier. Rates must stay within the platform's allowed range (set by admin). Rates shown to borrowers during application are based on your settings.</p>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
               {["A","B","C","D"].map(tier => {
@@ -6993,7 +7016,7 @@ const LenderSettings = ({ user, showToast }) => {
                       {!accepted && <span style={{ fontSize: 10, color: DS.colors.textMuted }}>Not accepted</span>}
                     </div>
                     <div style={{ textAlign: "center", marginBottom: 12 }}>
-                      <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 36, fontWeight: 800, color }}>{rate}</span>
+                      <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color }}>{rate}</span>
                       <span style={{ fontSize: 14, color: DS.colors.textMuted }}>% p.a.</span>
                     </div>
                     <input type="range" min={adminMin} max={adminMax} step="1" value={rate}
@@ -7013,7 +7036,7 @@ const LenderSettings = ({ user, showToast }) => {
 
           {/* Loan Terms */}
           <Card style={{ marginBottom: 20 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Accepted Loan Terms</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Accepted Loan Terms</h3>
             <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16 }}>Select the repayment periods you offer. Borrowers requesting terms you don't offer will not be routed to you.</p>
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               {[1, 2, 3, 6, 9, 12, 18, 24].map(months => {
@@ -7026,7 +7049,7 @@ const LenderSettings = ({ user, showToast }) => {
                     padding: "10px 20px", borderRadius: 10, border: `2px solid ${active ? DS.colors.accent + "66" : DS.colors.border}`,
                     background: active ? DS.colors.accentDim : DS.colors.surfaceAlt,
                     color: active ? DS.colors.accent : DS.colors.textSecondary,
-                    fontFamily: "'Syne',sans-serif", fontSize: 15, fontWeight: 700, cursor: "pointer", transition: "all .2s",
+                    fontFamily: "'Space Grotesk',sans-serif", fontSize: 15, fontWeight: 700, cursor: "pointer", transition: "all .2s",
                   }}>
                     {months === 1 ? "1 month" : `${months} months`}
                   </button>
@@ -7066,9 +7089,9 @@ const LenderSettings = ({ user, showToast }) => {
               }}>
                 {p.badge && <span style={{ position: "absolute", top: 14, right: 14, background: DS.colors.gold, color: "#0A0F1E", fontSize: 10, fontWeight: 800, padding: "3px 10px", borderRadius: 100 }}>{p.badge}</span>}
                 <div style={{ fontSize: 28, marginBottom: 10 }}>{p.icon}</div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{p.name}</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 4 }}>{p.name}</h3>
                 <div style={{ marginBottom: 18 }}>
-                  <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 36, fontWeight: 800, color: p.color }}>{p.price}</span>
+                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color: p.color }}>{p.price}</span>
                   <span style={{ fontSize: 13, color: DS.colors.textMuted, marginLeft: 6 }}>{p.per}</span>
                 </div>
                 <ul style={{ listStyle: "none", marginBottom: 20 }}>
@@ -7091,7 +7114,7 @@ const LenderSettings = ({ user, showToast }) => {
           )}
 
           <Card>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Billing History</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Billing History</h3>
             <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead><tr style={{ background: DS.colors.surfaceAlt }}>
@@ -7232,7 +7255,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             {/* DTI Thresholds */}
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>DTI Tier Thresholds</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>DTI Tier Thresholds</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Borrowers are assigned tiers based on their Debt-to-Income ratio. Lower DTI = better tier.</p>
               {[
                 { key: "tierAMaxDTI", label: "Tier A — Maximum DTI", color: DS.colors.tierA, hint: "Low risk. Salary must also be ≥ 2× minimum." },
@@ -7266,7 +7289,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
             {/* Salary & Multipliers */}
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               <Card>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Salary & Penalty Settings</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Salary & Penalty Settings</h3>
 
                 <div style={{ marginBottom: 18 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -7292,7 +7315,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
               </Card>
 
               <Card>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Loan Multipliers (Platform Default)</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Loan Multipliers (Platform Default)</h3>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 14 }}>Max loan = Disposable income × multiplier. Lenders may apply lower caps.</p>
                 {["A","B","C"].map(tier => (
                   <div key={tier} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, padding: "10px 12px", background: DS.colors.surfaceAlt, borderRadius: 10 }}>
@@ -7315,7 +7338,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
           {/* Tier summary table */}
           <Card>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Current Tier Assignment Rules</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Current Tier Assignment Rules</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
               {[
                 { tier: "A", color: DS.colors.tierA, cond: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}% AND Salary ≥ N${(rules.minSalary*2).toLocaleString()}`, mult: `${rules.maxLoanMultiplier.A}×`, rate: `${rules.interestRate.A}%`, label: "Low Risk" },
@@ -7345,7 +7368,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Category Weights</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Category Weights</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Adjust how much each scoring category contributes to the final risk score. All weights must sum to exactly 100%.</p>
 
               {Object.entries(scoreWeights).map(([key, val]) => (
@@ -7411,7 +7434,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Global Loan Amount Limits</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Global Loan Amount Limits</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>These are hard platform limits. Lender settings may be more restrictive but never exceed these.</p>
               {[
                 { key: "globalMinLoan", label: "Platform Min. Loan Amount", color: DS.colors.info, min: 100, max: 5000, step: 100, prefix: "N$" },
@@ -7430,7 +7453,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
             </Card>
 
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Interest Rate Bands</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Interest Rate Bands</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>Lenders set their own rates within these bands. Rates outside these ranges are blocked.</p>
               {["A","B","C","D"].map(tier => {
                 const floor = loanLimits.rateFloor[tier];
@@ -7470,7 +7493,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
           <Card style={{ marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Fraud Detection Rules</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Fraud Detection Rules</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 4 }}>Automated checks run on every application. Triggered flags are reported to lenders and logged for AML compliance.</p>
               </div>
               <div style={{ display: "flex", gap: 8 }}>
@@ -7518,7 +7541,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
           <Card style={{ marginBottom: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>AML / FIA 2012 Screening Rules</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>AML / FIA 2012 Screening Rules</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 4 }}>Anti-money laundering checks per the Namibia Financial Intelligence Act 2012. All flagged cases are reported to the Financial Intelligence Centre (FIC).</p>
               </div>
               <Badge label="FIA 2012 Compliant" color={DS.colors.accent} />
@@ -7563,7 +7586,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
           </Card>
 
           <Card>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>AML Reporting Configuration</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>AML Reporting Configuration</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
               {[
                 { label: "Auto-report to FIC", desc: "Automatically file suspicious activity reports with the Financial Intelligence Centre", on: true },
@@ -7589,7 +7612,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             <Card>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>🧪 Borrower Profile Simulator</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>🧪 Borrower Profile Simulator</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Test how a hypothetical borrower would be scored under the current engine settings. Adjust inputs and see the result instantly.</p>
 
               <div style={{ marginBottom: 18 }}>
@@ -7638,7 +7661,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
               <Card style={{ marginBottom: 16, background: tierColor + "0D", border: `2px solid ${tierColor}55` }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Simulation Result</p>
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
-                  <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 72, fontWeight: 800, color: tierColor, lineHeight: 1 }}>{simResult.tier}</p>
+                  <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 72, fontWeight: 800, color: tierColor, lineHeight: 1 }}>{simResult.tier}</p>
                   <p style={{ fontSize: 16, color: DS.colors.textSecondary, marginTop: 4 }}>{{ A: "Low Risk — Approve", B: "Moderate Risk — Approve", C: "Elevated Risk — Approve with caution", D: "High Risk — Decline" }[simResult.tier]}</p>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -7658,7 +7681,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
               {/* Which tiers this borrower would land in at different scenarios */}
               <Card>
-                <h4 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Scenario Comparison</h4>
+                <h4 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 14, marginBottom: 12 }}>Scenario Comparison</h4>
                 {[
                   { label: "Current inputs", sal: simSalary, exp: simExpenses, first: simFirst },
                   { label: "Expenses 10% lower", sal: simSalary, exp: Math.round(simExpenses * 0.9), first: simFirst },
@@ -7750,7 +7773,7 @@ const AdminReports = () => {
 
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
       <Card>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>AML / FIA 2012 Compliance Log</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>AML / FIA 2012 Compliance Log</h3>
         {[
           { ref: "AML-001", borrower: "Maria Haulofu", flag: "Income mismatch + unpaids flagged", date: "2025-02-18", lender: "Capital Micro" },
           { ref: "AML-002", borrower: "Petrus Nghiwete", flag: "Major income mismatch detected", date: "2025-03-10", lender: "QuickCash" },
@@ -7772,7 +7795,7 @@ const AdminReports = () => {
       </Card>
 
       <Card>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Revenue by Plan</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Revenue by Plan</h3>
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
             <span style={{ fontSize: 13 }}>Subscription Revenue</span>
@@ -7794,7 +7817,7 @@ const AdminReports = () => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Total Platform Revenue (Cumulative)</p>
-              <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.accent }}>N${totalRevenue.toLocaleString()}</p>
+              <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.accent }}>N${totalRevenue.toLocaleString()}</p>
             </div>
             <div style={{ textAlign: "right" }}>
               <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Active Subscription</p>
@@ -7807,7 +7830,7 @@ const AdminReports = () => {
 
     {/* Lead Performance Table */}
     <Card style={{ marginTop: 20 }}>
-      <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginBottom: 16 }}>Lead Performance by Lender</h3>
+      <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Lead Performance by Lender</h3>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
         <thead><tr style={{ background: DS.colors.surfaceAlt }}>
           {["Lender","Plan","Leads Sent","Approved","Declined","Pending","Conversion","Revenue"].map(h=>(
@@ -7886,7 +7909,7 @@ const AgentHome = ({ user, setView }) => {
         {/* Recent borrowers */}
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15 }}>Recent Captures</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Recent Captures</h3>
             <Btn small variant="ghost" onClick={() => setView("agent-borrowers")}>View All →</Btn>
           </div>
           {myBorrowers.slice(0, 4).map((b, i) => {
@@ -7910,7 +7933,7 @@ const AgentHome = ({ user, setView }) => {
 
         {/* Performance summary */}
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>This Month</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>This Month</h3>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
             {[
               { l: "Conversion Rate", v: conv + "%", c: +conv > 60 ? DS.colors.accent : DS.colors.warning },
@@ -7918,7 +7941,7 @@ const AgentHome = ({ user, setView }) => {
             ].map((s,i) => (
               <div key={i} style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: s.c }}>{s.v}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: s.c }}>{s.v}</p>
               </div>
             ))}
           </div>
@@ -7943,7 +7966,7 @@ const AgentHome = ({ user, setView }) => {
           )}
           <div style={{ marginTop: 16, padding: "10px 14px", background: "#A78BFA18", border: "1px solid #A78BFA33", borderRadius: 10 }}>
             <p style={{ fontSize: 11, color: "#A78BFA", marginBottom: 3 }}>Commission (N$50 per approved)</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: "#A78BFA" }}>N${(approved.length * 50).toLocaleString()}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: "#A78BFA" }}>N${(approved.length * 50).toLocaleString()}</p>
           </div>
         </Card>
       </div>
@@ -7951,7 +7974,7 @@ const AgentHome = ({ user, setView }) => {
       {/* Quick action */}
       <div style={{ padding: 20, background: "linear-gradient(135deg, #A78BFA18, #00C89614)", border: "1px solid #A78BFA33", borderRadius: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <p style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Ready to capture a new borrower?</p>
+          <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Ready to capture a new borrower?</p>
           <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>Fill in their details, run an instant risk assessment, and submit — they don't need a smartphone.</p>
         </div>
         <Btn onClick={() => setView("agent-add")} icon="➕" style={{ flexShrink: 0 }}>Add Borrower</Btn>
@@ -8014,7 +8037,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
   if (submitted) return (
     <div className="fade-in" style={{ maxWidth: 520, margin: "0 auto", textAlign: "center", paddingTop: 48 }}>
       <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
-      <h2 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 12 }}>Application Submitted!</h2>
+      <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 12 }}>Application Submitted!</h2>
       <p style={{ color: DS.colors.textSecondary, fontSize: 15, lineHeight: 1.7, marginBottom: 32 }}><strong>{form.name}</strong>'s application has been submitted to Capital Micro Finance and will be reviewed within 24 hours.</p>
       <div style={{ padding: "16px 20px", background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 12, marginBottom: 24 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, textAlign: "left" }}>
@@ -8056,7 +8079,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {/* Step 1 — Personal */}
         {step === 1 && (
           <Card className="fade-in">
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Personal Details</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Personal Details</h3>
             <Input label="Full Name (as on ID)" value={form.name} onChange={v => setForm({...form, name: v})} placeholder="e.g. Johannes Kamati" required />
             <Input label="Namibian ID Number" value={form.idNumber} onChange={v => setForm({...form, idNumber: v})} placeholder="11-digit ID number" required />
             <Input label="Mobile Number" value={form.phone} onChange={v => setForm({...form, phone: v})} placeholder="+264 81 000 0000" required />
@@ -8070,7 +8093,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {/* Step 2 — Financial */}
         {step === 2 && (
           <Card className="fade-in">
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Financial Information</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Financial Information</h3>
             <Input label="Employer / Business Name" value={form.employer} onChange={v => setForm({...form, employer: v})} placeholder="e.g. City of Windhoek" required />
             <Input label="Gross Monthly Salary (N$)" value={form.salary} onChange={v => { setForm({...form, salary: v}); setRiskResult(null); }} type="number" placeholder="e.g. 14000" required hint="Before tax, as per payslip" />
             <Input label="Total Monthly Expenses (N$)" value={form.expenses} onChange={v => { setForm({...form, expenses: v}); setRiskResult(null); }} type="number" placeholder="e.g. 5200" required hint="Rent, food, existing loan repayments" />
@@ -8093,11 +8116,11 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {/* Step 3 — Risk Assessment */}
         {step === 3 && riskResult && (
           <Card className="fade-in" style={{ background: tcol + "0D", border: `1px solid ${tcol}44` }}>
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Risk Assessment Result</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Risk Assessment Result</h3>
             <div style={{ display: "flex", gap: 20, alignItems: "flex-start", marginBottom: 24 }}>
               <div style={{ padding: "16px 24px", textAlign: "center", background: tcol + "18", borderRadius: 14, border: `1px solid ${tcol}44`, flexShrink: 0 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 6 }}>RISK SCORE</p>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 44, fontWeight: 800, color: tcol, lineHeight: 1 }}>{riskResult.finalScore}</p>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 44, fontWeight: 800, color: tcol, lineHeight: 1 }}>{riskResult.finalScore}</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted }}>/100</p>
                 <span style={{ background: tcol + "22", color: tcol, border: `1px solid ${tcol}44`, borderRadius: 8, padding: "3px 12px", fontWeight: 800, fontSize: 13, display: "inline-block", marginTop: 8 }}>Tier {riskResult.tier}</span>
               </div>
@@ -8134,7 +8157,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {/* Step 4 — Loan Details */}
         {step === 4 && (
           <Card className="fade-in">
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Loan Application Details</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Loan Application Details</h3>
             <div style={{ marginBottom: 16 }}>
               <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>Loan Purpose <span style={{ color: DS.colors.accent }}>*</span></label>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -8175,7 +8198,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {/* Step 5 — Consent & Submit */}
         {step === 5 && (
           <Card className="fade-in">
-            <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Review & Consent</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Review & Consent</h3>
 
             {/* Summary */}
             <div style={{ padding: 16, background: DS.colors.surfaceAlt, borderRadius: 12, marginBottom: 20 }}>
@@ -8308,7 +8331,7 @@ const AgentPerformance = ({ user }) => {
         ].map((s, i) => (
           <div key={i} style={{ padding:"16px 18px",background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:14,borderTop:`3px solid ${s.c}` }}>
             <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:4 }}>{s.l}</p>
-            <p style={{ fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:s.c }}>{s.v}</p>
+            <p style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:26,fontWeight:800,color:s.c }}>{s.v}</p>
           </div>
         ))}
       </div>
@@ -8316,10 +8339,10 @@ const AgentPerformance = ({ user }) => {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         {/* Commission breakdown */}
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Commission Earnings</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Commission Earnings</h3>
           <div style={{ padding: "16px 20px", background: "#A78BFA18", border: "1px solid #A78BFA33", borderRadius: 12, marginBottom: 16 }}>
             <p style={{ fontSize: 12, color: "#A78BFA", marginBottom: 4 }}>Total Commission Earned</p>
-            <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 36, fontWeight: 800, color: "#A78BFA" }}>N${(approved.length * 50).toLocaleString()}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color: "#A78BFA" }}>N${(approved.length * 50).toLocaleString()}</p>
             <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{approved.length} approved × N$50 per approval</p>
           </div>
           {[
@@ -8337,7 +8360,7 @@ const AgentPerformance = ({ user }) => {
 
         {/* Team leaderboard */}
         <Card>
-          <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Agent Leaderboard</h3>
+          <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Agent Leaderboard</h3>
           {allAgents.map((a, i) => (
             <div key={a.id} style={{ display:"flex",alignItems:"center",gap:14,padding:"12px 14px",background:a.userId===user.id?DS.colors.accentDim:DS.colors.surfaceAlt,border:`1px solid ${a.userId===user.id?DS.colors.accent+"44":DS.colors.border}`,borderRadius:12,marginBottom:8 }}>
               <div style={{ width:32,height:32,background:i===0?"#FFD70022":"transparent",border:`2px solid ${i===0?"#FFD700":"#A78BFA"}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:14,color:i===0?"#FFD700":"#A78BFA",flexShrink:0 }}>{i+1}</div>
@@ -8384,7 +8407,7 @@ const AdminWhatsApp = ({ showToast }) => {
           <Btn variant="ghost" small onClick={() => setSelected(null)}>← All Leads</Btn>
           <div style={{ flex:1 }}>
             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
-              <h1 style={{ fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:700 }}>{lead.name}</h1>
+              <h1 style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:22,fontWeight:700 }}>{lead.name}</h1>
               <span style={{ background:"#25D366",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20 }}>📱 WhatsApp</span>
               {lead.tier && <TierBadge tier={lead.tier} />}
             </div>
@@ -8435,7 +8458,7 @@ const AdminWhatsApp = ({ showToast }) => {
           {/* Lead profile */}
           <div style={{ display:"flex",flexDirection:"column",gap:16 }}>
             <Card>
-              <h3 style={{ fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15,marginBottom:16 }}>Lead Profile</h3>
+              <h3 style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:15,marginBottom:16 }}>Lead Profile</h3>
               <div style={{ display:"flex",gap:8,marginBottom:14,flexWrap:"wrap" }}>
                 <span style={{ background:(stageColor[lead.stage]||DS.colors.textMuted)+"22",color:stageColor[lead.stage]||DS.colors.textMuted,border:`1px solid ${(stageColor[lead.stage]||DS.colors.textMuted)}44`,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:700 }}>
                   📍 Stage: {stageLabel[lead.stage]||lead.stage}
@@ -8463,7 +8486,7 @@ const AdminWhatsApp = ({ showToast }) => {
             {lead.tier && lead.riskScore && (
               <div style={{ padding:16,background:DS.colors[`tier${lead.tier}`]+"0D",border:`1px solid ${DS.colors[`tier${lead.tier}`]}33`,borderRadius:14,textAlign:"center" }}>
                 <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.05em" }}>Risk Score</p>
-                <p style={{ fontFamily:"'Syne',sans-serif",fontSize:44,fontWeight:800,color:DS.colors[`tier${lead.tier}`],lineHeight:1 }}>{lead.riskScore}</p>
+                <p style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:44,fontWeight:800,color:DS.colors[`tier${lead.tier}`],lineHeight:1 }}>{lead.riskScore}</p>
                 <p style={{ fontSize:11,color:DS.colors.textMuted,marginTop:4 }}>/100</p>
                 <span style={{ background:DS.colors[`tier${lead.tier}`]+"22",color:DS.colors[`tier${lead.tier}`],border:`1px solid ${DS.colors[`tier${lead.tier}`]}44`,borderRadius:8,padding:"3px 12px",fontWeight:800,fontSize:13,display:"inline-block",marginTop:8 }}>Tier {lead.tier}</span>
               </div>
@@ -8508,7 +8531,7 @@ const AdminWhatsApp = ({ showToast }) => {
         ].map((s,i)=>(
           <div key={i} style={{ padding:"14px 16px",background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:12,borderTop:`3px solid ${s.c}` }}>
             <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:4 }}>{s.l}</p>
-            <p style={{ fontFamily:"'Syne',sans-serif",fontSize:24,fontWeight:800,color:s.c }}>{s.v}</p>
+            <p style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:24,fontWeight:800,color:s.c }}>{s.v}</p>
           </div>
         ))}
       </div>
@@ -8593,7 +8616,7 @@ const AdminAgents = ({ showToast }) => {
         ].map((s,i)=>(
           <div key={i} style={{ padding:"16px 18px",background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:14,borderTop:`3px solid ${s.c}` }}>
             <p style={{ fontSize:11,color:DS.colors.textMuted,marginBottom:4 }}>{s.l}</p>
-            <p style={{ fontFamily:"'Syne',sans-serif",fontSize:26,fontWeight:800,color:s.c }}>{s.v}</p>
+            <p style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:26,fontWeight:800,color:s.c }}>{s.v}</p>
           </div>
         ))}
       </div>
@@ -8611,7 +8634,7 @@ const AdminAgents = ({ showToast }) => {
               <div style={{ height:4,background:"#A78BFA" }} />
               <div style={{ padding:"20px 24px" }}>
                 <div style={{ display:"flex",alignItems:"flex-start",gap:16,marginBottom:16 }}>
-                  <div style={{ width:48,height:48,background:"#A78BFA22",border:"2px solid #A78BFA44",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:18,color:"#A78BFA",flexShrink:0 }}>{agent.name[0]}</div>
+                  <div style={{ width:48,height:48,background:"#A78BFA22",border:"2px solid #A78BFA44",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Space Grotesk',sans-serif",fontWeight:800,fontSize:18,color:"#A78BFA",flexShrink:0 }}>{agent.name[0]}</div>
                   <div style={{ flex:1 }}>
                     <div style={{ display:"flex",gap:8,alignItems:"center",marginBottom:4 }}>
                       <p style={{ fontWeight:700,fontSize:16 }}>{agent.name}</p>
@@ -8621,7 +8644,7 @@ const AdminAgents = ({ showToast }) => {
                   </div>
                   <div style={{ textAlign:"right" }}>
                     <p style={{ fontSize:11,color:DS.colors.textMuted }}>Commission this month</p>
-                    <p style={{ fontFamily:"'Syne',sans-serif",fontSize:22,fontWeight:800,color:"#A78BFA" }}>N${commission.toLocaleString()}</p>
+                    <p style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:22,fontWeight:800,color:"#A78BFA" }}>N${commission.toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -8664,7 +8687,7 @@ const AdminAgents = ({ showToast }) => {
       {/* Captured borrowers table */}
       <Card style={{ padding:0,overflow:"hidden" }}>
         <div style={{ padding:"16px 20px",borderBottom:`1px solid ${DS.colors.border}` }}>
-          <h3 style={{ fontFamily:"'Syne',sans-serif",fontWeight:700,fontSize:15 }}>All Agent-Captured Borrowers</h3>
+          <h3 style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:15 }}>All Agent-Captured Borrowers</h3>
         </div>
         <table style={{ width:"100%",borderCollapse:"collapse",fontSize:13 }}>
           <thead><tr style={{ background:"#0f172a" }}>
@@ -8862,7 +8885,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
         )}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>₦</div>
-          <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em" }}>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em" }}>
             MicroLend<span style={{ color: DS.colors.accent }}>NA</span>
           </h1>
           <p style={{ color: DS.colors.textSecondary, marginTop: 6, fontSize: 14 }}>Namibia's Microlending Platform</p>
@@ -8905,7 +8928,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
             <>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
                 <span style={{ fontSize: 40 }}>📱</span>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, marginTop: 8 }}>Two-Factor Authentication</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginTop: 8 }}>Two-Factor Authentication</h3>
                 <p style={{ color: DS.colors.textSecondary, fontSize: 13, marginTop: 4 }}>Enter the 6-digit code sent to your phone/email</p>
               </div>
               <div style={{ marginBottom: 16 }}>
@@ -8942,20 +8965,33 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
 
 const Homepage = ({ onGetStarted, onLogin }) => {
   const [activeTab, setActiveTab] = useState("borrower");
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled,  setScrolled]  = useState(false);
+  const [openFaq,   setOpenFaq]   = useState(null);
+  const [activeNav, setActiveNav] = useState("hero");
+  const navRef = useRef(null);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+      const sections = ["hero","how-it-works","benefits","pricing","faq"];
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sections[i]);
+        if (el && window.scrollY >= el.offsetTop - 120) { setActiveNav(sections[i]); break; }
+      }
+    };
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const scrollTo = (id) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  };
 
   const stats = [
     { value: "N$4.2M+", label: "Disbursed to date" },
     { value: "312+", label: "Verified borrowers" },
     { value: "68%", label: "Approval rate" },
-    { value: "< 24h", label: "Average decision time" },
+    { value: "< 24h", label: "Avg decision time" },
   ];
 
   const borrowerSteps = [
@@ -8993,22 +9029,15 @@ const Homepage = ({ onGetStarted, onLogin }) => {
 
   const plans = [
     {
-      name: "Pay-As-You-Go",
-      price: "N$125",
-      per: "per approved lead",
-      color: DS.colors.info,
-      icon: "🪙",
-      features: ["No monthly commitment", "Full borrower profiles", "Document access", "Risk tier reports", "KYC/AML pre-screened", "Email support"],
+      name: "Pay-As-You-Go", price: "N$125", per: "per approved lead",
+      color: DS.colors.info, icon: "🪙",
+      features: ["No monthly commitment","Full borrower profiles","Document access","Risk tier reports","KYC/AML pre-screened","Email support"],
       cta: "Start Free",
     },
     {
-      name: "Monthly Subscription",
-      price: "N$2,500",
-      per: "per month excl. VAT",
-      color: DS.colors.gold,
-      icon: "⭐",
-      badge: "Most Popular",
-      features: ["Unlimited leads", "Priority lead routing", "Advanced analytics", "REST API access", "Dedicated account manager", "Compliance reports", "Custom risk filters", "24/7 support"],
+      name: "Monthly Subscription", price: "N$2,500", per: "per month excl. VAT",
+      color: DS.colors.gold, icon: "⭐", badge: "Most Popular",
+      features: ["Unlimited leads","Priority lead routing","Advanced analytics","REST API access","Dedicated account manager","Compliance reports","Custom risk filters","24/7 support"],
       cta: "Get Started",
     },
   ];
@@ -9022,112 +9051,124 @@ const Homepage = ({ onGetStarted, onLogin }) => {
     { q: "How secure is my data?", a: "All documents are encrypted using AES-256 at rest and TLS 1.3 in transit. No document is accessible by any party without explicit borrower consent. Data is stored on Namibian-jurisdiction servers." },
   ];
 
-  const [openFaq, setOpenFaq] = useState(null);
+  const C = DS.colors;
+  const NAV_LINKS = [
+    { id: "how-it-works", label: "How It Works" },
+    { id: "benefits",     label: "Features" },
+    { id: "pricing",      label: "Pricing" },
+    { id: "faq",          label: "FAQ" },
+  ];
 
   return (
-    <div style={{ background: DS.colors.bg, minHeight: "100vh", overflowX: "hidden" }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{background:#0A0F1E;color:#F0F4FF;font-family:'DM Sans',sans-serif}
-        ::-webkit-scrollbar{width:4px;background:#0A0F1E}
-        ::-webkit-scrollbar-thumb{background:#1E2D45;border-radius:4px}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
-        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-        @keyframes gradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-        @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-        @keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-        .hero-glow{animation:float 6s ease-in-out infinite}
-        .fade-up{animation:fadeUp .6s ease both}
-        .delay-1{animation-delay:.1s}
-        .delay-2{animation-delay:.2s}
-        .delay-3{animation-delay:.3s}
-        .delay-4{animation-delay:.4s}
-        .delay-5{animation-delay:.5s}
-        .benefit-card:hover{transform:translateY(-4px);border-color:#00C89644!important}
-        .step-card:hover .step-icon{transform:scale(1.1)}
-        .nav-link{color:#8899BB;font-size:14px;font-weight:500;text-decoration:none;transition:color .2s;cursor:pointer}
-        .nav-link:hover{color:#F0F4FF}
-        .ticker-wrap{overflow:hidden;white-space:nowrap}
-        .ticker-inner{display:inline-flex;animation:ticker 30s linear infinite}
-      `}</style>
+    <div style={{ background: "#f7f9fc", minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* ── STICKY NAV ── */}
-      <nav style={{
-        position: "fixed", top: 0, left: 0, right: 0, zIndex: 500,
-        background: scrolled ? "rgba(10,15,30,.95)" : "transparent",
+      {/* ── NAV ── */}
+      <nav ref={navRef} style={{
+        position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
+        background: scrolled ? "rgba(255,255,255,.97)" : "transparent",
         backdropFilter: scrolled ? "blur(16px)" : "none",
-        borderBottom: scrolled ? `1px solid ${DS.colors.border}` : "none",
-        padding: "0 5%", height: 68,
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        borderBottom: scrolled ? `1px solid ${C.border}` : "1px solid transparent",
         transition: "all .3s",
+        boxShadow: scrolled ? "0 4px 32px rgba(0,0,0,.4)" : "none",
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: DS.colors.accent, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, fontWeight: 800, color: "#0A0F1E" }}>₦</div>
-          <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, letterSpacing: "-0.03em" }}>
-            MicroLend<span style={{ color: DS.colors.accent }}>NA</span>
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
-          <a className="nav-link" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>How It Works</a>
-          <a className="nav-link" onClick={() => document.getElementById("benefits")?.scrollIntoView({ behavior: "smooth" })}>Benefits</a>
-          <a className="nav-link" onClick={() => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" })}>Pricing</a>
-          <a className="nav-link" onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}>FAQ</a>
-          <button onClick={onLogin} style={{ background: "transparent", border: `1px solid ${DS.colors.border}`, color: DS.colors.textSecondary, padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: "pointer", transition: "all .2s" }}>Sign In</button>
-          <button onClick={() => onGetStarted("borrower")} style={{ background: DS.colors.accent, color: "#0A0F1E", padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer" }}>Get Started</button>
+        <div style={{ maxWidth: 1160, margin: "0 auto", padding: "0 24px", height: 68, display: "flex", alignItems: "center", gap: 32 }}>
+          {/* Logo */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0, cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>₦</div>
+            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 19, letterSpacing: "-0.02em" }}>
+              MicroLend<span style={{ color: C.accent }}>NA</span>
+            </span>
+          </div>
+
+          {/* Nav links */}
+          <div style={{ display: "flex", flex: 1, gap: 4 }}>
+            {NAV_LINKS.map(n => (
+              <button key={n.id} onClick={() => scrollTo(n.id)} style={{
+                background: "none", border: "none", color: activeNav === n.id ? C.textPrimary : C.textSecondary,
+                fontSize: 14, fontWeight: activeNav === n.id ? 600 : 500, cursor: "pointer", padding: "6px 14px",
+                borderRadius: 8, fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "color .2s, background .2s",
+                borderBottom: activeNav === n.id ? `2px solid ${C.accent}` : "2px solid transparent",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#F0F4FF"; e.currentTarget.style.background = C.accentDim; }}
+                onMouseLeave={e => { e.currentTarget.style.color = activeNav === n.id ? C.textPrimary : C.textSecondary; e.currentTarget.style.background = "transparent"; }}
+              >{n.label}</button>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexShrink: 0 }}>
+            <button onClick={onLogin} style={{
+              background: "none", border: `1px solid ${C.border}`, color: C.textSecondary,
+              padding: "8px 18px", borderRadius: 8, fontSize: 14, fontWeight: 500, cursor: "pointer",
+              fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .2s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.color = C.accent; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.border; e.currentTarget.style.color = C.textSecondary; }}
+            >Log in</button>
+            <button onClick={() => onGetStarted("borrower")} style={{
+              background: C.accent, color: "#0A0F1E", padding: "8px 20px", borderRadius: 8,
+              fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer",
+              boxShadow: `0 0 20px ${C.accent}44`, fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .2s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; }}
+            >Get Started</button>
+          </div>
         </div>
       </nav>
 
       {/* ── HERO ── */}
-      <section style={{
-        minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "120px 5% 80px",
-        background: "radial-gradient(ellipse 100% 80% at 50% -10%, #00C89614 0%, transparent 60%), radial-gradient(ellipse 60% 40% at 80% 60%, #4DA6FF0A 0%, transparent 50%)",
-        position: "relative", overflow: "hidden",
-      }}>
-        {/* Background grid lines */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "linear-gradient(rgba(30,45,69,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(30,45,69,.3) 1px,transparent 1px)", backgroundSize: "60px 60px", pointerEvents: "none" }} />
-
-        {/* Floating orbs */}
-        <div className="hero-glow" style={{ position: "absolute", top: "20%", right: "8%", width: 300, height: 300, background: "radial-gradient(circle, #00C89618 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: "15%", left: "5%", width: 200, height: 200, background: "radial-gradient(circle, #4DA6FF10 0%, transparent 70%)", borderRadius: "50%", pointerEvents: "none", animation: "float 8s ease-in-out infinite reverse" }} />
+      <section id="hero" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "120px 5% 80px", position: "relative", overflow: "hidden" }}>
+        {/* Background glow */}
+        <div style={{ position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)", width: 800, height: 800, background: `radial-gradient(ellipse, ${C.accent}10 0%, transparent 70%)`, pointerEvents: "none" }}/>
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, backgroundImage: `radial-gradient(circle at 20% 80%, ${C.info}08, transparent 50%), radial-gradient(circle at 80% 20%, ${C.accent}06, transparent 50%)`, pointerEvents: "none" }}/>
 
         <div style={{ maxWidth: 860, textAlign: "center", position: "relative", zIndex: 1 }}>
-          <div className="fade-up" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 100, padding: "6px 16px", marginBottom: 28 }}>
-            <span style={{ width: 6, height: 6, background: DS.colors.accent, borderRadius: "50%", display: "inline-block" }} />
-            <span style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 600 }}>🇳🇦 Built for Namibia · NAMFISA Compliant</span>
+          {/* Eyebrow badge */}
+          <div className="fade-up" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: C.accentDim, border: `1px solid ${C.accent}33`, borderRadius: 100, padding: "6px 18px", marginBottom: 32 }}>
+            <span style={{ width: 7, height: 7, background: C.accent, borderRadius: "50%", display: "inline-block", animation: "pulse 2s ease-in-out infinite" }} />
+            <span style={{ fontSize: 13, color: C.accent, fontWeight: 600, letterSpacing: "0.04em" }}>🇳🇦 Built for Namibia · NAMFISA Compliant</span>
           </div>
 
+          {/* Headline */}
           <h1 className="fade-up delay-1" style={{
-            fontFamily: "'Syne',sans-serif", fontSize: "clamp(38px,6vw,72px)",
-            fontWeight: 800, lineHeight: 1.08, letterSpacing: "-0.03em", marginBottom: 24,
+            fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(40px,6.5vw,76px)",
+            fontWeight: 800, lineHeight: 1.06, letterSpacing: "-0.03em", marginBottom: 28,
           }}>
             Namibia's Smarter<br />
-            <span style={{ color: DS.colors.accent }}>Microlending</span> Platform
+            <span style={{ color: C.accent, position: "relative" }}>Microlending</span> Platform
           </h1>
 
-          <p className="fade-up delay-2" style={{ fontSize: "clamp(16px,2vw,20px)", color: DS.colors.textSecondary, lineHeight: 1.6, maxWidth: 640, margin: "0 auto 40px", fontWeight: 300 }}>
+          {/* Sub */}
+          <p className="fade-up delay-2" style={{ fontSize: "clamp(16px,2vw,20px)", color: C.textSecondary, lineHeight: 1.65, maxWidth: 620, margin: "0 auto 44px", fontWeight: 300 }}>
             Connecting creditworthy borrowers with verified partner lenders — powered by automated KYC, AML screening, and a transparent DTI-based risk engine.
           </p>
 
-          <div className="fade-up delay-3" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 56 }}>
+          {/* CTAs */}
+          <div className="fade-up delay-3" style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap", marginBottom: 64 }}>
             <button onClick={() => onGetStarted("borrower")} style={{
-              background: DS.colors.accent, color: "#0A0F1E", padding: "14px 32px", borderRadius: 10,
+              background: C.accent, color: "#0A0F1E", padding: "15px 36px", borderRadius: 12,
               fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer",
-              boxShadow: `0 0 40px ${DS.colors.accent}44`, transition: "all .2s",
-            }}>Apply for a Loan →</button>
+              boxShadow: `0 0 48px ${C.accent}44`, transition: "all .22s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 48px ${C.accent}66`; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `0 0 48px ${C.accent}44`; }}
+            >Apply for a Loan →</button>
             <button onClick={() => onGetStarted("lender")} style={{
-              background: "transparent", color: DS.colors.textPrimary, padding: "14px 32px", borderRadius: 10,
-              fontSize: 15, fontWeight: 600, border: `1px solid ${DS.colors.border}`, cursor: "pointer", transition: "all .2s",
-            }}>I'm a Lender →</button>
+              background: "transparent", color: C.textPrimary, padding: "15px 36px", borderRadius: 12,
+              fontSize: 15, fontWeight: 600, border: `1px solid ${C.borderLight}`, cursor: "pointer", transition: "all .22s",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.background = C.accentDim; e.currentTarget.style.color = C.accent; }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderLight; e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.textPrimary; }}
+            >I'm a Lender →</button>
           </div>
 
-          {/* Stats ticker */}
-          <div className="fade-up delay-4" style={{ display: "flex", justifyContent: "center", gap: 0, flexWrap: "wrap" }}>
+          {/* Stats bar */}
+          <div className="fade-up delay-4" style={{ display: "inline-flex", background: "#ffffff", border: `1px solid ${C.border}`, borderRadius: 18, overflow: "hidden", boxShadow: "0 4px 24px rgba(15,23,42,.08)" }}>
             {stats.map((s, i) => (
-              <div key={i} style={{ padding: "12px 32px", borderLeft: i > 0 ? `1px solid ${DS.colors.border}` : "none", textAlign: "center" }}>
-                <p style={{ fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, color: DS.colors.accent }}>{s.value}</p>
-                <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>{s.label}</p>
+              <div key={i} style={{ padding: "18px 32px", borderLeft: i > 0 ? `1px solid ${C.border}` : "none", textAlign: "center", minWidth: 120 }}>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: C.accent, lineHeight: 1 }}>{s.value}</p>
+                <p style={{ fontSize: 11, color: C.textMuted, marginTop: 5, fontWeight: 500, letterSpacing: "0.04em" }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -9135,11 +9176,11 @@ const Homepage = ({ onGetStarted, onLogin }) => {
       </section>
 
       {/* ── COMPLIANCE TICKER ── */}
-      <div style={{ background: DS.colors.accentDim, borderTop: `1px solid ${DS.colors.accent}22`, borderBottom: `1px solid ${DS.colors.accent}22`, padding: "10px 0", overflow: "hidden" }}>
-        <div className="ticker-inner" style={{ gap: 60 }}>
+      <div style={{ background: C.accentDim, borderTop: `1px solid ${C.accent}22`, borderBottom: `1px solid ${C.accent}22`, padding: "11px 0", overflow: "hidden" }}>
+        <div className="ticker-inner" style={{ gap: 64 }}>
           {[...Array(2)].map((_, r) =>
-            ["🔐 AES-256 Encryption", "🇳🇦 NAMFISA Regulated", "📋 FIA 2012 AML Compliant", "✅ KYC Verified Borrowers", "⚡ 24h Decision Time", "🏦 PAYG & Subscription Plans", "🔒 TLS 1.3 Data Transit", "📱 Mobile-First Design", "🤝 Trusted by 2+ Lenders"].map((item, i) => (
-              <span key={`${r}-${i}`} style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500, marginRight: 60, whiteSpace: "nowrap" }}>{item}</span>
+            ["🔐 AES-256 Encryption", "🇳🇦 NAMFISA Regulated", "📋 FIA 2012 AML Compliant", "✅ KYC Verified Borrowers", "⚡ 24h Decision Time", "🏦 PAYG & Subscription Plans", "🔒 TLS 1.3 Data Transit", "📱 Mobile-First Design", "🤝 Trusted by Lenders"].map((item, i) => (
+              <span key={`${r}-${i}`} style={{ fontSize: 13, color: C.accent, fontWeight: 600, marginRight: 64, whiteSpace: "nowrap" }}>{item}</span>
             ))
           )}
         </div>
@@ -9148,47 +9189,42 @@ const Homepage = ({ onGetStarted, onLogin }) => {
       {/* ── HOW IT WORKS ── */}
       <section id="how-it-works" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>The Process</p>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 16 }}>How It Works</h2>
-            <p style={{ color: DS.colors.textSecondary, fontSize: 16, maxWidth: 540, margin: "0 auto" }}>Whether you're borrowing or lending, the process is designed to be fast, fair, and fully compliant.</p>
+          <div style={{ textAlign: "center", marginBottom: 56 }}>
+            <p style={{ fontSize: 12, color: C.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>The Process</p>
+            <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 16 }}>How It Works</h2>
+            <p style={{ color: C.textSecondary, fontSize: 16, maxWidth: 540, margin: "0 auto" }}>Whether you're borrowing or lending, the process is designed to be fast, fair, and fully compliant.</p>
           </div>
 
           {/* Tab switcher */}
-          <div style={{ display: "flex", justifyContent: "center", marginBottom: 56 }}>
-            <div style={{ background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 14, padding: 6, display: "flex", gap: 4 }}>
-              {[
-                { key: "borrower", label: "👤 For Borrowers" },
-                { key: "lender", label: "🏦 For Lenders" },
-              ].map(t => (
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 52 }}>
+            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: 5, display: "flex", gap: 4 }}>
+              {[{ key: "borrower", label: "👤 For Borrowers" }, { key: "lender", label: "🏦 For Lenders" }].map(t => (
                 <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
                   padding: "10px 28px", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer",
-                  background: activeTab === t.key ? DS.colors.accent : "transparent",
-                  color: activeTab === t.key ? "#0A0F1E" : DS.colors.textSecondary,
-                  transition: "all .2s",
+                  background: activeTab === t.key ? C.accent : "transparent",
+                  color: activeTab === t.key ? "#0A0F1E" : C.textSecondary,
+                  transition: "all .2s", fontFamily: "'Plus Jakarta Sans',sans-serif",
                 }}>{t.label}</button>
               ))}
             </div>
           </div>
 
           {/* Steps */}
-          <div style={{ display: "grid", gap: 16 }}>
+          <div style={{ display: "grid", gap: 14 }}>
             {(activeTab === "borrower" ? borrowerSteps : lenderSteps).map((s, i) => (
               <div key={i} className="step-card" style={{
-                display: "grid", gridTemplateColumns: "56px 64px 1fr", alignItems: "center", gap: 24,
-                background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 16, padding: "20px 28px",
-                transition: "border-color .2s",
+                display: "grid", gridTemplateColumns: "52px 60px 1fr", alignItems: "center", gap: 24,
+                background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: "20px 28px",
               }}>
-                <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accentDim, opacity: 0.5 }}>{s.step}</span>
+                <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 20, fontWeight: 800, color: C.accent, opacity: 0.45 }}>{s.step}</span>
                 <div className="step-icon" style={{
-                  width: 52, height: 52, background: DS.colors.accentDim,
-                  border: `1px solid ${DS.colors.accent}33`, borderRadius: 14,
-                  display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24,
-                  transition: "transform .2s",
+                  width: 52, height: 52, background: C.accentDim, border: `1px solid ${C.accent}33`,
+                  borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 24, transition: "transform .2s, background .2s",
                 }}>{s.icon}</div>
                 <div>
-                  <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 17, marginBottom: 4 }}>{s.title}</h3>
-                  <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6 }}>{s.desc}</p>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 17, marginBottom: 5 }}>{s.title}</h3>
+                  <p style={{ color: C.textSecondary, fontSize: 14, lineHeight: 1.65 }}>{s.desc}</p>
                 </div>
               </div>
             ))}
@@ -9196,113 +9232,116 @@ const Homepage = ({ onGetStarted, onLogin }) => {
 
           <div style={{ textAlign: "center", marginTop: 44 }}>
             <button onClick={() => onGetStarted(activeTab)} style={{
-              background: DS.colors.accent, color: "#0A0F1E", padding: "13px 36px",
+              background: C.accent, color: "#0A0F1E", padding: "13px 36px",
               borderRadius: 10, fontSize: 15, fontWeight: 700, border: "none", cursor: "pointer",
-              boxShadow: `0 0 32px ${DS.colors.accent}33`,
-            }}>
-              {activeTab === "borrower" ? "Start My Application →" : "Join as a Lender →"}
-            </button>
+              boxShadow: `0 0 32px ${C.accent}33`, transition: "all .2s", fontFamily: "'Plus Jakarta Sans',sans-serif",
+            }}
+              onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; }}
+            >{activeTab === "borrower" ? "Start My Application →" : "Join as a Lender →"}</button>
           </div>
         </div>
       </section>
 
       {/* ── BENEFITS ── */}
-      <section id="benefits" style={{ padding: "100px 5%", background: "linear-gradient(180deg, transparent, #111827 20%, #111827 80%, transparent)" }}>
+      <section id="benefits" style={{ padding: "100px 5%", background: `linear-gradient(180deg, transparent, ${C.surface} 15%, ${C.surface} 85%, transparent)` }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
-            <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Why MicroLendNA</p>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 16 }}>Built Different. Built for You.</h2>
+            <p style={{ fontSize: 12, color: C.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Why MicroLendNA</p>
+            <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 16 }}>Built Different. Built for You.</h2>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 56 }}>
+          <div className="hp-benefits-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 56 }}>
             {/* Borrower benefits */}
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 16px", background: C.accentDim, border: `1px solid ${C.accent}33`, borderRadius: 12 }}>
                 <span style={{ fontSize: 20 }}>👤</span>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20 }}>For Borrowers</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: C.accent }}>For Borrowers</h3>
               </div>
-              <div style={{ display: "grid", gap: 12 }}>
+              <div style={{ display: "grid", gap: 10 }}>
                 {borrowerBenefits.map((b, i) => (
-                  <div key={i} className="benefit-card" style={{
-                    padding: 20, background: DS.colors.bg, border: `1px solid ${DS.colors.border}`,
-                    borderRadius: 14, transition: "all .25s", cursor: "default",
-                  }}>
+                  <div key={i} className="benefit-card" style={{ padding: 18, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, cursor: "default" }}>
                     <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                      <div style={{ width: 40, height: 40, background: DS.colors.accentDim, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{b.icon}</div>
+                      <div style={{ width: 40, height: 40, background: C.accentDim, border: `1px solid ${C.accent}33`, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{b.icon}</div>
                       <div>
-                        <h4 style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{b.title}</h4>
-                        <p style={{ color: DS.colors.textSecondary, fontSize: 13, lineHeight: 1.5 }}>{b.desc}</p>
+                        <h4 style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, fontFamily: "'Space Grotesk',sans-serif" }}>{b.title}</h4>
+                        <p style={{ color: C.textSecondary, fontSize: 13, lineHeight: 1.6 }}>{b.desc}</p>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20 }}>
+              <div style={{ marginTop: 16 }}>
                 <button onClick={() => onGetStarted("borrower")} style={{
-                  background: DS.colors.accent, color: "#0A0F1E", padding: "12px 28px", borderRadius: 10,
+                  background: C.accent, color: "#0A0F1E", padding: "12px 28px", borderRadius: 10,
                   fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", width: "100%",
-                }}>Apply Now — Free</button>
+                  fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .2s",
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; }}
+                  onMouseLeave={e => { e.currentTarget.style.background = C.accent; }}
+                >Apply Now — Free</button>
               </div>
             </div>
 
             {/* Lender benefits */}
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 16px", background: `${C.gold}18`, border: `1px solid ${C.gold}33`, borderRadius: 12 }}>
                 <span style={{ fontSize: 20 }}>🏦</span>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20 }}>For Lenders</h3>
+                <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: C.gold }}>For Lenders</h3>
               </div>
-              <div style={{ display: "grid", gap: 12 }}>
+              <div style={{ display: "grid", gap: 10 }}>
                 {lenderBenefits.map((b, i) => (
-                  <div key={i} className="benefit-card" style={{
-                    padding: 20, background: DS.colors.bg, border: `1px solid ${DS.colors.border}`,
-                    borderRadius: 14, transition: "all .25s", cursor: "default",
-                  }}>
+                  <div key={i} className="benefit-card" style={{ padding: 18, background: C.bg, border: `1px solid ${C.border}`, borderRadius: 14, cursor: "default" }}>
                     <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
-                      <div style={{ width: 40, height: 40, background: "#F5A62322", border: "1px solid #F5A62333", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{b.icon}</div>
+                      <div style={{ width: 40, height: 40, background: `${C.gold}18`, border: `1px solid ${C.gold}33`, borderRadius: 11, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18, flexShrink: 0 }}>{b.icon}</div>
                       <div>
-                        <h4 style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>{b.title}</h4>
-                        <p style={{ color: DS.colors.textSecondary, fontSize: 13, lineHeight: 1.5 }}>{b.desc}</p>
+                        <h4 style={{ fontWeight: 700, fontSize: 14, marginBottom: 4, fontFamily: "'Space Grotesk',sans-serif" }}>{b.title}</h4>
+                        <p style={{ color: C.textSecondary, fontSize: 13, lineHeight: 1.6 }}>{b.desc}</p>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ marginTop: 20 }}>
+              <div style={{ marginTop: 16 }}>
                 <button onClick={() => onGetStarted("lender")} style={{
-                  background: DS.colors.gold, color: "#0A0F1E", padding: "12px 28px", borderRadius: 10,
+                  background: C.gold, color: "#0A0F1E", padding: "12px 28px", borderRadius: 10,
                   fontSize: 14, fontWeight: 700, border: "none", cursor: "pointer", width: "100%",
-                }}>Become a Partner Lender →</button>
+                  fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .2s",
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
+                >Become a Partner Lender →</button>
               </div>
             </div>
           </div>
 
           {/* Risk tier visual */}
-          <div style={{ background: DS.colors.bg, border: `1px solid ${DS.colors.border}`, borderRadius: 20, padding: 36 }}>
-            <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Risk Engine</p>
-              <h3 style={{ fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800 }}>Transparent Credit Tiering — No Black Boxes</h3>
-              <p style={{ color: DS.colors.textSecondary, fontSize: 14, marginTop: 8, maxWidth: 540, margin: "8px auto 0" }}>Our DTI-based engine scores every applicant the same way, regardless of background. Here's exactly how tiers are assigned.</p>
+          <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 20, padding: "36px 40px" }}>
+            <div style={{ textAlign: "center", marginBottom: 32 }}>
+              <p style={{ fontSize: 12, color: C.accent, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Risk Engine</p>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 10 }}>Transparent Credit Tiering — No Black Boxes</h3>
+              <p style={{ color: C.textSecondary, fontSize: 14, maxWidth: 540, margin: "0 auto" }}>Our DTI-based engine scores every applicant the same way, regardless of background. Here's exactly how tiers are assigned.</p>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
+            <div className="hp-tiers-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
               {[
-                { tier: "A", color: DS.colors.tierA, dtl: "DTI ≤ 25%", max: "3× disposable", rate: "18% p.a.", desc: "Excellent profile. Low risk. Largest loan available.", label: "Low Risk" },
-                { tier: "B", color: DS.colors.tierB, dtl: "DTI ≤ 40%", max: "2× disposable", rate: "24% p.a.", desc: "Good profile. Standard terms. Widely approved.", label: "Moderate Risk" },
-                { tier: "C", color: DS.colors.tierC, dtl: "DTI ≤ 55%", max: "1× disposable", rate: "30% p.a.", desc: "Higher obligations. Conservative loan sizing.", label: "Elevated Risk" },
-                { tier: "D", color: DS.colors.tierD, dtl: "DTI > 55%", max: "Not eligible", rate: "N/A", desc: "Advised to reduce obligations before re-applying.", label: "Decline" },
+                { tier: "A", color: C.tierA, dtl: "DTI ≤ 25%", max: "3× disposable", rate: "18% p.a.", desc: "Excellent profile. Low risk. Largest loan available.", label: "Low Risk" },
+                { tier: "B", color: C.tierB, dtl: "DTI ≤ 40%", max: "2× disposable", rate: "24% p.a.", desc: "Good profile. Standard terms. Widely approved.", label: "Moderate Risk" },
+                { tier: "C", color: C.tierC, dtl: "DTI ≤ 55%", max: "1× disposable", rate: "30% p.a.", desc: "Higher obligations. Conservative loan sizing.", label: "Elevated Risk" },
+                { tier: "D", color: C.tierD, dtl: "DTI > 55%", max: "Not eligible", rate: "N/A", desc: "Advised to reduce obligations before re-applying.", label: "Decline" },
               ].map(item => (
-                <div key={item.tier} style={{ padding: 20, background: item.color + "0D", border: `1px solid ${item.color}33`, borderRadius: 14, textAlign: "center" }}>
-                  <div style={{ width: 44, height: 44, background: item.color + "22", border: `2px solid ${item.color}`, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 20, color: item.color }}>
-                    {item.tier}
-                  </div>
+                <div key={item.tier} style={{ padding: 20, background: item.color + "0D", border: `1px solid ${item.color}33`, borderRadius: 14, textAlign: "center", transition: "transform .2s, box-shadow .2s" }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 12px 40px ${item.color}18`; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = "none"; }}>
+                  <div style={{ width: 48, height: 48, background: item.color + "22", border: `2px solid ${item.color}`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 22, color: item.color }}>{item.tier}</div>
                   <p style={{ fontSize: 11, fontWeight: 700, color: item.color, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>{item.label}</p>
-                  <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{item.dtl}</p>
-                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 4 }}>Max: {item.max}</p>
-                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8 }}>Rate: {item.rate}</p>
-                  <p style={{ fontSize: 11, color: DS.colors.textSecondary, lineHeight: 1.4 }}>{item.desc}</p>
+                  <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 5, fontFamily: "'DM Mono',monospace" }}>{item.dtl}</p>
+                  <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 3 }}>Max: {item.max}</p>
+                  <p style={{ fontSize: 12, color: C.textMuted, marginBottom: 10 }}>Rate: {item.rate}</p>
+                  <p style={{ fontSize: 11, color: C.textSecondary, lineHeight: 1.5 }}>{item.desc}</p>
                 </div>
               ))}
             </div>
-            <p style={{ textAlign: "center", fontSize: 12, color: DS.colors.textMuted, marginTop: 20 }}>
+            <p style={{ textAlign: "center", fontSize: 12, color: C.textMuted, marginTop: 20 }}>
               * First-time borrowers receive a +15% DTI buffer and 30% loan reduction as per conservative first-borrower policy. Reduced on successful repayment.
             </p>
           </div>
@@ -9313,89 +9352,98 @@ const Homepage = ({ onGetStarted, onLogin }) => {
       <section id="pricing" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <p style={{ fontSize: 12, color: DS.colors.gold, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Lender Pricing</p>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 12 }}>Simple, Honest Pricing</h2>
-            <p style={{ color: DS.colors.textSecondary, fontSize: 16 }}>No setup fees. No hidden costs. Cancel anytime.</p>
+            <p style={{ fontSize: 12, color: C.gold, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>Lender Pricing</p>
+            <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,46px)", fontWeight: 800, letterSpacing: "-0.02em", marginBottom: 14 }}>Simple, Honest Pricing</h2>
+            <p style={{ color: C.textSecondary, fontSize: 16 }}>No setup fees. No hidden costs. Cancel anytime.</p>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
+          <div className="hp-plans-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             {plans.map((plan, i) => (
               <div key={i} style={{
-                background: DS.colors.surface, border: `2px solid ${plan.color}44`,
-                borderRadius: 20, padding: 32, position: "relative", overflow: "hidden",
-                boxShadow: i === 1 ? `0 0 60px ${DS.colors.gold}18` : "none",
-              }}>
+                background: C.surface, border: `2px solid ${i === 1 ? plan.color + "55" : C.border}`,
+                borderRadius: 20, padding: "32px 28px", position: "relative",
+                boxShadow: i === 1 ? `0 0 48px ${plan.color}18` : "none",
+                transition: "transform .2s, box-shadow .2s",
+              }}
+                onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = `0 16px 48px ${plan.color}20`; }}
+                onMouseLeave={e => { e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = i === 1 ? `0 0 48px ${plan.color}18` : "none"; }}
+              >
                 {plan.badge && (
-                  <div style={{ position: "absolute", top: 16, right: 16, background: DS.colors.gold, color: "#0A0F1E", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 100 }}>{plan.badge}</div>
+                  <div style={{ position: "absolute", top: 16, right: 16, background: plan.color, color: "#0A0F1E", fontSize: 10, fontWeight: 800, padding: "3px 12px", borderRadius: 100, letterSpacing: "0.05em" }}>{plan.badge}</div>
                 )}
-                <div style={{ fontSize: 32, marginBottom: 12 }}>{plan.icon}</div>
-                <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 20, marginBottom: 4 }}>{plan.name}</h3>
-                <div style={{ margin: "16px 0" }}>
-                  <span style={{ fontFamily: "'Syne',sans-serif", fontSize: 40, fontWeight: 800, color: plan.color }}>{plan.price}</span>
-                  <span style={{ fontSize: 13, color: DS.colors.textMuted, marginLeft: 6 }}>{plan.per}</span>
+                <div style={{ fontSize: 30, marginBottom: 12 }}>{plan.icon}</div>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 6 }}>{plan.name}</p>
+                <div style={{ marginBottom: 24 }}>
+                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 40, fontWeight: 800, color: plan.color }}>{plan.price}</span>
+                  <span style={{ fontSize: 13, color: C.textMuted, marginLeft: 8 }}>{plan.per}</span>
                 </div>
                 <ul style={{ listStyle: "none", marginBottom: 28 }}>
                   {plan.features.map((f, j) => (
-                    <li key={j} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 14, color: DS.colors.textSecondary, marginBottom: 10 }}>
-                      <span style={{ color: plan.color, fontWeight: 700 }}>✓</span> {f}
+                    <li key={j} style={{ display: "flex", gap: 9, alignItems: "center", fontSize: 14, color: C.textSecondary, marginBottom: 10 }}>
+                      <span style={{ color: plan.color, fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
                     </li>
                   ))}
                 </ul>
                 <button onClick={() => onGetStarted("lender")} style={{
-                  width: "100%", padding: "12px", borderRadius: 10, border: "none",
-                  background: i === 1 ? DS.colors.gold : "transparent",
+                  width: "100%", padding: "13px", borderRadius: 10,
+                  background: i === 1 ? plan.color : "transparent",
                   color: i === 1 ? "#0A0F1E" : plan.color,
-                  border: i === 1 ? "none" : `1px solid ${plan.color}`,
+                  border: i === 1 ? "none" : `1.5px solid ${plan.color}`,
                   fontWeight: 700, fontSize: 14, cursor: "pointer", transition: "all .2s",
-                }}>{plan.cta} →</button>
+                  fontFamily: "'Plus Jakarta Sans',sans-serif",
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.opacity = ".85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
+                  onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "none"; }}
+                >{plan.cta} →</button>
               </div>
             ))}
           </div>
-          <p style={{ textAlign: "center", fontSize: 13, color: DS.colors.textMuted, marginTop: 20 }}>
+          <p style={{ textAlign: "center", fontSize: 13, color: C.textMuted, marginTop: 22 }}>
             Borrower registration is always free. Lenders pay only for the service tier they choose.
           </p>
         </div>
       </section>
 
       {/* ── COMPLIANCE BANNER ── */}
-      <section style={{ padding: "60px 5%", background: DS.colors.surface, borderTop: `1px solid ${DS.colors.border}`, borderBottom: `1px solid ${DS.colors.border}` }}>
-        <div style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 32 }}>
-          {[
-            { icon: "🏛️", title: "NAMFISA Compliant", desc: "Fully aligned with the Namibia Financial Institutions Supervisory Authority requirements." },
-            { icon: "🛡️", title: "FIA 2012 AML", desc: "Anti-money laundering screening on every borrower per the Financial Intelligence Act." },
-            { icon: "🔐", title: "KYC Verified", desc: "Identity verification on every application. Documents checked for authenticity." },
-            { icon: "🔒", title: "Bank-Grade Security", desc: "AES-256 encryption, TLS 1.3 transit, zero third-party data sharing without consent." },
-          ].map((item, i) => (
-            <div key={i} style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 32, marginBottom: 10 }}>{item.icon}</div>
-              <h4 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 6 }}>{item.title}</h4>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, lineHeight: 1.5 }}>{item.desc}</p>
-            </div>
-          ))}
+      <section style={{ padding: "60px 5%", background: C.surface, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+          <div className="hp-compliance-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 32 }}>
+            {[
+              { icon: "🏛️", title: "NAMFISA Compliant", desc: "Fully aligned with the Namibia Financial Institutions Supervisory Authority requirements." },
+              { icon: "🛡️", title: "FIA 2012 AML", desc: "Anti-money laundering screening on every borrower per the Financial Intelligence Act." },
+              { icon: "🔐", title: "KYC Verified", desc: "Identity verification on every application. Documents checked for authenticity." },
+              { icon: "🔒", title: "Bank-Grade Security", desc: "AES-256 encryption, TLS 1.3 transit, zero third-party data sharing without consent." },
+            ].map((item, i) => (
+              <div key={i} style={{ textAlign: "center" }}>
+                <div style={{ width: 52, height: 52, background: C.accentDim, border: `1px solid ${C.accent}22`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, margin: "0 auto 14px" }}>{item.icon}</div>
+                <h4 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 7 }}>{item.title}</h4>
+                <p style={{ fontSize: 13, color: C.textMuted, lineHeight: 1.55 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
       <section id="faq" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 56 }}>
-            <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>FAQ</p>
-            <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, letterSpacing: "-0.02em" }}>Common Questions</h2>
+          <div style={{ textAlign: "center", marginBottom: 52 }}>
+            <p style={{ fontSize: 12, color: C.accent, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>FAQ</p>
+            <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,42px)", fontWeight: 800, letterSpacing: "-0.02em" }}>Common Questions</h2>
           </div>
           <div style={{ display: "grid", gap: 10 }}>
             {faqs.map((faq, i) => (
-              <div key={i} style={{ background: DS.colors.surface, border: `1px solid ${openFaq === i ? DS.colors.accent + "55" : DS.colors.border}`, borderRadius: 14, overflow: "hidden", transition: "border .2s" }}>
+              <div key={i} style={{ background: C.surface, border: `1px solid ${openFaq === i ? C.accent + "55" : C.border}`, borderRadius: 14, overflow: "hidden", transition: "border-color .2s" }}>
                 <button onClick={() => setOpenFaq(openFaq === i ? null : i)} style={{
                   width: "100%", padding: "18px 22px", background: "none", border: "none",
                   display: "flex", justifyContent: "space-between", alignItems: "center", cursor: "pointer",
-                  color: DS.colors.textPrimary,
+                  color: C.textPrimary,
                 }}>
                   <span style={{ fontSize: 15, fontWeight: 600, textAlign: "left" }}>{faq.q}</span>
-                  <span style={{ color: DS.colors.accent, fontSize: 20, transition: "transform .2s", transform: openFaq === i ? "rotate(45deg)" : "none", flexShrink: 0, marginLeft: 12 }}>+</span>
+                  <span style={{ color: C.accent, fontSize: 22, transition: "transform .2s", transform: openFaq === i ? "rotate(45deg)" : "none", flexShrink: 0, marginLeft: 16, lineHeight: 1 }}>+</span>
                 </button>
                 {openFaq === i && (
-                  <div style={{ padding: "0 22px 18px", color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.7, borderTop: `1px solid ${DS.colors.border}` }}>
-                    <p style={{ paddingTop: 14 }}>{faq.a}</p>
+                  <div style={{ padding: "0 22px 20px", borderTop: `1px solid ${C.border}` }}>
+                    <p style={{ paddingTop: 16, color: C.textSecondary, fontSize: 14, lineHeight: 1.75 }}>{faq.a}</p>
                   </div>
                 )}
               </div>
@@ -9405,43 +9453,49 @@ const Homepage = ({ onGetStarted, onLogin }) => {
       </section>
 
       {/* ── CTA FOOTER ── */}
-      <section style={{
-        padding: "80px 5%", textAlign: "center",
-        background: "radial-gradient(ellipse 80% 60% at 50% 50%, #00C89610 0%, transparent 70%)",
-        borderTop: `1px solid ${DS.colors.border}`,
-      }}>
-        <h2 style={{ fontFamily: "'Syne',sans-serif", fontSize: "clamp(28px,4vw,50px)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 16 }}>
+      <section style={{ padding: "80px 5%", textAlign: "center", borderTop: `1px solid ${C.border}`, background: `radial-gradient(ellipse 80% 60% at 50% 50%, ${C.accent}12 0%, transparent 70%)` }}>
+        <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,52px)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 16 }}>
           Ready to get started?
         </h2>
-        <p style={{ color: DS.colors.textSecondary, fontSize: 17, marginBottom: 40, maxWidth: 480, margin: "0 auto 40px" }}>
+        <p style={{ color: C.textSecondary, fontSize: 17, marginBottom: 44, maxWidth: 460, margin: "0 auto 44px" }}>
           Join Namibia's most transparent microlending platform. Apply in minutes, get matched in hours.
         </p>
         <div style={{ display: "flex", gap: 14, justifyContent: "center", flexWrap: "wrap" }}>
           <button onClick={() => onGetStarted("borrower")} style={{
-            background: DS.colors.accent, color: "#0A0F1E", padding: "15px 40px", borderRadius: 12,
+            background: C.accent, color: "#0A0F1E", padding: "15px 44px", borderRadius: 12,
             fontSize: 16, fontWeight: 700, border: "none", cursor: "pointer",
-            boxShadow: `0 0 48px ${DS.colors.accent}40`,
-          }}>Apply for a Loan — Free</button>
+            boxShadow: `0 0 48px ${C.accent}44`, transition: "all .2s", fontFamily: "'Plus Jakarta Sans',sans-serif",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; }}
+          >Apply for a Loan — Free</button>
           <button onClick={() => onGetStarted("lender")} style={{
-            background: DS.colors.gold, color: "#0A0F1E", padding: "15px 40px", borderRadius: 12,
+            background: C.gold, color: "#0A0F1E", padding: "15px 44px", borderRadius: 12,
             fontSize: 16, fontWeight: 700, border: "none", cursor: "pointer",
-          }}>Partner With Us as a Lender</button>
+            fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all .2s",
+          }}
+            onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; e.currentTarget.style.transform = "translateY(-2px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "none"; }}
+          >Partner With Us as a Lender</button>
         </div>
       </section>
 
       {/* ── FOOTER ── */}
-      <footer style={{ background: DS.colors.surface, borderTop: `1px solid ${DS.colors.border}`, padding: "40px 5%" }}>
-        <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
+      <footer style={{ background: C.surface, borderTop: `1px solid ${C.border}`, padding: "40px 5%" }}>
+        <div className="hp-footer-row" style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 32, height: 32, background: DS.colors.accent, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 800, color: "#0A0F1E" }}>₦</div>
-            <span style={{ fontFamily: "'Syne',sans-serif", fontWeight: 800, fontSize: 18 }}>MicroLend<span style={{ color: DS.colors.accent }}>NA</span></span>
+            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>₦</div>
+            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18 }}>MicroLend<span style={{ color: C.accent }}>NA</span></span>
           </div>
-          <p style={{ fontSize: 12, color: DS.colors.textMuted, textAlign: "center" }}>
-            © 2025 MicroLendNA. Regulated by NAMFISA · FIA 2012 Compliant · Windhoek, Namibia
+          <p style={{ fontSize: 12, color: C.textMuted, textAlign: "center" }}>
+            © 2025 MicroLendNA · Regulated by NAMFISA · FIA 2012 Compliant · Windhoek, Namibia
           </p>
           <div style={{ display: "flex", gap: 20 }}>
             {["Privacy Policy", "Terms of Service", "Contact"].map(l => (
-              <span key={l} style={{ fontSize: 12, color: DS.colors.textMuted, cursor: "pointer", transition: "color .2s" }}>{l}</span>
+              <span key={l} style={{ fontSize: 12, color: C.textMuted, cursor: "pointer", transition: "color .2s" }}
+                onMouseEnter={e => e.target.style.color = C.textSecondary}
+                onMouseLeave={e => e.target.style.color = C.textMuted}
+              >{l}</span>
             ))}
           </div>
         </div>
@@ -9460,7 +9514,7 @@ const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, danger = fal
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.7)", zIndex: 2000, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
       <div className="fade-in" style={{ background: DS.colors.surface, border: `1px solid ${danger ? DS.colors.danger + "44" : DS.colors.border}`, borderRadius: 16, padding: 28, maxWidth: 400, width: "100%", boxShadow: "0 24px 60px rgba(0,0,0,.5)" }}>
-        <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10 }}>{title}</h3>
+        <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 10 }}>{title}</h3>
         <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>{message}</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <Btn variant="ghost" onClick={onCancel}>Cancel</Btn>
@@ -9476,7 +9530,7 @@ const PageHeader = ({ title, subtitle, actions, badge }) => (
   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
     <div>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>
-        <h1 style={{ fontFamily: "'Syne',sans-serif", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>{title}</h1>
+        <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>{title}</h1>
         {badge && badge}
       </div>
       {subtitle && <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>{subtitle}</p>}
@@ -9489,7 +9543,7 @@ const PageHeader = ({ title, subtitle, actions, badge }) => (
 const EmptyState = ({ icon, title, message, action, actionLabel }) => (
   <Card style={{ textAlign: "center", padding: "48px 32px" }}>
     <div style={{ fontSize: 52, marginBottom: 16, opacity: .7 }}>{icon}</div>
-    <h3 style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{title}</h3>
+    <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>{title}</h3>
     <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6, maxWidth: 360, margin: "0 auto", marginBottom: action ? 20 : 0 }}>{message}</p>
     {action && <Btn onClick={action}>{actionLabel || "Get Started"}</Btn>}
   </Card>
@@ -9642,7 +9696,7 @@ export default function App() {
   if (!sessionRestored) return (
     <>
       <GlobalStyles />
-      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: DS.colors.bg }}>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f7f9fc" }}>
         <div style={{ textAlign: "center" }}>
           <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>₦</div>
           <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Loading...</p>
