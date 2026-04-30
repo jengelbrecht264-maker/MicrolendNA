@@ -2085,40 +2085,78 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
     }
     setAnalyzing(true);
 
-    // Get the actual uploaded bank statement file path from Supabase
-    const doc = typeof bankStatementDoc === "string"
-      ? { key: bankStatementDoc }
-      : (bankStatementDoc || {});
+    var base64Data = null;
+    var mimeType = "application/pdf";
 
-    // Try to fetch and analyse the real uploaded bank statement PDF via Claude API
     try {
-      // Build file URL from Supabase storage
-      var filePath = doc.filePath || doc.path || null;
-      var fileUrl = doc.fileUrl || (filePath ? (SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath) : null);
+      // Step 1: Resolve the real borrower_profiles.id (UUID) from whatever we have
+      // borrower.id  = borrower_profiles.id  (UUID — what documents table uses as borrower_id)
+      // borrower.userId = auth user UUID
+      var uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      var borrowerProfileId = null;
+      var filePath = null;
 
-      var base64Data = null;
-      var mimeType = "application/pdf";
-
-      if (fileUrl) {
+      // If borrower.id looks like a UUID it IS the borrower_profiles.id — use directly
+      if (borrower?.id && uuidRe.test(String(borrower.id))) {
+        borrowerProfileId = borrower.id;
+      }
+      // Otherwise look up via user_id
+      if (!borrowerProfileId && borrower?.userId && uuidRe.test(String(borrower.userId))) {
         try {
-          // Fetch the actual bank statement file
+          var bpRows = await SB.query("borrower_profiles", "user_id=eq." + borrower.userId + "&select=id");
+          if (bpRows && bpRows[0]) borrowerProfileId = bpRows[0].id;
+        } catch(e) { console.log("Profile lookup:", e.message); }
+      }
+      // Last resort — try borrower.userId as profile id directly
+      if (!borrowerProfileId && borrower?.userId) borrowerProfileId = borrower.userId;
+
+      console.log("Bank analysis — borrowerProfileId:", borrowerProfileId);
+
+      // Step 2: Query documents table for the latest bank_statement file path
+      if (borrowerProfileId) {
+        try {
+          var docRows = await SB.query(
+            "documents",
+            "borrower_id=eq." + borrowerProfileId + "&doc_type=eq.bank_statement&select=file_path,mime_type&order=uploaded_at.desc&limit=1"
+          );
+          if (docRows && docRows[0] && docRows[0].file_path) {
+            filePath = docRows[0].file_path;
+            mimeType = docRows[0].mime_type || "application/pdf";
+            console.log("Bank statement file found:", filePath);
+          } else {
+            console.log("No bank_statement doc found in documents table for borrower_id:", borrowerProfileId);
+          }
+        } catch(e) { console.log("Doc query:", e.message); }
+      }
+
+      // Step 2: If we have a real file path, fetch it from Supabase Storage
+      if (filePath) {
+        var fileUrl = SUPABASE_URL + "/storage/v1/object/kyc-documents/" + filePath;
+        try {
           var fileResp = await fetch(fileUrl, {
-            headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + (SB.getToken() || SUPABASE_KEY) }
+            headers: {
+              apikey: SUPABASE_KEY,
+              Authorization: "Bearer " + (SB.getToken() || SUPABASE_KEY)
+            }
           });
           if (fileResp.ok) {
             var blob = await fileResp.blob();
-            mimeType = blob.type || "application/pdf";
-            // Convert to base64
+            mimeType = blob.type || mimeType;
             base64Data = await new Promise(function(resolve, reject) {
               var reader = new FileReader();
               reader.onload = function() { resolve(reader.result.split(",")[1]); };
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
+            console.log("Bank statement fetched — size:", blob.size, "bytes, type:", mimeType);
+          } else {
+            console.log("File fetch failed:", fileResp.status, fileResp.statusText);
           }
         } catch(fetchErr) {
-          console.log("File fetch:", fetchErr.message);
+          console.log("File fetch error:", fetchErr.message);
         }
+      } else {
+        console.log("No bank statement file path found in documents table — falling back to profile data");
       }
 
       // Build Claude API request — with real document if available, else text-only
@@ -3775,7 +3813,7 @@ const StorageService = {
       Object.assign(LENDER_DB.borrowers[idx], profile, { id: lbId });
     } else {
       LENDER_DB.borrowers.push(Object.assign({}, profile, {
-        id: "lb" + Date.now(), loans: [], scorecard: null, scorecardAnswers: null,
+        id: profile.id || profile.userId || ("lb" + Date.now()), loans: [], scorecard: null, scorecardAnswers: null,
       }));
     }
   },
@@ -5793,17 +5831,47 @@ const AdminBorrowers = ({ showToast, setView }) => {
                         var sel = document.getElementById("lender-select-"+b.userId);
                         var lenderId = sel ? sel.value : "";
                         if (!lenderId) { showToast("Please select a lender first","error"); return; }
+
+                        // Validate that b.id is a real Supabase UUID (not a local lb/b mock ID)
+                        var uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+                        var borrowerProfileId = b.id;
+
+                        // If b.id is not a UUID, it means this borrower has no borrower_profile yet
+                        // In that case look it up from Supabase using the user's UUID
+                        if (!uuidPattern.test(String(borrowerProfileId))) {
+                          showToast("This borrower has not completed their profile yet. Ask them to fill in their profile before assigning.", "error");
+                          return;
+                        }
+
+                        // Also validate lenderId is a UUID
+                        if (!uuidPattern.test(String(lenderId))) {
+                          showToast("Invalid lender ID. Please refresh and try again.", "error");
+                          return;
+                        }
+
                         var lender = DB.lenders.find(function(l){return l.id===lenderId;});
                         try {
-                          // Update all pending applications for this borrower to assign to lender
-                          var apps = await SB.query("applications","borrower_id=eq."+b.id+"&status=eq.pending&select=id");
-                          for (var i=0; i<(apps||[]).length; i++) {
-                            await SB.update("applications",{id:apps[i].id},{lender_user_id:lenderId,lender_name:lender?.name||"",status:"new_lead"});
-                          }
-                          // If no pending apps exist, create one as a lead
-                          if (!apps || apps.length===0) {
+                          // Update all pending/new_lead applications for this borrower
+                          var existingApps = await SB.query(
+                            "applications",
+                            "borrower_id=eq."+borrowerProfileId+"&select=id,status"
+                          );
+                          var pendingApps = (existingApps||[]).filter(function(a){
+                            return a.status==="pending"||a.status==="new_lead";
+                          });
+
+                          if (pendingApps.length > 0) {
+                            for (var i=0; i<pendingApps.length; i++) {
+                              await SB.update("applications",{id:pendingApps[i].id},{
+                                lender_user_id: lenderId,
+                                lender_name: lender?.name||"",
+                                status: "new_lead"
+                              });
+                            }
+                          } else {
+                            // No pending apps — create a new lead
                             await SB.insert("applications",{
-                              borrower_id: b.id,
+                              borrower_id: borrowerProfileId,
                               lender_user_id: lenderId,
                               lender_name: lender?.name||"",
                               amount_cents: Math.round((b.salary||0)*100),
@@ -5814,15 +5882,20 @@ const AdminBorrowers = ({ showToast, setView }) => {
                               status: "new_lead",
                             });
                           }
-                          // Notify the lender
-                          await SB.insert("notifications",{
+
+                          // Notify lender (non-blocking)
+                          SB.insert("notifications",{
                             user_id: lenderId,
                             title: "New Borrower Assigned",
                             message: b.name+" (Tier "+rr.tier+") has been assigned to you by admin. Review their profile and make a decision.",
-                            type: "warning",
-                          });
-                          showToast("✅ "+b.name+" assigned to "+lender?.name+" — lender notified");
-                        } catch(e){ showToast("Assignment error: "+e.message,"error"); }
+                            type: "info",
+                          }).catch(function(ne){ console.log("Notify lender:", ne.message); });
+
+                          showToast("✅ "+b.name+" assigned to "+(lender?.name||"lender")+" — lender notified");
+                        } catch(e){
+                          console.error("Assignment error:", e);
+                          showToast("Assignment error: "+e.message,"error");
+                        }
                       }} style={{background:DS.colors.accent,color:"#0A0F1E"}}>Assign →</Btn>
                     </div>
                     <p style={{fontSize:11,color:DS.colors.textMuted,marginTop:8}}>Only approved (KYC verified) borrowers can be assigned to lenders. The lender will see this borrower in their Applications queue.</p>
