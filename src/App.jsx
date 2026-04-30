@@ -2231,11 +2231,11 @@ Required JSON structure:
 
 RISK SCORE SUMMARY:
 - Overall Score: ${riskResult.finalScore}/100 — Tier ${riskResult.tier} (${riskResult.recommendation})
-- Employment: ${riskResult.breakdown.employment.pct.toFixed(0)}/100 (weight 25%)
-- Banking History: ${riskResult.breakdown.banking.pct.toFixed(0)}/100 (weight 15%)
-- Bank Conduct: ${riskResult.breakdown.conduct.pct.toFixed(0)}/100 (weight 35%)
-- Affordability: ${riskResult.breakdown.affordability.pct.toFixed(0)}/100 (weight 20%)
-- Fraud/Integrity: ${riskResult.breakdown.fraud.pct.toFixed(0)}/100 (weight 5%)
+- Employment: ${(riskResult?.breakdown?.employment?.pct||0).toFixed(0)}/100 (weight 25%)
+- Banking History: ${(riskResult?.breakdown?.banking?.pct||0).toFixed(0)}/100 (weight 15%)
+- Bank Conduct: ${(riskResult?.breakdown?.conduct?.pct||0).toFixed(0)}/100 (weight 35%)
+- Affordability: ${(riskResult?.breakdown?.affordability?.pct||0).toFixed(0)}/100 (weight 20%)
+- Fraud/Integrity: ${(riskResult?.breakdown?.fraud?.pct||0).toFixed(0)}/100 (weight 5%)
 
 BANK STATEMENT DATA:
 - Core income: NAD ${sc.avgCoreCredits.toLocaleString()}/mo | Total credits: NAD ${sc.avgCredits.toLocaleString()}/mo
@@ -2313,7 +2313,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                   ))}
                 </div>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Score Breakdown</p>
-                {Object.entries(riskResult.breakdown).map(([k, v]) => (
+                {Object.entries(riskResult?.breakdown||{}).map(([k, v]) => (
                   <RiskProfileBar key={k} label={v.label} pct={v.pct} color={catColors[k]} weight={v.weight} weighted={v.weighted} />
                 ))}
               </div>
@@ -2421,7 +2421,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 </div>
                 <div>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 12 }}>Score Breakdown</p>
-                  {Object.entries(riskResult.breakdown).map(([k, v]) => (
+                  {Object.entries(riskResult?.breakdown||{}).map(([k, v]) => (
                     <RiskProfileBar key={k} label={v.label} pct={v.pct} color={catColors[k]} weight={v.weight} weighted={v.weighted} />
                   ))}
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${DS.colors.border}` }}>
@@ -2572,7 +2572,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     ))}
                   </tr></thead>
                   <tbody>
-                    {scorecard.deductions.map((d, i) => (
+                    {(scorecard.deductions||[]).map((d, i) => (
                       <tr key={i} style={{ background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent", borderTop: `1px solid ${DS.colors.border}` }}>
                         <td style={{ padding: "11px 14px" }}><ScorecardBadge type={d.badge} /></td>
                         <td style={{ padding: "11px 14px", fontSize: 12, color: DS.colors.textSecondary }}>{d.desc}</td>
@@ -2584,9 +2584,9 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     ))}
                     <tr style={{ borderTop: `2px solid #1e3a5f`, background: DS.colors.infoDim }}>
                       <td colSpan={2} style={{ padding: "12px 14px", fontWeight: 700 }}>Total Committed Deductions</td>
-                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{scorecard.deductions.reduce((a,d)=>a+(d.nov||0),0).toLocaleString()}</td>
-                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{scorecard.deductions.reduce((a,d)=>a+(d.dec||0),0).toLocaleString()}</td>
-                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{scorecard.deductions.reduce((a,d)=>a+(d.jan||0),0).toLocaleString()}</td>
+                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{(scorecard.deductions||[]).reduce((a,d)=>a+(d.nov||0),0).toLocaleString()}</td>
+                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{(scorecard.deductions||[]).reduce((a,d)=>a+(d.dec||0),0).toLocaleString()}</td>
+                      <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700 }}>{(scorecard.deductions||[]).reduce((a,d)=>a+(d.jan||0),0).toLocaleString()}</td>
                       <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700, fontSize: 15, color: DS.colors.info }}>{scorecard.totalDeductionAvg.toLocaleString()}</td>
                     </tr>
                   </tbody>
@@ -2669,7 +2669,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
 
               {/* Category score pills */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 20 }}>
-                {Object.entries(riskResult.breakdown).map(([k, v]) => (
+                {Object.entries(riskResult?.breakdown||{}).map(([k, v]) => (
                   <div key={k} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
                     <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 22, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 12, fontWeight: 400 }}>/100</span></p>
@@ -2743,7 +2743,7 @@ const LenderScorecard = ({ showToast }) => {
           model: "claude-sonnet-4-20250514", max_tokens: 700,
           messages: [{ role: "user", content: `Namibian microlender credit analyst. Brief 3-paragraph credit recommendation for ${b.name}:
 Risk score: ${result.finalScore}/100, Tier ${result.tier}.
-Employment ${result.breakdown.employment.pct.toFixed(0)}/100 | Conduct ${result.breakdown.conduct.pct.toFixed(0)}/100 | Affordability ${result.breakdown.affordability.pct.toFixed(0)}/100.
+Employment ${(result?.breakdown?.employment?.pct||0).toFixed(0)}/100 | Conduct ${(result?.breakdown?.conduct?.pct||0).toFixed(0)}/100 | Affordability ${(result?.breakdown?.affordability?.pct||0).toFixed(0)}/100.
 Core income: NAD ${sc.avgCoreCredits?.toLocaleString()}/mo. Surplus: NAD ${sc.avgSurplusDeficit?.toLocaleString()}. Unpaids: ${sc.unpaidCount}. Low days: ${sc.lowDays}.
 Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decision with max loan in NAD. Be direct and decisive.` }]
         })
@@ -2795,7 +2795,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
 
         {/* Category bars */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 10, marginBottom: 20 }}>
-          {Object.entries(result.breakdown).map(([k,v])=>(
+          {Object.entries(result?.breakdown||{}).map(([k,v])=>(
             <div key={k} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
               <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
               <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
@@ -4538,7 +4538,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               <div style={{ background: "#1e3a5f", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "#e2e8f0", display: "flex", justifyContent: "space-between" }}>
                 <span>Committed Deductions (Debit Orders)</span><span>Avg/Month</span>
               </div>
-              {b?.scorecard.deductions.map((d, i) => (
+              {b?.(scorecard.deductions||[]).map((d, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderTop: `1px solid ${DS.colors.border}`, background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}><ScorecardBadge type={d.badge} /><span style={{ fontSize: 12, color: DS.colors.textSecondary }}>{d.desc}</span></div>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 700, color: DS.colors.info }}>N${d.avg.toLocaleString()}</span>
@@ -4557,7 +4557,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr.breakdown).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${app.borrowerName.replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${app.borrowerName.replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -4568,7 +4568,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               </div>
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 16 }}>
-                  {Object.entries(rr.breakdown).map(([k, v]) => (
+                  {Object.entries(rr?.breakdown||{}).map(([k, v]) => (
                     <div key={k} style={{ padding: 12, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                       <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
@@ -5123,7 +5123,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               <div style={{ background: "#1e3a5f", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "#e2e8f0", display: "flex", justifyContent: "space-between" }}>
                 <span>Committed Monthly Deductions</span><span>Avg/Month</span>
               </div>
-              {(b.scorecard.deductions||[]).map((d, i) => (
+              {((b.scorecard?.deductions||[])||[]).map((d, i) => (
                 <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderTop: `1px solid ${DS.colors.border}`, background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent" }}>
                   <div style={{ display: "flex", gap: 10, alignItems: "center" }}><ScorecardBadge type={d.badge} /><span style={{ fontSize: 12, color: DS.colors.textSecondary }}>{d.desc}</span></div>
                   <span style={{ fontFamily: "'DM Mono',monospace", fontSize: 13, fontWeight: 700, color: DS.colors.info }}>N${d.avg.toLocaleString()}</span>
@@ -5142,7 +5142,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr.breakdown).map(([k, v]) => `${v.label}: ${v.pct.toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr?.breakdown||{}).map(([k, v]) => `${v.label}: ${v.pct.toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -5153,7 +5153,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               </div>
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 8, marginBottom: 16 }}>
-                  {Object.entries(rr.breakdown).map(([k, v]) => (
+                  {Object.entries(rr?.breakdown||{}).map(([k, v]) => (
                     <div key={k} style={{ padding: 12, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                       <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
@@ -6015,7 +6015,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 <span style={{background:rr.tierColor+"22",color:rr.tierColor,border:`1px solid ${rr.tierColor}44`,borderRadius:8,padding:"4px 12px",fontWeight:800,fontSize:13,display:"inline-block",marginTop:10}}>{rr.recommendation}</span>
               </div>
               <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:8}}>
-                {Object.entries(rr.breakdown).map(([k,v])=>(
+                {Object.entries(rr?.breakdown||{}).map(([k,v])=>(
                   <div key={k} style={{padding:12,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:10,textAlign:"center",borderTop:`3px solid ${catColors[k]}`}}>
                     <p style={{fontSize:10,color:DS.colors.textMuted,marginBottom:4,lineHeight:1.3}}>{v.label}</p>
                     <p style={{fontFamily:"'DM Mono',monospace",fontSize:18,fontWeight:700,color:catColors[k]}}>{v.pct.toFixed(0)}<span style={{fontSize:10,fontWeight:400}}>/100</span></p>
