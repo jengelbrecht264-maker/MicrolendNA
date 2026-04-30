@@ -2075,31 +2075,166 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
 
   const riskResult = RISK_SCORECARD.computeScore(answers);
 
-  const runAnalysis = () => {
+  const runAnalysis = async () => {
     if (!hasStatement) {
       showToast("Please upload your bank statement first under Documents & KYC", "error");
       return;
     }
     setAnalyzing(true);
-    // In production: parse actual PDF from Supabase storage
-    // For now: build scorecard from borrower profile data
-    var s = +borrower?.salary || 0;
-    var e = +borrower?.expenses || 0;
-    setTimeout(function() {
-      var built = {
+
+    // Get the actual uploaded bank statement file path from Supabase
+    const doc = typeof bankStatementDoc === "string"
+      ? { key: bankStatementDoc }
+      : (bankStatementDoc || {});
+
+    // Try to fetch and analyse the real uploaded bank statement PDF via Claude API
+    try {
+      // Build file URL from Supabase storage
+      var filePath = doc.filePath || doc.path || null;
+      var fileUrl = doc.fileUrl || (filePath ? (SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath) : null);
+
+      var base64Data = null;
+      var mimeType = "application/pdf";
+
+      if (fileUrl) {
+        try {
+          // Fetch the actual bank statement file
+          var fileResp = await fetch(fileUrl, {
+            headers: { apikey: SUPABASE_KEY, Authorization: "Bearer " + (SB.getToken() || SUPABASE_KEY) }
+          });
+          if (fileResp.ok) {
+            var blob = await fileResp.blob();
+            mimeType = blob.type || "application/pdf";
+            // Convert to base64
+            base64Data = await new Promise(function(resolve, reject) {
+              var reader = new FileReader();
+              reader.onload = function() { resolve(reader.result.split(",")[1]); };
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch(fetchErr) {
+          console.log("File fetch:", fetchErr.message);
+        }
+      }
+
+      // Build Claude API request — with real document if available, else text-only
+      var messages;
+      if (base64Data) {
+        messages = [{
+          role: "user",
+          content: [
+            {
+              type: "document",
+              source: { type: "base64", media_type: mimeType, data: base64Data }
+            },
+            {
+              type: "text",
+              text: `You are a Namibian microlender bank statement analyst. Analyse this bank statement and extract the following data. Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks.
+
+Required JSON structure:
+{
+  "period": "string — date range covered e.g. Jan–Mar 2026",
+  "avgCredits": number (average monthly total credits in NAD),
+  "avgCoreCredits": number (average monthly salary/core income credits in NAD),
+  "avgNonCore": number (average monthly non-core/irregular credits in NAD),
+  "avgDebits": number (average monthly total debits in NAD),
+  "avgSurplusDeficit": number (average monthly surplus or deficit: credits minus debits),
+  "avgBalance": number (average closing balance in NAD),
+  "avgTransfers": number (average monthly transfer amount in NAD),
+  "lowDays": number (average days per month where balance was low — under N$500),
+  "negativeDays": number (average days per month where balance was negative),
+  "unpaidCount": number (total unpaid/returned debit orders across all months),
+  "totalDeductionAvg": number (average monthly committed deductions: loans, insurance, subscriptions in NAD),
+  "months": [
+    {
+      "month": "string e.g. January 2026",
+      "credits": number,
+      "debits": number,
+      "creditsN": number (count of credit transactions),
+      "debitsN": number (count of debit transactions),
+      "closing": number (closing balance),
+      "lowDays": number,
+      "negDays": number,
+      "unpaids": number
+    }
+  ],
+  "deductions": [
+    { "description": "string", "amount": number, "frequency": "monthly|once|irregular" }
+  ],
+  "balanceHistory": [number] (10 data points showing balance trend across the period)
+}`
+            }
+          ]
+        }];
+      } else {
+        // Fallback: text-only analysis using borrower profile data
+        var s = +borrower?.salary || 0;
+        var e = +borrower?.expenses || 0;
+        messages = [{
+          role: "user",
+          content: `You are a Namibian microlender bank statement analyst. The borrower's uploaded bank statement could not be fetched. Based on their declared profile — monthly salary NAD ${s.toLocaleString()}, monthly expenses NAD ${e.toLocaleString()} — generate a realistic 3-month bank statement analysis. Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks.
+
+Required JSON structure:
+{
+  "period": "string",
+  "avgCredits": number,
+  "avgCoreCredits": number,
+  "avgNonCore": number,
+  "avgDebits": number,
+  "avgSurplusDeficit": number,
+  "avgBalance": number,
+  "avgTransfers": number,
+  "lowDays": number,
+  "negativeDays": number,
+  "unpaidCount": number,
+  "totalDeductionAvg": number,
+  "months": [{"month":"string","credits":number,"debits":number,"creditsN":number,"debitsN":number,"closing":number,"lowDays":number,"negDays":number,"unpaids":number}],
+  "deductions": [{"description":"string","amount":number,"frequency":"monthly"}],
+  "balanceHistory": [number]
+}`
+        }];
+      }
+
+      var resp = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 1500,
+          messages: messages
+        })
+      });
+
+      var data = await resp.json();
+      var raw = (data.content || []).map(function(c) { return c.text || ""; }).join("").trim();
+
+      // Strip any accidental markdown fences
+      raw = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/\s*```$/i, "").trim();
+
+      var built = JSON.parse(raw);
+      built.name = borrower?.name || "Borrower";
+      built.analysedFromReal = !!base64Data;
+      setScorecard(built);
+      showToast(base64Data
+        ? "✅ Bank statement analysed from uploaded document"
+        : "⚠ Analysis based on declared profile — statement could not be read directly"
+      , base64Data ? "success" : "warning");
+
+    } catch(err) {
+      console.log("Bank analysis error:", err);
+      // Final fallback — use profile numbers directly
+      var s = +borrower?.salary || 0;
+      var e = +borrower?.expenses || 0;
+      setScorecard({
         name: borrower?.name || "Borrower",
         period: "Last 3 months",
-        avgCredits: s,
-        avgCoreCredits: s,
-        avgNonCore: 0,
-        avgDebits: e,
-        avgSurplusDeficit: s - e,
-        avgBalance: Math.max(0, (s - e) * 2),
-        avgTransfers: 0,
+        avgCredits: s, avgCoreCredits: s, avgNonCore: 0,
+        avgDebits: e, avgSurplusDeficit: s - e,
+        avgBalance: Math.max(0, (s - e) * 2), avgTransfers: 0,
         lowDays: e / s > 0.7 ? 5 : 1,
         negativeDays: e >= s ? 2 : 0,
-        unpaidCount: 0,
-        totalDeductionAvg: e,
+        unpaidCount: 0, totalDeductionAvg: e,
         months: [
           { month: "Month 1", credits: s, debits: e, creditsN: 1, debitsN: Math.round(e/1000), closing: s-e, lowDays: 0, negDays: 0, unpaids: 0 },
           { month: "Month 2", credits: s, debits: e, creditsN: 1, debitsN: Math.round(e/1000), closing: s-e, lowDays: e/s>0.7?1:0, negDays: 0, unpaids: 0 },
@@ -2107,11 +2242,11 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
         ],
         deductions: [],
         balanceHistory: [s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e],
-      };
-      setScorecard(built);
-      setAnalyzing(false);
-      showToast("Scorecard generated from your profile data ✓");
-    }, 1500);
+        analysedFromReal: false,
+      });
+      showToast("Analysis generated from profile data — bank statement could not be parsed", "warning");
+    }
+    setAnalyzing(false);
   };
 
   const computeRisk = () => {
@@ -2251,7 +2386,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <div>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Statement Analysis</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>
-                  {hasStatement ? "Bank statement uploaded — generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
+                  {hasStatement ? scorecard?.analysedFromReal ? "✅ Analysed from your uploaded bank statement" : "Bank statement uploaded — generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
                 </p>
               </div>
               {hasStatement && !scorecard && !analyzing && (
@@ -4033,45 +4168,65 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     : [];
 
   const handleDecision = async (appId, decision, amount) => {
-    setAppStatuses(prev => ({ ...prev, [appId]: decision }));
     var app = apps.find(function(a) { return a.id === appId; });
-    // Persist to Supabase
+    if (!app) { showToast("Application not found. Refresh and try again.", "error"); return; }
+    // Optimistically update UI immediately
+    setAppStatuses(prev => ({ ...prev, [appId]: decision }));
     try {
+      // Persist status to Supabase
       await SB.update("applications", { id: appId }, {
         status: decision,
         decided_at: new Date().toISOString(),
         decided_by: user?.id || null,
       });
-      // Create notification for the borrower
-      if (app && app.borrowerUserId) {
+      // Notify borrower
+      if (app.borrowerUserId) {
         try {
           await SB.insert("notifications", {
             user_id: app.borrowerUserId,
-            title: decision === "approved" ? "Loan Approved!" : "Loan Application Update",
+            title: decision === "approved" ? "Loan Approved! 🎉" : "Loan Application Update",
             message: decision === "approved"
-              ? "Your loan of N$" + (amount || 0).toLocaleString() + " has been approved."
-              : "Your loan application has been declined. Contact support for details.",
+              ? "Your loan of N$" + (amount || app.amount || 0).toLocaleString() + " has been approved. Your lender will contact you within 24 hours."
+              : "Your loan application has been reviewed and was not approved at this time. Contact support for details.",
             type: decision === "approved" ? "success" : "warning",
             read: false,
           });
-        } catch(ne) { console.log("Notification create:", ne.message); }
+        } catch(ne) { console.log("Notification:", ne.message); }
       }
-    } catch(e) { console.log("Decision save:", e.message); }
-    showToast(decision === "approved" ? "✅ N$" + (amount || 0).toLocaleString() + " approved — borrower notified" : "Application declined — borrower notified.", decision === "approved" ? "success" : "error");
-    setSelectedApp(null);
-    setAppTab("overview");
-    // Refresh the applications list
-    loadAppsFromDB();
+      showToast(
+        decision === "approved"
+          ? "✅ N$" + (amount || app.amount || 0).toLocaleString() + " approved — borrower notified"
+          : "Application declined — borrower notified.",
+        decision === "approved" ? "success" : "error"
+      );
+      // Refresh list THEN clear selection so UI updates correctly
+      await loadAppsFromDB();
+      setSelectedApp(null);
+      setAppTab("overview");
+    } catch(e) {
+      // Roll back optimistic update on failure
+      setAppStatuses(prev => ({ ...prev, [appId]: app.status }));
+      showToast("Error saving decision: " + (e.message || "Please try again."), "error");
+      console.log("Decision save error:", e);
+    }
   };
 
   const confirmDecision = (app, decision) => {
+    if (!app || !app.id) { showToast("No application selected.", "error"); return; }
     if (decision === "declined") {
-      showConfirm && showConfirm({
-        title: "Decline Application",
-        message: `Are you sure you want to decline the application from ${app.borrowerName} for N${(app.amount||0).toLocaleString()}? This action cannot be undone.`,
-        danger: true,
-        onConfirm: () => handleDecision(app.id, "declined", app.amount),
-      });
+      // Use showConfirm if available, else fall back to native confirm
+      if (typeof showConfirm === "function") {
+        showConfirm({
+          title: "Decline Application",
+          message: "Are you sure you want to decline the application from " + app.borrowerName + " for N$" + (app.amount||0).toLocaleString() + "? This action cannot be undone.",
+          danger: true,
+          onConfirm: () => handleDecision(app.id, "declined", app.amount),
+        });
+      } else {
+        if (window.confirm("Decline this application from " + app.borrowerName + "?")) {
+          handleDecision(app.id, "declined", app.amount);
+        }
+      }
     } else {
       handleDecision(app.id, "approved", app.amount);
     }
@@ -4273,8 +4428,8 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
 
             {!decided && (
               <div style={{ display: "flex", gap: 12 }}>
-                <Btn onClick={() => handleDecision(app.id, "approved")} style={{ flex: 1 }}>✓ Approve — N${(app.amount||0).toLocaleString()} over {app.term} months</Btn>
-                <Btn variant="danger" onClick={() => handleDecision(app.id, "declined")}>✗ Decline</Btn>
+                <Btn onClick={() => confirmDecision(app, "approved")} style={{ flex: 1 }}>✓ Approve — N${(app.amount||0).toLocaleString()} over {app.term} months</Btn>
+                <Btn variant="danger" onClick={() => confirmDecision(app, "declined")}>✗ Decline</Btn>
                 <Btn variant="ghost" onClick={() => showToast("Additional info requested — borrower notified")}>📎 Request More Info</Btn>
               </div>
             )}
