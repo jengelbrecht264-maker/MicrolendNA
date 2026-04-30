@@ -3027,7 +3027,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         await StorageService.saveApplication(appRecord);
 
         // Also push to in-memory for immediate UI display
-        LENDER_DB.applications.push({
+        (LENDER_DB.applications=LENDER_DB.applications||[]).push({
           id: appRecord.id, borrowerId: borrower.id, borrowerName: borrower.name,
           tier: tier, riskScore: riskScore, amount: amt, term: +form.term,
           purpose: form.purpose, status: "new_lead", dti: borrower.dti ? (borrower.dti * 100).toFixed(1) + "%" : "—",
@@ -3730,14 +3730,14 @@ const StorageService = {
   // Sync to LENDER_DB (keep for compatibility with UI components)
   syncToLenderDB: function(uid, profile) {
     var idx = -1;
-    for (var i = 0; i < LENDER_DB.borrowers.length; i++) {
-      if (LENDER_DB.borrowers[i].userId === uid) { idx = i; break; }
+    for (var i = 0; i < (LENDER_DB.borrowers||[]).length; i++) {
+      if ((LENDER_DB.borrowers[i]||{}).userId === uid) { idx = i; break; }
     }
     if (idx >= 0) {
       var lbId = LENDER_DB.borrowers[idx].id;
       Object.assign(LENDER_DB.borrowers[idx], profile, { id: lbId });
     } else {
-      LENDER_DB.borrowers.push(Object.assign({}, profile, {
+      (LENDER_DB.borrowers=LENDER_DB.borrowers||[]).push(Object.assign({}, profile, {
         id: profile.id || profile.userId || ("lb" + Date.now()), loans: [], scorecard: null, scorecardAnswers: null,
       }));
     }
@@ -3837,7 +3837,7 @@ const LenderHome = ({ user, setView }) => {
 
   const active = allB.filter(b => b.status === "active").length;
   const declined = allB.filter(b => b.status === "declined").length;
-  const totalDisbursed = allB.flatMap(b => b.loans || []).filter(l => l.status === "approved" && l.disbursed).reduce((s, l) => s + l.amount, 0);
+  const totalDisbursed = allB.flatMap(b => b.loans||[]).filter(l => l && l.status === "approved" && l.disbursed).reduce((s, l) => s + (l.amount||0), 0);
   const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
 
   return (
@@ -3943,7 +3943,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
         return;
       }
 
-      var bpIds = [...new Set(rows.map(function(r) { return r.borrower_id; }).filter(Boolean))];
+      var bpIds = [...new Set((rows||[]).map(function(r) { return r.borrower_id; }).filter(Boolean))];
       var bpMap = {};
       if (bpIds.length > 0) {
         var bpRows = await SB.query("borrower_profiles", "select=*");
@@ -3978,7 +3978,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
         });
       } catch(e) {}
 
-      var mapped = rows.map(function(r) {
+      var mapped = (rows||[]).map(function(r) {
         var bp = bpMap[r.borrower_id] || {};
         var u = userMap[bp.user_id] || {};
         return {
@@ -4144,7 +4144,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const effectiveDocsList = (selectedBorrower?.documents && selectedBorrower.documents.length > 0)
     ? selectedBorrower.documents
     : Object.keys(storedDocMetas).length > 0
-      ? Object.entries(storedDocMetas).map(function([k, meta]) {
+      ? Object.entries(storedDocMetas||{}).map(function([k, meta]) {
           return {
             key: k,
             label: ({id:"National ID / Passport",payslip:"Latest Payslip",bank_stmt:"Bank Statement",proof_addr:"Proof of Address",employment:"Employment Letter"})[k] || k,
@@ -4757,7 +4757,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
                     <Btn small onClick={() => { setSelectedApp(app); setAppTab("overview"); setAiInsight(null); }}>📋 Full Review</Btn>
                     <Btn small variant="outline" onClick={() => { setSelectedApp(app); setAppTab("documents"); setAiInsight(null); }}>📁 Docs</Btn>
-                    <Btn small variant="ghost" onClick={() => { setSelectedApp(app); setAppTab("ai"); getAiRec(app, LENDER_DB.borrowers.find(b => b.id === app.borrowerId)); }}>🤖 AI</Btn>
+                    <Btn small variant="ghost" onClick={() => { setSelectedApp(app); setAppTab("ai"); getAiRec(app, (LENDER_DB.borrowers||[]).find(b => b.id === app.borrowerId)); }}>🤖 AI</Btn>
                   </div>
                 </div>
               </div>
@@ -4857,7 +4857,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
   const downloadCSV = () => {
     const rows = [["Name", "ID Number", "Phone", "Email", "Employer", "Salary", "Expenses", "Tier", "Risk Score", "DTI", "Status", "KYC", "AML", "Bank Verified", "First Borrower", "Loans", "Assigned Date"]];
     allBorrowers.forEach(b => rows.push([b.name, b.idNumber, b.phone, b.email, b.employer, b.salary, b.expenses, b.tier, b.riskScore, b.dti, b.status, b.kycStatus, b.amlStatus, b.bankVerified, b.firstBorrower, (b.loans||[]).length, b.assignedDate]));
-    const csv = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+    const csv = (rows||[]).map(r => (r||[]).map(v => `"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = `borrowers_${new Date().toISOString().slice(0,10)}.csv`; a.click();
@@ -4952,7 +4952,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
   if (selectedBorrower) {
     const b = safeBorrower(selectedBorrower);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
-    const totalLoaned = (b.loans||[]).filter(l => l.status === "approved").reduce((s, l) => s + l.amount, 0);
+    const totalLoaned = (b.loans||[]).filter(l => l && l.status === "approved").reduce((s, l) => s + l.amount, 0);
     const totalOutstanding = (b.loans||[]).reduce((s, l) => s + (l.outstanding || 0), 0);
     const totalRepaid = (b.loans||[]).flatMap(l => l.repayments || []).filter(r => r.status === "paid").reduce((s, r) => s + r.amount, 0);
 
@@ -5329,7 +5329,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         {filtered.map(b => {
           const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
           const activeLoan = (b.loans||[]).find(l => l.status === "approved" && l.outstanding > 0);
-          const settled = (b.loans||[]).filter(l => l.outstanding === 0 && l.disbursed).length;
+          const settled = (b.loans||[]).filter(l => l && l.outstanding === 0 && l.disbursed).length;
           return (
             <Card key={b.id} style={{ padding: 0, overflow: "hidden", opacity: b.status === "declined" ? 0.85 : 1 }}>
               <div style={{ height: 3, background: b.status === "active" ? DS.colors.accent : b.status === "declined" ? DS.colors.danger : DS.colors.textMuted }} />
@@ -5614,7 +5614,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
   var seenIds = {};
   var allBorrowers = [];
   sbBorrowers.forEach(function(b) { seenIds[b.userId || b.id] = true; allBorrowers.push(b); });
-  LENDER_DB.borrowers.forEach(function(b) {
+  (LENDER_DB.borrowers||[]).forEach(function(b) {
     if (!seenIds[b.userId || b.id]) { allBorrowers.push(b); }
   });
 
@@ -5642,7 +5642,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
   const downloadCSV = () => {
     const rows = [["Name","ID","Employer","Salary","Tier","Score","DTI","Status","KYC","AML","Bank","Date"]];
     allBorrowers.forEach(b => rows.push([b.name||"",b.idNumber||"",b.employer||"",b.salary||0,b.tier||"—",b.riskScore||0,b.dti||"—",b.status||"pending",b.kycStatus||"pending",b.amlStatus||"pending",b.bankVerified?"Yes":"No",b.assignedDate||"—"]));
-    const csv = rows.map(r => r.map(v=>`"${v}"`).join(",")).join("\n");
+    const csv = (rows||[]).map(r => (r||[]).map(v=>`"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv"});
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href=url; a.download=`platform_borrowers_${new Date().toISOString().slice(0,10)}.csv`; a.click();
@@ -6426,9 +6426,9 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     rejected: "Rejected",
   };
 
-  const filtered = filterStatus === "all" ? lenders : lenders.filter(l => l.status === filterStatus);
-  const pendingCount = lenders.filter(l => l.status === "pending_review").length;
-  const activeCount = lenders.filter(l => l.status === "active").length;
+  const filtered = filterStatus === "all" ? lenders : lenders.filter(l => l && l.status === filterStatus);
+  const pendingCount = lenders.filter(l => l && l.status === "pending_review").length;
+  const activeCount = lenders.filter(l => l && l.status === "active").length;
 
   const updateLender = (id, changes) => {
     setLenders(prev => prev.map(l => l.id === id ? { ...l, ...changes } : l));
@@ -6869,7 +6869,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           { label: "Total Lenders", value: lenders.length, color: DS.colors.textPrimary, filter: "all" },
           { label: "Active", value: activeCount, color: DS.colors.accent, filter: "active" },
           { label: "Pending Review", value: pendingCount, color: DS.colors.gold, filter: "pending_review" },
-          { label: "Suspended / Rejected", value: lenders.filter(l => l.status === "suspended" || l.status === "rejected").length, color: DS.colors.danger, filter: "suspended" },
+          { label: "Suspended / Rejected", value: lenders.filter(l => l && l.status === "suspended" || l.status === "rejected").length, color: DS.colors.danger, filter: "suspended" },
         ].map((s, i) => (
           <div key={i} onClick={() => setFilterStatus(s.filter)} className="card-hover"
             style={{ padding: "14px 18px", background: DS.colors.surface, border: `2px solid ${filterStatus === s.filter ? s.color + "66" : DS.colors.border}`, borderRadius: 14, cursor: "pointer", transition: "all .2s", borderTop: `3px solid ${s.color}` }}>
@@ -6888,11 +6888,11 @@ const AdminLenders = ({ showToast, showConfirm }) => {
       </div>
 
       {/* Pending lenders alert */}
-      {filtered.filter(l => l.status === "pending_review").length > 0 && (filterStatus === "all" || filterStatus === "pending_review") && (
+      {filtered.filter(l => l && l.status === "pending_review").length > 0 && (filterStatus === "all" || filterStatus === "pending_review") && (
         <div style={{ padding: "12px 18px", marginBottom: 20, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 10, display: "flex", gap: 12, alignItems: "center" }}>
           <span style={{ fontSize: 20 }}>⏳</span>
           <div>
-            <p style={{ fontWeight: 700, color: DS.colors.gold, fontSize: 14 }}>{filtered.filter(l => l.status === "pending_review").length} lender{filtered.filter(l=>l.status==="pending_review").length>1?"s":""} awaiting due diligence review</p>
+            <p style={{ fontWeight: 700, color: DS.colors.gold, fontSize: 14 }}>{filtered.filter(l => l && l.status === "pending_review").length} lender{filtered.filter(l=>l.status==="pending_review").length>1?"s":""} awaiting due diligence review</p>
             <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginTop: 2 }}>Review each lender's registration and complete all 6 due diligence checks before approving access.</p>
           </div>
         </div>
@@ -7855,7 +7855,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 8 }}>Category Weights</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Adjust how much each scoring category contributes to the final risk score. All weights must sum to exactly 100%.</p>
 
-              {Object.entries(scoreWeights).map(([key, val]) => (
+              {Object.entries(scoreWeights||{}).map(([key, val]) => (
                 <div key={key} style={{ marginBottom: 18 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -7876,7 +7876,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                     {!weightOk ? `⚠ Total: ${totalWeight}% — must equal 100%` : `✓ Total: ${totalWeight}% — balanced`}
                   </p>
                   <div style={{ display: "flex", gap: 6 }}>
-                    {Object.entries(scoreWeights).map(([key, val]) => (
+                    {Object.entries(scoreWeights||{}).map(([key, val]) => (
                       <div key={key} style={{ width: `${val}%`, height: 8, background: catColors[key], borderRadius: 4, minWidth: 4, transition: "width .3s" }} />
                     ))}
                   </div>
@@ -7886,7 +7886,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
               {/* Category descriptions */}
-              {Object.entries(catLabels).map(([key, label]) => (
+              {Object.entries(catLabels||{}).map(([key, label]) => (
                 <div key={key} style={{ padding: "12px 16px", background: DS.colors.surface, border: `1px solid ${catColors[key]}33`, borderRadius: 12 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                     <p style={{ fontSize: 13, fontWeight: 700, color: catColors[key] }}>{label}</p>
@@ -8195,16 +8195,16 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
 const AdminReports = () => {
   // Derive all figures from live DB data
-  const activeLenders = DB.lenders.filter(l => l.status === "active");
+  const activeLenders = DB.lenders.filter(l => l && l.status === "active");
   const subLenders = activeLenders.filter(l => l.plan === "subscription");
   const paygLenders = activeLenders.filter(l => l.plan === "payasyougo");
   const subRevenue = subLenders.reduce((s, l) => s + (l.revenue || 0), 0);
   const paygRevenue = paygLenders.reduce((s, l) => s + (l.revenue || 0), 0);
   const totalRevenue = subRevenue + paygRevenue;
-  const totalLeads = activeLenders.reduce((s, l) => s + l.leadsTotal, 0);
-  const totalApproved = activeLenders.reduce((s, l) => s + l.leadsApproved, 0);
-  const totalDeclined = activeLenders.reduce((s, l) => s + l.leadsDeclined, 0);
-  const paygLeads = paygLenders.reduce((s, l) => s + l.leadsApproved, 0);
+  const totalLeads = activeLenders.reduce((s, l) => s + (l.leadsTotal||0), 0);
+  const totalApproved = activeLenders.reduce((s, l) => s + (l.leadsApproved||0), 0);
+  const totalDeclined = activeLenders.reduce((s, l) => s + (l.leadsDeclined||0), 0);
+  const paygLeads = paygLenders.reduce((s, l) => s + (l.leadsApproved||0), 0);
   const [storedProfiles, setStoredProfiles] = useState({});
   const [storedDocMetas, setStoredDocMetas] = useState({});
   useEffect(function() {
@@ -8225,7 +8225,7 @@ const AdminReports = () => {
     })();
     return function() { alive = false; };
   }, []);
-  const allBorrowers = LENDER_DB.borrowers.map(function(b) {
+  const allBorrowers = (LENDER_DB.borrowers||[]).map(function(b) {
     var sp = b.userId && storedProfiles[b.userId];
     var sm = b.userId && storedDocMetas[b.userId];
     var merged = sp ? Object.assign({}, b, sp, { id: b.id }) : b;
@@ -8242,7 +8242,7 @@ const AdminReports = () => {
   });
   const kycVerified = allBorrowers.filter(b => b.kycStatus === "verified").length;
   const amlFlagged = allBorrowers.filter(b => b.amlStatus === "flagged").length;
-  const avgLoan = allBorrowers.flatMap(b => b.loans).filter(l => l.status === "approved" && l.amount > 0).reduce((s, l, _, a) => s + l.amount / a.length, 0);
+  const _loans = allBorrowers.flatMap(b => b.loans||[]); const _approved = _loans.filter(l => l && l.status === "approved" && l.amount > 0); const avgLoan = _approved.length ? _approved.reduce((s,l)=>s+l.amount,0)/_approved.length : 0;
 
   return (
   <div className="fade-in">
@@ -8875,8 +8875,8 @@ const AdminWhatsApp = ({ showToast }) => {
   const [filter, setFilter] = useState("all");
 
   const leads = WHATSAPP_DB.leads;
-  const filtered = filter === "all" ? leads : leads.filter(l => l.status === filter);
-  const new_leads = leads.filter(l => l.status === "new_lead").length;
+  const filtered = filter === "all" ? leads : leads.filter(l => l && l.status === filter);
+  const new_leads = leads.filter(l => l && l.status === "new_lead").length;
   const stageColor = { new: DS.colors.textMuted, screening: DS.colors.info, documents: DS.colors.gold, qualified: DS.colors.accent };
   const stageLabel = { new: "Started", screening: "Screening", documents: "Docs Sent", qualified: "Qualified ✓" };
 
@@ -10159,7 +10159,7 @@ export default function App() {
       try {
         var rows = await SB.query("notifications", "user_id=eq." + user.id + "&order=created_at.desc&limit=20");
         if (rows && rows.length > 0) {
-          setNotifications(rows.map(function(n) {
+          setNotifications((rows||[]).map(function(n) {
             return { id: n.id, userId: n.user_id, msg: n.message, title: n.title, read: n.read, time: n.created_at ? timeAgo(n.created_at) : "now", type: n.type, link_to: n.link_to };
           }));
         }
