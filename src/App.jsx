@@ -409,7 +409,7 @@ const Select = ({ label, value, onChange, options, required = false }) => (
       {label}{required && <span style={{ color: DS.colors.accent }}> *</span>}
     </label>
     <select value={value} onChange={e => onChange(e.target.value)}>
-      {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      {(options||[]).map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   </div>
 );
