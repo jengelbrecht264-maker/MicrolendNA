@@ -895,7 +895,7 @@ const RISK_SCORECARD = {
       const varScores = {};
       for (const v of cat.variables) {
         const ans = answers[v.key];
-        const opt = v.options.find(o => o.label === ans);
+        const opt = (v.options||[]).find(o => o.label === ans);
         const s = opt ? opt.score : 0;
         rawScore += s;
         varScores[v.key] = { label: ans || "—", score: s };
@@ -1231,7 +1231,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
               <span style={{ fontSize: 13, color: DS.colors.textMuted, marginLeft: 6 }}>{tier.period}</span>
             </div>
             <ul style={{ listStyle: "none", marginBottom: 24 }}>
-              {tier.features.map((f, j) => (
+              {(tier.features||[]).map((f, j) => (
                 <li key={j} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 8 }}>
                   <span style={{ color: tier.color, fontWeight: 700 }}>✓</span> {f}
                 </li>
@@ -1351,7 +1351,7 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
       var active = (apps || []).some(function(a) { return a.status === "pending" || a.status === "approved" || a.status === "disbursed"; });
       if (!active) {
         // Also check in-memory
-        active = DB.applications.some(function(a) { return (a.borrowerUserId === user.id || a.borrowerId === borrower?.id) && (a.status === "pending" || a.status === "approved" || a.status === "disbursed"); });
+        active = (DB.applications||[]).some(function(a) { return (a.borrowerUserId === user.id || a.borrowerId === borrower?.id) && (a.status === "pending" || a.status === "approved" || a.status === "disbursed"); });
       }
       setHasActiveLoan(active);
     }).catch(function() {});
@@ -1808,7 +1808,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
       {/* Document Upload Grid */}
       <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 14 }}>Document Upload</h3>
       <div style={{ display: "grid", gap: 10 }}>
-        {docs.map(function(doc) {
+        {(docs||[]).map(function(doc) {
           var isUploaded = uploaded.includes(doc.key + ".pdf");
           var fileInfo = uploadedFiles[doc.key];
           var isLoading = uploading === doc.key;
@@ -2545,7 +2545,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     ))}
                   </tr></thead>
                   <tbody>
-                    {scorecard.months.map((m, i) => (
+                    {(scorecard.months||[]).map((m, i) => (
                       <tr key={i} style={{ background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent", borderTop: `1px solid ${DS.colors.border}` }}>
                         <td style={{ padding: "12px 14px", fontWeight: 600 }}>{m.month}</td>
                         <td style={{ padding: "12px 14px", color: DS.colors.accent, fontFamily: "'DM Mono',monospace" }}>{m.credits.toLocaleString()}</td>
@@ -5837,7 +5837,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                           return;
                         }
 
-                        var lender = sbLenders.find(function(l){return l.id===lenderId;}) || DB.lenders.find(function(l){return l.id===lenderId;});
+                        var lender = sbLenders.find(function(l){return l.id===lenderId;}) || (DB.lenders||[]).find(function(l){return l.id===lenderId;});
                         try {
                           // Update all pending/new_lead applications for this borrower
                           var existingApps = await SB.query(
@@ -6234,19 +6234,19 @@ const AdminHome = ({ setView }) => {
       )}
 
       {/* WhatsApp + Agent banner */}
-      {(WHATSAPP_DB.leads.filter(l=>l.status==="new_lead").length > 0 || AGENT_DB.borrowers.filter(b=>b.status==="pending").length > 0) && (
+      {((WHATSAPP_DB.leads||[]).filter(l=>l.status==="new_lead").length > 0 || (AGENT_DB.borrowers||[]).filter(b=>b.status==="pending").length > 0) && (
         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20 }}>
           <div onClick={() => setView("admin-whatsapp")} className="card-hover" style={{ padding:"12px 18px",background:"#25D36618",border:"1px solid #25D36633",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center" }}>
             <span style={{ fontSize:22 }}>💬</span>
             <div>
-              <p style={{ fontWeight:700,color:"#25D366",fontSize:13 }}>{WHATSAPP_DB.leads.filter(l=>l.status==="new_lead").length} WhatsApp leads pending review</p>
+              <p style={{ fontWeight:700,color:"#25D366",fontSize:13 }}>{(WHATSAPP_DB.leads||[]).filter(l=>l.status==="new_lead").length} WhatsApp leads pending review</p>
               <p style={{ fontSize:12,color:DS.colors.textSecondary }}>Click to view and route →</p>
             </div>
           </div>
           <div onClick={() => setView("admin-agents")} className="card-hover" style={{ padding:"12px 18px",background:"#A78BFA18",border:"1px solid #A78BFA33",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center" }}>
             <span style={{ fontSize:22 }}>🧑‍💼</span>
             <div>
-              <p style={{ fontWeight:700,color:"#A78BFA",fontSize:13 }}>{AGENT_DB.borrowers.filter(b=>b.status==="pending").length} agent-captured borrowers pending</p>
+              <p style={{ fontWeight:700,color:"#A78BFA",fontSize:13 }}>{(AGENT_DB.borrowers||[]).filter(b=>b.status==="pending").length} agent-captured borrowers pending</p>
               <p style={{ fontSize:12,color:DS.colors.textSecondary }}>{AGENT_DB.agents.length} field agents active →</p>
             </div>
           </div>
@@ -6298,7 +6298,7 @@ const AdminHome = ({ setView }) => {
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Partner Lenders</h3>
             <Btn small variant="ghost" onClick={() => setView("admin-lenders")}>Manage →</Btn>
           </div>
-          {DB.lenders.map(l => (
+          {(DB.lenders||[]).map(l => (
             <div key={l.id} onClick={() => setView("admin-lenders")} className="card-hover"
               style={{ marginBottom: 12, padding: "12px 14px", background: DS.colors.surfaceAlt, borderRadius: 10, cursor: "pointer", border: `1px solid ${DS.colors.border}`, transition: "all .2s" }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -6313,7 +6313,7 @@ const AdminHome = ({ setView }) => {
           ))}
           <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 10, marginTop: 8 }}>
             <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Total Platform Revenue</p>
-            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>N${DB.lenders.filter(l=>l.status==="active").reduce((s,l)=>s+(l.revenue||0),0).toLocaleString()}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 800, color: DS.colors.accent }}>N${(DB.lenders||[]).filter(l=>l.status==="active").reduce((s,l)=>s+(l.revenue||0),0).toLocaleString()}</p>
           </div>
         </Card>
       </div>
@@ -6432,7 +6432,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
 
   const updateLender = (id, changes) => {
     setLenders(prev => prev.map(l => l.id === id ? { ...l, ...changes } : l));
-    DB.lenders.forEach((l, i) => { if (l.id === id) Object.assign(DB.lenders[i], changes); });
+    (DB.lenders||[]).forEach((l, i) => { if (l.id === id) Object.assign(DB.lenders[i], changes); });
   };
 
   const persistLenderStatus = async (l, changes) => {
@@ -7579,7 +7579,7 @@ const LenderSettings = ({ user, showToast }) => {
                   <span style={{ fontSize: 13, color: DS.colors.textMuted, marginLeft: 6 }}>{p.per}</span>
                 </div>
                 <ul style={{ listStyle: "none", marginBottom: 20 }}>
-                  {p.features.map((f, j) => (
+                  {(p.features||[]).map((f, j) => (
                     <li key={j} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 8 }}>
                       <span style={{ color: p.color, fontWeight: 700 }}>✓</span>{f}
                     </li>
@@ -8195,7 +8195,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
 const AdminReports = () => {
   // Derive all figures from live DB data
-  const activeLenders = DB.lenders.filter(l => l && l.status === "active");
+  const activeLenders = (DB.lenders||[]).filter(l => l && l.status === "active");
   const subLenders = activeLenders.filter(l => l.plan === "subscription");
   const paygLenders = activeLenders.filter(l => l.plan === "payasyougo");
   const subRevenue = subLenders.reduce((s, l) => s + (l.revenue || 0), 0);
@@ -8366,8 +8366,8 @@ const AdminReports = () => {
 // ══════════════════════════════════════════════════════════════════════════════
 
 const AgentHome = ({ user, setView }) => {
-  const agent = AGENT_DB.agents.find(a => a.userId === user.id) || {};
-  const myBorrowers = AGENT_DB.borrowers.filter(b => b.agentId === agent.id);
+  const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
+  const myBorrowers = (AGENT_DB.borrowers||[]).filter(b => b.agentId === agent.id);
   const pending = myBorrowers.filter(b => b.status === "pending");
   const approved = myBorrowers.filter(b => b.status === "approved");
   const declined = myBorrowers.filter(b => b.status === "declined");
@@ -8469,7 +8469,7 @@ const AgentHome = ({ user, setView }) => {
 
 // ── AGENT ADD BORROWER (Assisted Intake) ──────────────────────────────────────
 const AgentAddBorrower = ({ user, showToast, setView }) => {
-  const agent = AGENT_DB.agents.find(a => a.userId === user.id) || {};
+  const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
   const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     name: "", idNumber: "", phone: "", employer: "", salary: "", expenses: "",
@@ -8733,8 +8733,8 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
 
 // ── AGENT BORROWERS LIST ──────────────────────────────────────────────────────
 const AgentBorrowers = ({ user, showToast, setView }) => {
-  const agent = AGENT_DB.agents.find(a => a.userId === user.id) || {};
-  const myBorrowers = AGENT_DB.borrowers.filter(b => b.agentId === agent.id);
+  const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
+  const myBorrowers = (AGENT_DB.borrowers||[]).filter(b => b.agentId === agent.id);
   const [filter, setFilter] = useState("all");
   const filtered = filter === "all" ? myBorrowers : myBorrowers.filter(b => b.status === filter);
 
@@ -8790,14 +8790,14 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
 
 // ── AGENT PERFORMANCE ─────────────────────────────────────────────────────────
 const AgentPerformance = ({ user }) => {
-  const agent = AGENT_DB.agents.find(a => a.userId === user.id) || {};
-  const myBorrowers = AGENT_DB.borrowers.filter(b => b.agentId === agent.id);
+  const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
+  const myBorrowers = (AGENT_DB.borrowers||[]).filter(b => b.agentId === agent.id);
   const approved = myBorrowers.filter(b => b.status === "approved");
   const totalDisbursed = approved.reduce((s, b) => s + (b.amount || 0), 0);
   const conv = myBorrowers.length ? (approved.length / myBorrowers.length * 100).toFixed(1) : "0.0";
 
   // All agents for leaderboard
-  const allAgents = AGENT_DB.agents.map(a => ({
+  const allAgents = (AGENT_DB.agents||[]).map(a => ({
     ...a,
     conv: a.totalCaptured ? (a.approved / a.totalCaptured * 100).toFixed(0) : 0,
   })).sort((a, b) => b.approved - a.approved);
@@ -8883,7 +8883,7 @@ const AdminWhatsApp = ({ showToast }) => {
   if (selected) {
     const lead = leads.find(l => l.id === selected);
     const convo = WHATSAPP_DB.conversations[selected] || [];
-    const lender = lead.lenderId ? DB.lenders.find(l => l.id === lead.lenderId) : null;
+    const lender = lead.lenderId ? (DB.lenders||[]).find(l => l.id === lead.lenderId) : null;
 
     return (
       <div className="fade-in">
@@ -9034,7 +9034,7 @@ const AdminWhatsApp = ({ showToast }) => {
         {leads.map(lead => {
           const stage_c = stageColor[lead.stage] || DS.colors.textMuted;
           const convo_count = (WHATSAPP_DB.conversations[lead.id] || []).length;
-          const lender = lead.lenderId ? DB.lenders.find(l => l.id === lead.lenderId) : null;
+          const lender = lead.lenderId ? (DB.lenders||[]).find(l => l.id === lead.lenderId) : null;
           return (
             <div key={lead.id} className="card-hover" onClick={() => setSelected(lead.id)}
               style={{ padding:0,background:DS.colors.surface,border:`1px solid ${lead.stage==="qualified"?DS.colors.accent+"44":DS.colors.border}`,borderRadius:16,cursor:"pointer",overflow:"hidden",transition:"all .2s" }}>
@@ -9107,7 +9107,7 @@ const AdminAgents = ({ showToast }) => {
 
       {/* Agent cards */}
       <div style={{ display:"grid",gap:16,marginBottom:24 }}>
-        {AGENT_DB.agents.map((agent, i) => {
+        {(AGENT_DB.agents||[]).map((agent, i) => {
           const agentBorrowers = allBorrowers.filter(b => b.agentId === agent.id);
           const approved = agentBorrowers.filter(b => b.status === "approved");
           const conv = agentBorrowers.length ? (approved.length/agentBorrowers.length*100).toFixed(0) : 0;
@@ -9181,7 +9181,7 @@ const AdminAgents = ({ showToast }) => {
           </tr></thead>
           <tbody>
             {allBorrowers.map((b,i)=>{
-              const ag=AGENT_DB.agents.find(a=>a.id===b.agentId);
+              const ag=(AGENT_DB.agents||[]).find(a=>a.id===b.agentId);
               const sCol={approved:DS.colors.accent,pending:DS.colors.gold,declined:DS.colors.danger}[b.status]||DS.colors.textMuted;
               return(
                 <tr key={b.id} style={{borderTop:`1px solid ${DS.colors.border}`,background:i%2===1?DS.colors.surfaceAlt:"transparent"}}>
@@ -9916,7 +9916,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
                   <span style={{ fontSize: 13, color: C.textMuted, marginLeft: 8 }}>{plan.per}</span>
                 </div>
                 <ul style={{ listStyle: "none", marginBottom: 28 }}>
-                  {plan.features.map((f, j) => (
+                  {(plan.features||[]).map((f, j) => (
                     <li key={j} style={{ display: "flex", gap: 9, alignItems: "center", fontSize: 14, color: C.textSecondary, marginBottom: 10 }}>
                       <span style={{ color: plan.color, fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
                     </li>
