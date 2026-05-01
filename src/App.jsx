@@ -117,18 +117,24 @@ const SB = {
 
   // ── Storage ──
   async uploadFile(bucket, path, file) {
+    // Use auth token if available, fall back to anon key
+    var token = _sbToken || SUPABASE_KEY;
     const res = await fetch(`${SUPABASE_URL}/storage/v1/object/${bucket}/${path}`, {
       method: "POST",
       headers: {
         apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${_sbToken}`,
-        "Content-Type": file.type,
+        Authorization: `Bearer ${token}`,
+        "Content-Type": file.type || "application/octet-stream",
         "x-upsert": "true",
       },
       body: file,
     });
-    if (!res.ok) throw new Error("Upload failed");
-    return res.json();
+    if (!res.ok) {
+      var errText = await res.text().catch(() => res.statusText);
+      throw new Error("Upload failed (" + res.status + "): " + errText);
+    }
+    var text = await res.text();
+    return text ? JSON.parse(text) : {};
   },
 
   getFileUrl(bucket, path) {
@@ -2039,7 +2045,7 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
         try {
           var docRows = await SB.query(
             "documents",
-            "borrower_id=eq." + borrowerProfileId + "&doc_type=eq.bank_statement&select=file_path,mime_type&order=uploaded_at.desc&limit=1"
+            "borrower_id=eq." + borrowerProfileId + "&doc_type=eq.bank_statement&select=file_path,mime_type&limit=1"
           );
           if (docRows && docRows[0] && docRows[0].file_path) {
             filePath = docRows[0].file_path;
@@ -2053,7 +2059,8 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
 
       // Step 2: If we have a real file path, fetch it from Supabase Storage
       if (filePath) {
-        var fileUrl = SUPABASE_URL + "/storage/v1/object/kyc-documents/" + filePath;
+        // Try public URL first, then authenticated URL
+        var fileUrl = SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath;
         try {
           var fileResp = await fetch(fileUrl, {
             headers: {
@@ -3059,7 +3066,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 
         // Notify admin (find admin user)
         try {
-          var admins = await SB.query("profiles", "role=eq.admin&select=id");
+          var admins = await SB.query("profiles", "select=id,role");
           for (var ai = 0; ai < (admins || []).length; ai++) {
             await SB.insert("notifications", {
               user_id: admins[ai].id,
@@ -3608,7 +3615,11 @@ const StorageService = {
     _MLNA_MEM["docmeta:" + uid + ":" + key] = meta;
     try {
       var bp = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=id");
-      if (!bp || !bp.length) return;
+      if (!bp || !bp.length) {
+        // No borrower_profile — try lender_profiles documents or just store in memory
+        console.log("saveDocument: no borrower_profile for uid", uid, "— storing metadata only");
+        return;
+      }
       var borrowerId = bp[0].id;
       var typeMap = { id: "national_id", payslip: "payslip", bank_stmt: "bank_statement", proof_addr: "proof_of_address", employment: "employment_letter" };
       var filePath = meta.filePath || (uid + "/" + key);
@@ -3620,7 +3631,6 @@ const StorageService = {
           file_name: meta.name || key + ".pdf",
           file_size_bytes: parseInt(meta.size) * 1024 || 0,
           mime_type: meta.type || "application/pdf",
-          uploaded_at: new Date().toISOString(),
         });
       } else {
         await SB.insert("documents", {
@@ -3640,7 +3650,7 @@ const StorageService = {
     try {
       var bp = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=id");
       if (!bp || !bp.length) return _MLNA_MEM["allmetas:" + uid] || {};
-      var rows = await SB.query("documents", "borrower_id=eq." + bp[0].id + "&select=*&order=uploaded_at.desc");
+      var rows = await SB.query("documents", "borrower_id=eq." + bp[0].id + "&select=*");
       var out = {};
       var reverseMap = { national_id: "id", payslip: "payslip", bank_statement: "bank_stmt", proof_of_address: "proof_addr", employment_letter: "employment" };
       (rows || []).forEach(function(r) {
@@ -3748,10 +3758,20 @@ const LenderHome = ({ user, setView }) => {
   const [allApps, setAllApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load this lender's own profile for plan display
+  // Load this lender's own profile — check approval status
   useEffect(function() {
-    SB.query("lender_profiles", "user_id=eq." + user.id + "&select=plan_type,name,status").then(function(rows) {
+    SB.query("lender_profiles", "user_id=eq." + user.id + "&select=plan_type,name,status,user_id").then(function(rows) {
       if (rows && rows[0]) setLenderProfile(rows[0]);
+      else {
+        // No lender_profiles row — create one
+        SB.upsert("lender_profiles", {
+          user_id: user.id, email: user.email, name: user.name,
+          contact_person: user.name, status: "pending_review",
+          plan_type: "payasyougo", notes: "{}",
+          due_diligence: JSON.stringify({ namfisaVerified:false, regVerified:false, directorCheck:false, amlCheck:false, bankAccountVerified:false, contractSigned:false }),
+        }).catch(function(e){ console.log("Create lender profile:", e.message); });
+        setLenderProfile({ status: "pending_review", plan_type: "payasyougo" });
+      }
     }).catch(function(e) { console.log("Lender profile load:", e.message); });
   }, [user.id]);
 
@@ -3793,7 +3813,7 @@ const LenderHome = ({ user, setView }) => {
         var userIds = myBpRows.map(function(bp) { return bp.user_id; }).filter(Boolean);
         var userMap = {};
         if (userIds.length > 0) {
-          var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+          var users = await SB.query("profiles", "select=id,name,email,phone");
           (users || []).forEach(function(u) { userMap[u.id] = u; });
         }
 
@@ -3836,6 +3856,44 @@ const LenderHome = ({ user, setView }) => {
   const declined = allB.filter(b => b.status === "declined").length;
   const totalDisbursed = allB.flatMap(b => b.loans||[]).filter(l => l && l.status === "approved" && l.disbursed).reduce((s, l) => s + (l.amount||0), 0);
   const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
+
+  // ── Block unapproved lenders ──────────────────────────────────────────────
+  if (loading) return (
+    <div style={{ display:"flex", justifyContent:"center", alignItems:"center", minHeight:300 }}>
+      <Spinner />
+    </div>
+  );
+
+  if (lenderProfile && lenderProfile.status === "pending_review") return (
+    <div className="fade-in" style={{ maxWidth:560, margin:"60px auto", textAlign:"center" }}>
+      <div style={{ padding:40, background:DS.colors.surface, border:"1px solid "+DS.colors.border, borderRadius:20 }}>
+        <div style={{ fontSize:52, marginBottom:16 }}>⏳</div>
+        <h2 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:800, fontSize:24, marginBottom:12 }}>Account Pending Review</h2>
+        <p style={{ color:DS.colors.textSecondary, lineHeight:1.7, marginBottom:24 }}>
+          Your lender account is awaiting admin verification. An admin will review your submitted documents and complete due diligence before granting you access to borrower applications.
+        </p>
+        <div style={{ padding:"12px 16px", background:DS.colors.goldDim, border:"1px solid "+DS.colors.gold+"44", borderRadius:10, marginBottom:24 }}>
+          <p style={{ fontSize:13, color:DS.colors.gold }}>
+            📋 <strong>While you wait:</strong> Complete your company profile under Settings &amp; Billing to speed up the review process.
+          </p>
+        </div>
+        <Btn onClick={() => setView("lender-settings")}>Complete Profile →</Btn>
+      </div>
+    </div>
+  );
+
+  if (lenderProfile && lenderProfile.status === "rejected") return (
+    <div className="fade-in" style={{ maxWidth:560, margin:"60px auto", textAlign:"center" }}>
+      <div style={{ padding:40, background:DS.colors.surface, border:"1px solid "+DS.colors.danger+"44", borderRadius:20 }}>
+        <div style={{ fontSize:52, marginBottom:16 }}>❌</div>
+        <h2 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:800, fontSize:24, marginBottom:12, color:DS.colors.danger }}>Application Not Approved</h2>
+        <p style={{ color:DS.colors.textSecondary, lineHeight:1.7, marginBottom:24 }}>
+          Your lender application was not approved at this time. Please contact MicroLendNA admin for more information or to resubmit with corrected documentation.
+        </p>
+        <p style={{ fontSize:13, color:DS.colors.textMuted }}>Contact: admin@microlendna.com</p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="fade-in">
@@ -3927,7 +3985,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   // Load applications from Supabase
   const loadAppsFromDB = async function() {
     try {
-      // ── CRITICAL: Only load applications explicitly assigned to THIS lender ──
+      // ── CRITICAL: Only load applications explicitly assigned to THIS APPROVED lender ──
       var allRows = await SB.query("applications", "select=*&order=created_at.desc");
       // Filter strictly to apps where lender_user_id matches this lender's user ID
       var rows = (allRows || []).filter(function(r) {
@@ -3948,7 +4006,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
       }
       var userMap = {};
       try {
-        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone");
+        var users = await SB.query("profiles", "select=id,name,email,phone");
         (users || []).forEach(function(u) { userMap[u.id] = u; });
       } catch(e) {}
       setSbBorrowerMap(bpMap);
@@ -5404,7 +5462,7 @@ const AdminAllApplications = ({ showToast }) => {
         var bpRows = await SB.query("borrower_profiles", "select=*");
         var bpMap = {};
         (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
-        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email");
+        var users = await SB.query("profiles", "select=id,name,email");
         var userMap = {};
         (users || []).forEach(function(u) { userMap[u.id] = u; });
         var mapped = (rows || []).map(function(r) {
@@ -5499,7 +5557,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
         var lpRows = await SB.query("lender_profiles", "status=eq.active&select=user_id,name,email,plan_type,status");
         // Also load pending so admin can see them — filter in UI
         var allLpRows = await SB.query("lender_profiles", "select=user_id,name,email,plan_type,status");
-        var profRows = await SB.query("profiles", "role=eq.lender&select=id,name,email");
+        var profRows = await SB.query("profiles", "select=id,name,email");
         var profMap = {};
         (profRows || []).forEach(function(p) { profMap[p.id] = p; });
         var mapped = (allLpRows || []).map(function(lp) {
@@ -5527,7 +5585,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
     (async function() {
       try {
         var profiles = await SB.query("borrower_profiles", "select=*");
-        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone,created_at");
+        var users = await SB.query("profiles", "select=id,name,email,phone,created_at");
         var userMap = {};
         (users || []).forEach(function(u) { userMap[u.id] = u; });
         var mapped = (profiles || []).map(function(bp) {
@@ -5871,12 +5929,12 @@ const AdminBorrowers = ({ showToast, setView }) => {
                           // Notify lender (non-blocking)
                           SB.insert("notifications",{
                             user_id: lenderId,
-                            title: "New Borrower Assigned",
-                            message: b.name+" (Tier "+rr.tier+") has been assigned to you by admin. Review their profile and make a decision.",
+                            title: "🔔 New Loan Application Assigned",
+                            message: "A vetted borrower application from " + b.name + " (Tier " + rr.tier + ", DTI " + rr.dti + ") has been assigned to you by admin. Log in to review and approve or decline.",
                             type: "info",
                           }).catch(function(ne){ console.log("Notify lender:", ne.message); });
 
-                          showToast("✅ "+b.name+" assigned to "+(lender?.name||"lender")+" — lender notified");
+                          showToast("✅ " + b.name + " assigned to " + (lender?.name||"lender") + " — lender notified");
                         } catch(e){
                           console.error("Assignment error:", e);
                           showToast("Assignment error: "+e.message,"error");
@@ -6358,52 +6416,60 @@ const AdminLenders = ({ showToast, showConfirm }) => {
   const [editForm, setEditForm] = useState({});
   const [loadingLenders, setLoadingLenders] = useState(true);
 
-  // Load lenders from Supabase on mount — merge with DB.lenders seed data
+  // Load lenders from Supabase on mount
   useEffect(function() {
     (async function() {
       try {
-        // Load from lender_profiles table
-        var lpRows = await SB.query("lender_profiles", "select=*&order=registered_at.desc");
-        // Load matching profiles for name/email
-        var profRows = await SB.query("profiles", "role=eq.lender&select=id,name,email,phone");
+        // Step 1: Load all lender_profiles rows — no ordering by columns that may not exist
+        var lpRows = await SB.query("lender_profiles", "select=*");
+        console.log("lender_profiles rows:", (lpRows||[]).length, lpRows);
+
+        // Step 2: Load all profiles to get name/email (no role filter — column may not exist)
+        var profRows = await SB.query("profiles", "select=id,name,email,phone");
         var profMap = {};
         (profRows || []).forEach(function(p) { profMap[p.id] = p; });
 
         var fromDB = (lpRows || []).map(function(lp) {
           var prof = profMap[lp.user_id] || {};
+          // Parse due_diligence safely
           var dd = {};
           try { dd = typeof lp.due_diligence === "string" ? JSON.parse(lp.due_diligence) : (lp.due_diligence || {}); } catch(e) {}
+          // Parse extra metadata from notes
+          var meta = {};
+          try { meta = JSON.parse(lp.notes || "{}"); } catch(e) {}
           return {
             id: lp.user_id || lp.id,
             lpId: lp.id,
             userId: lp.user_id,
-            name: lp.name || prof.name || "Unknown",
+            name: lp.name || lp.company_name || prof.name || "Unknown",
             email: lp.email || prof.email || "",
             contactPerson: lp.contact_person || lp.name || prof.name || "",
             phone: lp.phone || prof.phone || "",
-            regNumber: (function(){ try{ return JSON.parse(lp.notes||"{}").regNumber||""; }catch(e){return "";} })(),
-            namfisaLicense: (function(){ try{ return JSON.parse(lp.notes||"{}").namfisaLicense||""; }catch(e){return "";} })(),
-            licenseExpiry: (function(){ try{ return JSON.parse(lp.notes||"{}").licenseExpiry||""; }catch(e){return "";} })(),
-            plan: lp.plan_type || "payasyougo",
+            regNumber:      meta.regNumber || lp.reg_number || "",
+            namfisaLicense: meta.namfisaLicense || lp.namfisa_license || "",
+            licenseExpiry:  meta.licenseExpiry || lp.license_expiry || "",
+            plan: lp.plan_type || lp.plan || "payasyougo",
             status: lp.status || "pending_review",
-            registeredAt: lp.registered_at ? lp.registered_at.slice(0,10) : "—",
+            registeredAt: (lp.registered_at || lp.created_at || "—").slice(0,10),
             approvedAt: lp.approved_at ? lp.approved_at.slice(0,10) : null,
             approvedBy: lp.approved_by || null,
             notes: lp.notes || "",
             dueDiligence: dd,
-            leadsTotal: lp.leads_total || 0,
+            leadsTotal:    lp.leads_total    || 0,
             leadsApproved: lp.leads_approved || 0,
             leadsDeclined: lp.leads_declined || 0,
-            leadsPending: lp.leads_pending || 0,
+            leadsPending:  lp.leads_pending  || 0,
             revenue: lp.revenue || 0,
             fromSupabase: true,
           };
         });
 
-        // Use only real Supabase data — no mock seed data
+        // Sort by registeredAt descending
+        fromDB.sort(function(a,b){ return (b.registeredAt||"").localeCompare(a.registeredAt||""); });
         setLenders(fromDB);
+        console.log("AdminLenders loaded:", fromDB.length, "lenders");
       } catch(e) {
-        console.log("Load lenders from Supabase:", e.message);
+        console.error("AdminLenders load error:", e.message);
         setLenders([]);
       }
       setLoadingLenders(false);
@@ -6452,7 +6518,16 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     var changes = { status: "active", approvedAt: new Date().toISOString().slice(0, 10), approvedBy: "System Admin" };
     updateLender(l.id, changes);
     await persistLenderStatus(l, changes);
-    showToast(`✅ ${l.name} approved — lender can now log in and receive applications`);
+    // Notify the lender
+    if (l.userId) {
+      SB.insert("notifications", {
+        user_id: l.userId,
+        title: "🎉 Lender Account Approved!",
+        message: "Your MicroLendNA lender account has been approved. You can now log in to receive vetted borrower applications and start lending.",
+        type: "success",
+      }).catch(function(e){ console.log("Lender approval notification:", e.message); });
+    }
+    showToast("✅ " + l.name + " approved — lender notified and can now receive applications");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -6460,7 +6535,16 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     var changes = { status: "rejected", notes: (l.notes || "") + "\nRejected: " + (reason || "Due diligence failed") };
     updateLender(l.id, changes);
     await persistLenderStatus(l, changes);
-    showToast(l.name + " rejected — notified via email", "error");
+    // Notify the lender
+    if (l.userId) {
+      SB.insert("notifications", {
+        user_id: l.userId,
+        title: "Lender Application Update",
+        message: "Your MicroLendNA lender application has not been approved at this time. Reason: " + (reason || "Due diligence requirements not met") + ". Please contact admin@microlendna.com for more information.",
+        type: "error",
+      }).catch(function(e){ console.log("Lender rejection notification:", e.message); });
+    }
+    showToast(l.name + " rejected — lender notified", "error");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -7120,8 +7204,16 @@ const LenderSettings = ({ user, showToast }) => {
     if (file.size > 10 * 1024 * 1024) { showToast("File must be under 10MB", "error"); return; }
     setUploadingDoc(key);
     try {
-      var path = "lender-docs/" + user.id + "/" + key + "_" + Date.now() + "_" + file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-      await SB.uploadFile("kyc-documents", path, file);
+      var safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      var path = "lender-docs/" + user.id + "/" + key + "_" + Date.now() + "_" + safeName;
+      try {
+        await SB.uploadFile("kyc-documents", path, file);
+      } catch(uploadErr) {
+        // If kyc-documents bucket fails, try lender-documents bucket
+        console.log("kyc-documents upload failed, error:", uploadErr.message);
+        path = "lender-docs/" + user.id + "/" + key + "_" + Date.now() + "_" + safeName;
+        await SB.uploadFile("kyc-documents", path, file); // retry once
+      }
       setDocUploads(function(p) { return Object.assign({}, p, { [key]: { name: file.name, path, size: Math.round(file.size/1024) + " KB" } }); });
       showToast(file.name + " uploaded ✓");
     } catch(err) {
