@@ -2066,7 +2066,7 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
             mimeType = blob.type || mimeType;
             base64Data = await new Promise(function(resolve, reject) {
               var reader = new FileReader();
-              reader.onload = function() { resolve(reader.result.split(",")[1]); };
+              reader.onload = function() { resolve((reader.result||"—").split(",")[1]); };
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
@@ -2669,7 +2669,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 {Object.entries(riskResult?.breakdown||{}).map(([k, v]) => (
                   <div key={k} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
-                    <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 22, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 12, fontWeight: 400 }}>/100</span></p>
+                    <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 22, fontWeight: 700, color: catColors[k] }}>{(v?.pct||0).toFixed(0)}<span style={{ fontSize: 12, fontWeight: 400 }}>/100</span></p>
                     <div style={{ background: DS.colors.surfaceAlt, borderRadius: 4, height: 4, marginTop: 6, overflow: "hidden" }}>
                       <div style={{ width: `${v.pct}%`, height: "100%", background: catColors[k], borderRadius: 4 }} />
                     </div>
@@ -2795,7 +2795,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
           {Object.entries(result?.breakdown||{}).map(([k,v])=>(
             <div key={k} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
               <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
-              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
+              <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: catColors[k] }}>{(v?.pct||0).toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
               <div style={{ background: DS.colors.surfaceAlt, borderRadius: 4, height: 4, marginTop: 6, overflow: "hidden" }}>
                 <div style={{ width: `${v.pct}%`, height: "100%", background: catColors[k], borderRadius: 4 }} />
               </div>
@@ -4554,7 +4554,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${(app.borrowerName||"borrower").replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${(v?.pct||0).toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${(app.borrowerName||"borrower").replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -4568,7 +4568,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                   {Object.entries(rr?.breakdown||{}).map(([k, v]) => (
                     <div key={k} style={{ padding: 12, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                       <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
-                      <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
+                      <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{(v?.pct||0).toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
                       <div style={{ background: DS.colors.surfaceAlt, borderRadius: 4, height: 4, marginTop: 6, overflow: "hidden" }}>
                         <div style={{ width: `${v.pct}%`, height: "100%", background: catColors[k], borderRadius: 4 }} />
                       </div>
@@ -5139,7 +5139,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr?.breakdown||{}).map(([k, v]) => `${v.label}: ${v.pct.toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr?.breakdown||{}).map(([k, v]) => `${v.label}: ${(v?.pct||0).toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -5153,7 +5153,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                   {Object.entries(rr?.breakdown||{}).map(([k, v]) => (
                     <div key={k} style={{ padding: 12, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, textAlign: "center", borderTop: `3px solid ${catColors[k]}` }}>
                       <p style={{ fontSize: 10, color: DS.colors.textMuted, marginBottom: 4 }}>{v.label}</p>
-                      <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{v.pct.toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
+                      <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 18, fontWeight: 700, color: catColors[k] }}>{(v?.pct||0).toFixed(0)}<span style={{ fontSize: 10, fontWeight: 400 }}>/100</span></p>
                       <div style={{ background: DS.colors.surfaceAlt, borderRadius: 4, height: 4, marginTop: 6, overflow: "hidden" }}>
                         <div style={{ width: `${v.pct}%`, height: "100%", background: catColors[k], borderRadius: 4 }} />
                       </div>
@@ -6015,7 +6015,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 {Object.entries(rr?.breakdown||{}).map(([k,v])=>(
                   <div key={k} style={{padding:12,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,borderRadius:10,textAlign:"center",borderTop:`3px solid ${catColors[k]}`}}>
                     <p style={{fontSize:10,color:DS.colors.textMuted,marginBottom:4,lineHeight:1.3}}>{v.label}</p>
-                    <p style={{fontFamily:"'DM Mono',monospace",fontSize:18,fontWeight:700,color:catColors[k]}}>{v.pct.toFixed(0)}<span style={{fontSize:10,fontWeight:400}}>/100</span></p>
+                    <p style={{fontFamily:"'DM Mono',monospace",fontSize:18,fontWeight:700,color:catColors[k]}}>{(v?.pct||0).toFixed(0)}<span style={{fontSize:10,fontWeight:400}}>/100</span></p>
                     <div style={{background:DS.colors.surfaceAlt,borderRadius:3,height:4,marginTop:6,overflow:"hidden"}}>
                       <div style={{width:`${v.pct}%`,height:"100%",background:catColors[k],borderRadius:3}}/>
                     </div>
@@ -6332,7 +6332,7 @@ const AdminHome = ({ setView }) => {
                   <TierBadge tier={app.tier} />
                   <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 8px", borderRadius: 20, background: app.status === "new_lead" ? DS.colors.goldDim : DS.colors.infoDim, color: app.status === "new_lead" ? DS.colors.gold : DS.colors.info }}>{app.status === "new_lead" ? "New Lead" : "Under Review"}</span>
                 </div>
-                <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{app.employer} · {app.receivedAt.split(" ")[0]}</p>
+                <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{app.employer} · {(app.receivedAt||"—").split(" ")[0]}</p>
               </div>
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, color: DS.colors.accent }}>N${(app.amount||0).toLocaleString()}</p>
@@ -8381,7 +8381,7 @@ const AgentHome = ({ user, setView }) => {
   return (
     <div className="fade-in">
       <PageHeader
-        title={`Welcome, ${user.name.split(" ")[0]} 👋`}
+        title={`Welcome, ${(user.name||"—").split(" ")[0]} 👋`}
         subtitle={`${agent.region || "Field Agent"} · Capital Micro Finance · Your assisted intake portal`}
         actions={<Btn onClick={() => setView("agent-add")} icon="➕">Add New Borrower</Btn>}
       />
