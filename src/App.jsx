@@ -1,3 +1,4 @@
+// MicroLendNA v202605011413 — runtime crash fix
 import { useState, useEffect, useRef } from "react";
 
 // ── SUPABASE CLIENT (REST API — no SDK needed) ────────────────────────────────
