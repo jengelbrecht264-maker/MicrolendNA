@@ -992,14 +992,10 @@ function safeBorrower(b) {
     kycStatus: "pending",
     amlStatus: "pending",
     bankVerified: false,
-    firstBorrower: true,
-    status: "pending",
-    assignedDate: "—",
     ...b,
-    loans: b.loans || [],
-    documents: b.documents || [],
-    scorecard: b.scorecard || SAMPLE_SCORECARD,
-    scorecardAnswers: b.scorecardAnswers || DEMO_ANSWERS,
+    firstBorrower: b.firstBorrower !== undefined ? b.firstBorrower : true,
+    status: b.status || "pending",
+    assignedDate: b.assignedDate || "—",
   };
 }
 
@@ -4557,7 +4553,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${app.borrowerName.replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${v.pct.toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${(app.borrowerName||"borrower").replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -4735,7 +4731,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               )}
               <div style={{ padding: 20 }}>
                 <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-                  <div style={{ width: 48, height: 48, background: tierColor + "22", border: `2px solid ${tierColor}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: tierColor, flexShrink: 0 }}>{app.borrowerName[0]}</div>
+                  <div style={{ width: 48, height: 48, background: tierColor + "22", border: `2px solid ${tierColor}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: tierColor, flexShrink: 0 }}>{(app.borrowerName||"?")[0]}</div>
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 10 }}>
                       <p style={{ fontWeight: 700, fontSize: 16 }}>{app.borrowerName}</p>
@@ -6328,7 +6324,7 @@ const AdminHome = ({ setView }) => {
           {allApps.slice(0, 4).map((app, i) => (
             <div key={app.id} onClick={() => setView("admin-apps")} className="card-hover"
               style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", background: DS.colors.surfaceAlt, borderRadius: 10, cursor: "pointer", border: `1px solid ${DS.colors.border}`, transition: "all .2s" }}>
-              <div style={{ width: 36, height: 36, background: DS.colors[`tier${app.tier}`] + "22", border: `1px solid ${DS.colors[`tier${app.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: DS.colors[`tier${app.tier}`], flexShrink: 0 }}>{app.borrowerName[0]}</div>
+              <div style={{ width: 36, height: 36, background: DS.colors[`tier${app.tier}`] + "22", border: `1px solid ${DS.colors[`tier${app.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14, color: DS.colors[`tier${app.tier}`], flexShrink: 0 }}>{(app.borrowerName||"?")[0]}</div>
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
                   <p style={{ fontWeight: 600, fontSize: 14 }}>{app.borrowerName}</p>
@@ -6911,7 +6907,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <div style={{ height: 4, background: statusColors[l.status] || DS.colors.textMuted }} />
               <div style={{ padding: "18px 20px", display: "flex", alignItems: "center", gap: 18 }}>
                 {/* Avatar */}
-                <div style={{ width: 48, height: 48, background: (statusColors[l.status] || DS.colors.textMuted) + "22", border: `2px solid ${(statusColors[l.status] || DS.colors.textMuted)}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: statusColors[l.status] || DS.colors.textMuted, flexShrink: 0 }}>{l.name[0]}</div>
+                <div style={{ width: 48, height: 48, background: (statusColors[l.status] || DS.colors.textMuted) + "22", border: `2px solid ${(statusColors[l.status] || DS.colors.textMuted)}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: statusColors[l.status] || DS.colors.textMuted, flexShrink: 0 }}>{(l.name||"?")[0]}</div>
 
                 {/* Main info */}
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -7363,7 +7359,7 @@ const LenderSettings = ({ user, showToast }) => {
                   ].map(item => (
                     <div key={item.key} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "10px 12px", background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                       <label style={{ display: "flex", gap: 10, alignItems: "center", cursor: "pointer", flex: 1 }}>
-                        <input type="checkbox" checked={!!prefs[item.key]} onChange={e => update(item.key, e.target.checked)} style={{ width: "auto", accentColor: DS.colors.accent, width: 16, height: 16 }} />
+                        <input type="checkbox" checked={!!prefs[item.key]} onChange={e => update(item.key, e.target.checked)} style={{ width: 16, height: 16, accentColor: DS.colors.accent }} />
                         <div>
                           <p style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</p>
                           <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>{item.desc}</p>
@@ -8916,7 +8912,7 @@ const AdminWhatsApp = ({ showToast }) => {
             <div style={{ background:"#0A1628",border:`1px solid #25D36633`,borderRadius:16,overflow:"hidden" }}>
               {/* WA header */}
               <div style={{ padding:"14px 18px",background:"#25D36618",borderBottom:"1px solid #25D36633",display:"flex",alignItems:"center",gap:12 }}>
-                <div style={{ width:38,height:38,background:"#25D366",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:16,color:"#fff" }}>{lead.name[0]}</div>
+                <div style={{ width:38,height:38,background:"#25D366",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:16,color:"#fff" }}>{(lead.name||"?")[0]}</div>
                 <div>
                   <p style={{ fontWeight:700,fontSize:14 }}>{lead.name}</p>
                   <p style={{ fontSize:11,color:"#25D366" }}>{lead.phone}</p>
@@ -9050,7 +9046,7 @@ const AdminWhatsApp = ({ showToast }) => {
               <div style={{ padding:"16px 20px",display:"flex",alignItems:"center",gap:16 }}>
                 {/* Avatar */}
                 <div style={{ width:44,height:44,background:"#25D36622",border:"2px solid #25D36644",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:800,fontSize:18,color:"#25D366",flexShrink:0 }}>
-                  {lead.name[0]}
+                  {(lead.name||"?")[0]}
                 </div>
                 {/* Info */}
                 <div style={{ flex:1,minWidth:0 }}>
@@ -9126,7 +9122,7 @@ const AdminAgents = ({ showToast }) => {
               <div style={{ height:4,background:"#A78BFA" }} />
               <div style={{ padding:"20px 24px" }}>
                 <div style={{ display:"flex",alignItems:"flex-start",gap:16,marginBottom:16 }}>
-                  <div style={{ width:48,height:48,background:"#A78BFA22",border:"2px solid #A78BFA44",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Space Grotesk',sans-serif",fontWeight:800,fontSize:18,color:"#A78BFA",flexShrink:0 }}>{agent.name[0]}</div>
+                  <div style={{ width:48,height:48,background:"#A78BFA22",border:"2px solid #A78BFA44",borderRadius:14,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:"'Space Grotesk',sans-serif",fontWeight:800,fontSize:18,color:"#A78BFA",flexShrink:0 }}>{(agent.name||"?")[0]}</div>
                   <div style={{ flex:1 }}>
                     <div style={{ display:"flex",gap:8,alignItems:"center",marginBottom:4 }}>
                       <p style={{ fontWeight:700,fontSize:16 }}>{agent.name}</p>
