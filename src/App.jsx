@@ -1,7 +1,7 @@
-// MicroLendNA v202605011413 — runtime crash fix
+// MicroLendNA v202605011413 â runtime crash fix
 import { useState, useEffect, useRef } from "react";
 
-// ── SUPABASE CLIENT (REST API — no SDK needed) ────────────────────────────────
+// ââ SUPABASE CLIENT (REST API â no SDK needed) ââââââââââââââââââââââââââââââââ
 const SUPABASE_URL = "https://eipuaeczssshrvauuncw.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVpcHVhZWN6c3NzaHJ2YXV1bmN3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU0ODMxMzksImV4cCI6MjA5MTA1OTEzOX0.mVTw2wcscnEIsQZRIRv9vnsnev5m-ZQEAw-V4dhRPc4";
 
@@ -18,7 +18,7 @@ try {
 } catch (e) {}
 
 const SB = {
-  // ── Auth ──
+  // ââ Auth ââ
   async signUp(email, password, metadata = {}) {
     const res = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
       method: "POST",
@@ -61,7 +61,7 @@ const SB = {
   getToken() { return _sbToken; },
   getUser() { return _sbUser; },
 
-  // ── Database (PostgREST) ──
+  // ââ Database (PostgREST) ââ
   _headers() {
     return {
       apikey: SUPABASE_KEY,
@@ -92,7 +92,7 @@ const SB = {
       method: "PATCH", headers: this._headers(), body: JSON.stringify(data),
     });
     if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.message || res.statusText); }
-    // Supabase PATCH may return 204 No Content — handle empty body safely
+    // Supabase PATCH may return 204 No Content â handle empty body safely
     const text = await res.text();
     return text ? JSON.parse(text) : {};
   },
@@ -115,7 +115,7 @@ const SB = {
     return res.json();
   },
 
-  // ── Storage ──
+  // ââ Storage ââ
   async uploadFile(bucket, path, file) {
     // Use auth token if available, fall back to anon key
     var token = _sbToken || SUPABASE_KEY;
@@ -163,7 +163,19 @@ const SB = {
   },
 };
 
-// ── DESIGN SYSTEM ──────────────────────────────────────────────────────────────
+// ââ DESIGN SYSTEM ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+
+// -- DOCUMENT VIEWER HELPER ---------------------------------------------------
+// Uses signed URL (private buckets) with public URL fallback
+async function openDocFile(filePath) {
+  if (!filePath) return;
+  try {
+    var signed = await SB.getSignedUrl("kyc-documents", filePath, 3600);
+    if (signed) { window.open(signed, "_blank"); return; }
+  } catch(e) {}
+  window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath, "_blank");
+}
+
 const DS = {
   colors: {
     bg: "#f7f9fc",
@@ -192,7 +204,7 @@ const DS = {
   },
 };
 
-// ── GLOBAL STYLES ─────────────────────────────────────────────────────────────
+// ââ GLOBAL STYLES âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap');
@@ -271,12 +283,12 @@ const GlobalStyles = () => (
   `}</style>
 );
 
-// ── MOCK DATABASE ─────────────────────────────────────────────────────────────
+// ââ MOCK DATABASE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const DB = {
   users: [],
   borrowers: [],
   applications: [],
-  lenders: [], // Populated from Supabase lender_profiles on load — no hardcoded mock data
+  lenders: [], // Populated from Supabase lender_profiles on load â no hardcoded mock data
   riskRules: {
     dtiMax: 0.45,
     minSalary: 3000,
@@ -292,7 +304,7 @@ const DB = {
   notifications: [],
 };
 
-// ── RISK ENGINE ───────────────────────────────────────────────────────────────
+// ââ RISK ENGINE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function runRiskEngine(salary, expenses, isFirstBorrower, rules) {
   const disposable = salary - expenses;
   const dti = expenses / salary;
@@ -309,7 +321,7 @@ function runRiskEngine(salary, expenses, isFirstBorrower, rules) {
   return { tier, dti, adjDTI, disposable, maxLoan: Math.max(0, maxLoan), rate, isFirstBorrower };
 }
 
-// ── COMPONENTS ────────────────────────────────────────────────────────────────
+// ââ COMPONENTS ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const Card = ({ children, style = {}, className = "" }) => (
   <div className={className} style={{
     background: DS.colors.surface,
@@ -405,7 +417,7 @@ const Input = ({ label, value, onChange, type = "text", placeholder = "", requir
       onKeyDown={onKeyDown}
       style={error ? { borderColor: DS.colors.danger, boxShadow: `0 0 0 3px ${DS.colors.danger}18` } : {}}
     />
-    {error && <p style={{ fontSize: 11, color: DS.colors.danger, marginTop: 4 }}>⚠ {error}</p>}
+    {error && <p style={{ fontSize: 11, color: DS.colors.danger, marginTop: 4 }}>â  {error}</p>}
     {!error && hint && <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>{hint}</p>}
   </div>
 );
@@ -444,7 +456,7 @@ const Stat = ({ label, value, sub, color, icon, onClick, badge }) => (
       </div>
       <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6 }}>
         {icon && <span style={{ fontSize: 22, opacity: .65 }}>{icon}</span>}
-        {onClick && <span style={{ fontSize: 11, color: color || DS.colors.accent, fontWeight: 600, opacity: .8 }}>View →</span>}
+        {onClick && <span style={{ fontSize: 11, color: color || DS.colors.accent, fontWeight: 600, opacity: .8 }}>View â</span>}
       </div>
     </div>
   </div>
@@ -465,7 +477,7 @@ const Modal = ({ open, onClose, title, children, width = 560 }) => {
         onClick={e => e.stopPropagation()} className="fade-in">
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
           <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 20, fontWeight: 700 }}>{title}</h2>
-          <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>×</button>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>Ã</button>
         </div>
         {children}
       </div>
@@ -475,10 +487,10 @@ const Modal = ({ open, onClose, title, children, width = 560 }) => {
 
 const Toast = ({ msg, type = "success", onClose }) => {
   const typeMap = {
-    success: { bg: DS.colors.accentDim, border: DS.colors.accent, color: DS.colors.accent, icon: "✓" },
-    error: { bg: DS.colors.dangerDim, border: DS.colors.danger, color: DS.colors.danger, icon: "✗" },
-    info: { bg: DS.colors.infoDim, border: DS.colors.info, color: DS.colors.info, icon: "ℹ" },
-    warning: { bg: DS.colors.warningDim, border: DS.colors.warning, color: DS.colors.warning, icon: "⚠" },
+    success: { bg: DS.colors.accentDim, border: DS.colors.accent, color: DS.colors.accent, icon: "â" },
+    error: { bg: DS.colors.dangerDim, border: DS.colors.danger, color: DS.colors.danger, icon: "â" },
+    info: { bg: DS.colors.infoDim, border: DS.colors.info, color: DS.colors.info, icon: "â¹" },
+    warning: { bg: DS.colors.warningDim, border: DS.colors.warning, color: DS.colors.warning, icon: "â " },
   };
   const t = typeMap[type] || typeMap.success;
   return (
@@ -493,12 +505,12 @@ const Toast = ({ msg, type = "success", onClose }) => {
     }}>
       <span style={{ fontSize: 16, flexShrink: 0 }}>{t.icon}</span>
       <span style={{ flex: 1, lineHeight: 1.4 }}>{msg}</span>
-      <button onClick={onClose} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: 20, opacity: .7, padding: "0 2px", flexShrink: 0 }}>×</button>
+      <button onClick={onClose} style={{ background: "none", border: "none", color: "inherit", cursor: "pointer", fontSize: 20, opacity: .7, padding: "0 2px", flexShrink: 0 }}>Ã</button>
     </div>
   );
 };
 
-// ── HEADER ────────────────────────────────────────────────────────────────────
+// ââ HEADER ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, setSidebarOpen }) => {
   const [notifOpen, setNotifOpen] = useState(false);
   const [notifList, setNotifList] = useState(notifications);
@@ -525,9 +537,9 @@ const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, set
         <button className="sidebar-collapse" onClick={() => setSidebarOpen && setSidebarOpen(o => !o)} style={{
           background: DS.colors.surfaceAlt, border: `1px solid ${DS.colors.border}`, color: DS.colors.textSecondary,
           borderRadius: 8, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18
-        }}>☰</button>
+        }}>â°</button>
         <div style={{ width: 32, height: 32, background: DS.colors.accent, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ fontSize: 16, fontWeight: 800, color: "#0A0F1E" }}>₦</span>
+          <span style={{ fontSize: 16, fontWeight: 800, color: "#0A0F1E" }}>â¦</span>
         </div>
         <span className="hide-mobile" style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, letterSpacing: "-0.02em" }}>
           MicroLend<span style={{ color: DS.colors.accent }}>NA</span>
@@ -540,7 +552,7 @@ const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, set
             background: "none", border: `1px solid ${DS.colors.border}`,
             borderRadius: 8, padding: "6px 12px", color: DS.colors.textSecondary, cursor: "pointer", position: "relative"
           }}>
-            🔔
+            ð
             {unread > 0 && <span className="pulse" style={{
               position: "absolute", top: -4, right: -4, background: DS.colors.danger,
               color: "#fff", borderRadius: "50%", width: 18, height: 18, fontSize: 10, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700,
@@ -594,38 +606,38 @@ const Header = ({ user, onLogout, notifications, view, setView, sidebarOpen, set
   );
 };
 
-// ── SIDEBAR ───────────────────────────────────────────────────────────────────
+// ââ SIDEBAR âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const Sidebar = ({ role, activeView, setView, open, onClose }) => {
   const navItems = {
     borrower: [
-      { id: "borrower-profile", icon: "👤", label: "My Profile" },
-      { id: "borrower-docs", icon: "📁", label: "Documents & KYC" },
-      { id: "borrower-scorecard", icon: "📊", label: "My Scorecard" },
-      { id: "borrower-apply", icon: "📝", label: "Apply Now" },
-      { id: "borrower-status", icon: "🗂️", label: "My Applications" },
+      { id: "borrower-profile", icon: "ð¤", label: "My Profile" },
+      { id: "borrower-docs", icon: "ð", label: "Documents & KYC" },
+      { id: "borrower-scorecard", icon: "ð", label: "My Scorecard" },
+      { id: "borrower-apply", icon: "ð", label: "Apply Now" },
+      { id: "borrower-status", icon: "ðï¸", label: "My Applications" },
     ],
     lender: [
-      { id: "lender-home", icon: "🏠", label: "Dashboard" },
-      { id: "lender-apps", icon: "📋", label: "Applications" },
-      { id: "lender-scorecard", icon: "📊", label: "Scorecards" },
-      { id: "lender-borrowers", icon: "👥", label: "Borrowers" },
-      { id: "lender-settings", icon: "⚙️", label: "Settings & Billing" },
+      { id: "lender-home", icon: "ð ", label: "Dashboard" },
+      { id: "lender-apps", icon: "ð", label: "Applications" },
+      { id: "lender-scorecard", icon: "ð", label: "Scorecards" },
+      { id: "lender-borrowers", icon: "ð¥", label: "Borrowers" },
+      { id: "lender-settings", icon: "âï¸", label: "Settings & Billing" },
     ],
     agent: [
-      { id: "agent-home", icon: "🏠", label: "Dashboard" },
-      { id: "agent-add", icon: "➕", label: "Add Borrower" },
-      { id: "agent-borrowers", icon: "👥", label: "My Borrowers" },
-      { id: "agent-performance", icon: "📊", label: "My Performance" },
+      { id: "agent-home", icon: "ð ", label: "Dashboard" },
+      { id: "agent-add", icon: "â", label: "Add Borrower" },
+      { id: "agent-borrowers", icon: "ð¥", label: "My Borrowers" },
+      { id: "agent-performance", icon: "ð", label: "My Performance" },
     ],
     admin: [
-      { id: "admin-home", icon: "🏠", label: "Overview" },
-      { id: "admin-borrowers", icon: "👥", label: "All Borrowers" },
-      { id: "admin-lenders", icon: "🏦", label: "Lenders" },
-      { id: "admin-apps", icon: "📋", label: "All Applications" },
-      { id: "admin-whatsapp", icon: "💬", label: "WhatsApp Leads" },
-      { id: "admin-agents", icon: "🧑‍💼", label: "Field Agents" },
-      { id: "admin-risk", icon: "⚙️", label: "Risk Engine" },
-      { id: "admin-reports", icon: "📈", label: "Reports" },
+      { id: "admin-home", icon: "ð ", label: "Overview" },
+      { id: "admin-borrowers", icon: "ð¥", label: "All Borrowers" },
+      { id: "admin-lenders", icon: "ð¦", label: "Lenders" },
+      { id: "admin-apps", icon: "ð", label: "All Applications" },
+      { id: "admin-whatsapp", icon: "ð¬", label: "WhatsApp Leads" },
+      { id: "admin-agents", icon: "ð§âð¼", label: "Field Agents" },
+      { id: "admin-risk", icon: "âï¸", label: "Risk Engine" },
+      { id: "admin-reports", icon: "ð", label: "Reports" },
     ],
   };
 
@@ -687,7 +699,7 @@ const Sidebar = ({ role, activeView, setView, open, onClose }) => {
 
       {/* Bottom version tag */}
       <div style={{ padding: "12px 14px", borderTop: `1px solid ${DS.colors.border}` }}>
-        <p style={{ fontSize: 10, color: DS.colors.textMuted, textAlign: "center" }}>MicroLendNA v1.0 · NAMFISA Compliant</p>
+        <p style={{ fontSize: 10, color: DS.colors.textMuted, textAlign: "center" }}>MicroLendNA v1.0 Â· NAMFISA Compliant</p>
       </div>
     </div>
   );
@@ -706,7 +718,7 @@ const Sidebar = ({ role, activeView, setView, open, onClose }) => {
           <aside style={{ position: "fixed", top: 0, left: 0, bottom: 0, width: 260, background: DS.colors.surface, borderRight: `1px solid ${DS.colors.border}`, zIndex: 400, overflowY: "auto", animation: "slideIn .2s ease" }}>
             <div style={{ padding: "16px 14px", borderBottom: `1px solid ${DS.colors.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 16 }}>MicroLend<span style={{ color: DS.colors.accent }}>NA</span></span>
-              <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>×</button>
+              <button onClick={onClose} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 22, cursor: "pointer" }}>Ã</button>
             </div>
             {sidebarContent}
           </aside>
@@ -716,9 +728,9 @@ const Sidebar = ({ role, activeView, setView, open, onClose }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-// RISK SCORING ENGINE — from microlender_scorecard.xlsx
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// RISK SCORING ENGINE â from microlender_scorecard.xlsx
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const RISK_SCORECARD = {
   categories: {
@@ -731,8 +743,8 @@ const RISK_SCORECARD = {
           key: "jobTenure", label: "Time at current job",
           options: [
             { label: "> 24 months", score: 10 },
-            { label: "12 – 24 months", score: 7 },
-            { label: "6 – 12 months", score: 4 },
+            { label: "12 â 24 months", score: 7 },
+            { label: "6 â 12 months", score: 4 },
             { label: "< 6 months", score: 1 },
           ]
         },
@@ -762,7 +774,7 @@ const RISK_SCORECARD = {
           key: "accountAge", label: "Account age",
           options: [
             { label: "> 24 months", score: 8 },
-            { label: "12 – 24 months", score: 5 },
+            { label: "12 â 24 months", score: 5 },
             { label: "< 12 months", score: 2 },
           ]
         },
@@ -791,7 +803,7 @@ const RISK_SCORECARD = {
           key: "negativeDays", label: "Negative balance days",
           options: [
             { label: "0 days", score: 10 },
-            { label: "1 – 3 days", score: 6 },
+            { label: "1 â 3 days", score: 6 },
             { label: "> 3 days", score: 2 },
           ]
         },
@@ -799,7 +811,7 @@ const RISK_SCORECARD = {
           key: "lowBalanceDays", label: "Low balance days",
           options: [
             { label: "< 5 days", score: 5 },
-            { label: "5 – 10 days", score: 3 },
+            { label: "5 â 10 days", score: 3 },
             { label: "> 10 days", score: 1 },
           ]
         },
@@ -807,7 +819,7 @@ const RISK_SCORECARD = {
           key: "unpaidOrders", label: "Unpaid debit orders",
           options: [
             { label: "0", score: 8 },
-            { label: "1 – 2", score: 4 },
+            { label: "1 â 2", score: 4 },
             { label: "> 2", score: 0 },
           ]
         },
@@ -837,7 +849,7 @@ const RISK_SCORECARD = {
           key: "dtiRatio", label: "Debt-to-income ratio",
           options: [
             { label: "< 30%", score: 10 },
-            { label: "30 – 50%", score: 6 },
+            { label: "30 â 50%", score: 6 },
             { label: "> 50%", score: 2 },
           ]
         },
@@ -886,12 +898,12 @@ const RISK_SCORECARD = {
   computeScore(answers) {
     if (!answers || typeof answers !== "object") {
       answers = {
-        jobTenure: "6 – 12 months", incomeRegularity: "Mostly regular",
+        jobTenure: "6 â 12 months", incomeRegularity: "Mostly regular",
         employerType: "SME / informal", accountAge: "< 12 months",
         salaryInAccount: "Partial / inconsistent", accountUsage: "Active & stable",
         negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
         incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
-        dtiRatio: "30 – 50%", disposableIncome: "Moderate", loanBurden: "Low",
+        dtiRatio: "30 â 50%", disposableIncome: "Moderate", loanBurden: "Low",
         incomeMismatch: "None", docAuthenticity: "Verified",
       };
     }
@@ -905,7 +917,7 @@ const RISK_SCORECARD = {
         const opt = (v.options||[]).find(o => o.label === ans);
         const s = opt ? opt.score : 0;
         rawScore += s;
-        varScores[v.key] = { label: ans || "—", score: s };
+        varScores[v.key] = { label: ans || "â", score: s };
       }
       const pct = Math.min(100, Math.max(0, (rawScore / cat.maxRaw) * 100));
       const weighted = pct * cat.weight;
@@ -924,18 +936,18 @@ const RISK_SCORECARD = {
 
 // Default demo answers
 const NULL_SCORECARD_ANSWERS = {
-  jobTenure: "6 – 12 months", incomeRegularity: "Mostly regular",
+  jobTenure: "6 â 12 months", incomeRegularity: "Mostly regular",
   employerType: "SME / informal", accountAge: "< 12 months",
   salaryInAccount: "Partial / inconsistent", accountUsage: "Active & stable",
   negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
   incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
-  dtiRatio: "30 – 50%", disposableIncome: "Moderate", loanBurden: "Low",
+  dtiRatio: "30 â 50%", disposableIncome: "Moderate", loanBurden: "Low",
   incomeMismatch: "None", docAuthenticity: "Verified",
 };
 const NULL_SCORECARD = {
-  period: "—", avgCoreCredits: 0, avgDebits: 0, avgSurplusDeficit: 0,
+  period: "â", avgCoreCredits: 0, avgDebits: 0, avgSurplusDeficit: 0,
   avgBalance: 0, totalDeductionAvg: 0, unpaidCount: 0, lowDays: 0,
-  negativeDays: 0, balanceHistory: [0, 0, 0], deductions: [], avgCredits: 0, name: "—",
+  negativeDays: 0, balanceHistory: [0, 0, 0], deductions: [], avgCredits: 0, name: "â",
 };
 const DEMO_ANSWERS = {
   jobTenure: "> 24 months",
@@ -949,14 +961,14 @@ const DEMO_ANSWERS = {
   unpaidOrders: "0",
   incomeVolatility: "Stable (< 20% variation)",
   overdraftUsage: "None / minimal",
-  dtiRatio: "30 – 50%",
+  dtiRatio: "30 â 50%",
   disposableIncome: "Moderate",
   loanBurden: "Low",
   incomeMismatch: "None",
   docAuthenticity: "Verified",
 };
 
-// ── RISK PROFILE COMPONENT ──────────────────────────────────────────────────
+// ââ RISK PROFILE COMPONENT ââââââââââââââââââââââââââââââââââââââââââââââââââ
 const RiskProfileBar = ({ label, pct, color, weight, weighted }) => (
   <div style={{ marginBottom: 14 }}>
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
@@ -973,15 +985,15 @@ const RiskProfileBar = ({ label, pct, color, weight, weighted }) => (
   </div>
 );
 
-// ScoreGauge removed — replaced with inline score number displays
+// ScoreGauge removed â replaced with inline score number displays
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // SAMPLE SCORECARD DATA
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ── SAFE BORROWER DEFAULTS — prevents crashes when real Supabase data lacks mock fields ──
+// ââ SAFE BORROWER DEFAULTS â prevents crashes when real Supabase data lacks mock fields ââ
 function safeBorrower(b) {
-  if (!b) return { loans: [], documents: [], scorecard: null, scorecardAnswers: null, phone: "", email: "", idNumber: "", employer: "", salary: 0, expenses: 0, tier: "—", riskScore: 0, dti: "—", kycStatus: "pending", amlStatus: "pending", bankVerified: false, firstBorrower: true, status: "pending", assignedDate: "—", name: "Unknown" };
+  if (!b) return { loans: [], documents: [], scorecard: null, scorecardAnswers: null, phone: "", email: "", idNumber: "", employer: "", salary: 0, expenses: 0, tier: "â", riskScore: 0, dti: "â", kycStatus: "pending", amlStatus: "pending", bankVerified: false, firstBorrower: true, status: "pending", assignedDate: "â", name: "Unknown" };
   return {
     loans: [],
     documents: [],
@@ -993,16 +1005,16 @@ function safeBorrower(b) {
     employer: "",
     salary: 0,
     expenses: 0,
-    tier: "—",
+    tier: "â",
     riskScore: 0,
-    dti: "—",
+    dti: "â",
     kycStatus: "pending",
     amlStatus: "pending",
     bankVerified: false,
     ...b,
     firstBorrower: b.firstBorrower !== undefined ? b.firstBorrower : true,
     status: b.status || "pending",
-    assignedDate: b.assignedDate || "—",
+    assignedDate: b.assignedDate || "â",
   };
 }
 
@@ -1010,7 +1022,7 @@ const SAMPLE_SCORECARD = {
   name: "Manfriedt Muundjua",
   account: "62132353377",
   bank: "FNB Namibia",
-  period: "Nov 2025 – Jan 2026",
+  period: "Nov 2025 â Jan 2026",
   avgCredits: 509965,
   avgNonCore: 61552,
   avgDebits: 525269,
@@ -1027,17 +1039,17 @@ const SAMPLE_SCORECARD = {
     { month: "Jan 2026", credits: 554060, debits: 715113, creditsN: 19, debitsN: 151, closing: 148528, lowDays: 0, negDays: 0, unpaids: 0 },
   ],
   deductions: [
-    { category: "Bond / Mortgage", desc: "Standard Bank — PPS Namibia", nov: 13574, dec: 13574, jan: 14372, avg: 13840, badge: "bond" },
-    { category: "Insurance / Investment", desc: "Sanlam — Large Policy", nov: 15969, dec: 15969, jan: 15969, avg: 15969, badge: "insurance" },
-    { category: "Insurance", desc: "Sanlam — Life / Risk Cover", nov: 1102, dec: 1102, jan: 1102, avg: 1102, badge: "insurance" },
-    { category: "Vehicle Finance", desc: "FNB — Stina VAF", nov: 2579, dec: 2579, jan: 2579, avg: 2579, badge: "vaf" },
-    { category: "Mobile Contract", desc: "MTC — Contract 1", nov: 1203, dec: 1203, jan: 1203, avg: 1203, badge: "mobile" },
-    { category: "Mobile Contract", desc: "MTC — Contract 2", nov: null, dec: 1641, jan: 1191, avg: 944, badge: "mobile" },
-    { category: "Medical Aid", desc: "Momentum — Medical", nov: null, dec: 599, jan: 599, avg: 399, badge: "medical" },
-    { category: "Security", desc: "G4S Namibia — Monitoring", nov: null, dec: 559, jan: 559, avg: 373, badge: "security" },
-    { category: "Own Investment", desc: "Scheduled — Dec Vacation Fund", nov: 1120, dec: 560, jan: 1120, avg: 933, badge: "invest" },
-    { category: "Own Investment", desc: "Scheduled — Meno School Fund", nov: 1400, dec: 700, jan: 1750, avg: 1283, badge: "invest" },
-    { category: "Bank Charges", desc: "FNB — Monthly Service Fees", nov: 980, dec: 962, jan: 856, avg: 933, badge: "bank" },
+    { category: "Bond / Mortgage", desc: "Standard Bank â PPS Namibia", nov: 13574, dec: 13574, jan: 14372, avg: 13840, badge: "bond" },
+    { category: "Insurance / Investment", desc: "Sanlam â Large Policy", nov: 15969, dec: 15969, jan: 15969, avg: 15969, badge: "insurance" },
+    { category: "Insurance", desc: "Sanlam â Life / Risk Cover", nov: 1102, dec: 1102, jan: 1102, avg: 1102, badge: "insurance" },
+    { category: "Vehicle Finance", desc: "FNB â Stina VAF", nov: 2579, dec: 2579, jan: 2579, avg: 2579, badge: "vaf" },
+    { category: "Mobile Contract", desc: "MTC â Contract 1", nov: 1203, dec: 1203, jan: 1203, avg: 1203, badge: "mobile" },
+    { category: "Mobile Contract", desc: "MTC â Contract 2", nov: null, dec: 1641, jan: 1191, avg: 944, badge: "mobile" },
+    { category: "Medical Aid", desc: "Momentum â Medical", nov: null, dec: 599, jan: 599, avg: 399, badge: "medical" },
+    { category: "Security", desc: "G4S Namibia â Monitoring", nov: null, dec: 559, jan: 559, avg: 373, badge: "security" },
+    { category: "Own Investment", desc: "Scheduled â Dec Vacation Fund", nov: 1120, dec: 560, jan: 1120, avg: 933, badge: "invest" },
+    { category: "Own Investment", desc: "Scheduled â Meno School Fund", nov: 1400, dec: 700, jan: 1750, avg: 1283, badge: "invest" },
+    { category: "Bank Charges", desc: "FNB â Monthly Service Fees", nov: 980, dec: 962, jan: 856, avg: 933, badge: "bank" },
   ],
   totalDeductionAvg: 39558,
   balanceHistory: [
@@ -1081,11 +1093,11 @@ const MiniSparkline = ({ data, color }) => {
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // BORROWER VIEWS
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// Credit Score / Coming Soon page — replaces old BorrowerHome
+// Credit Score / Coming Soon page â replaces old BorrowerHome
 const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
   const [notified, setNotified] = useState(false);
 
@@ -1112,24 +1124,24 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
         accountAge: "> 24 months", salaryInAccount: "Yes consistently", accountUsage: "Active & stable",
         negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
         incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
-        dtiRatio: !b.dti ? "30 – 50%" : b.dti < 0.3 ? "< 30%" : b.dti < 0.5 ? "30 – 50%" : "> 50%",
+        dtiRatio: !b.dti ? "30 â 50%" : b.dti < 0.3 ? "< 30%" : b.dti < 0.5 ? "30 â 50%" : "> 50%",
         disposableIncome: (b.salary - b.expenses) > b.salary * 0.4 ? "Strong surplus" : "Moderate",
         loanBurden: "Low", incomeMismatch: "None", docAuthenticity: "Verified",
       })
     : null;
 
   const features = [
-    { icon: "📊", title: "Full Credit Score (0–850)", desc: "A comprehensive Namibian credit score based on TransUnion bureau data, payment history, and behavioural scoring — the same score banks and lenders see.", tag: null },
-    { icon: "📋", title: "Complete Payment History", desc: "Every credit account, loan, and payment record from all registered Namibian credit providers — presented in a clean, readable report.", tag: null },
-    { icon: "🏦", title: "Bureau Report", desc: "Official TransUnion Namibia credit bureau report — the same document required by banks, employers, and landlords.", tag: "Powered by TransUnion" },
-    { icon: "🎯", title: "Lender-Grade Report Card", desc: "A formatted PDF you can hand directly to any lender, employer, or financial institution — no explaining needed.", tag: null },
-    { icon: "🔔", title: "Score Change Alerts", desc: "Get notified whenever your credit score changes — good or bad. Stay on top of your credit health automatically.", tag: "Subscription" },
-    { icon: "💡", title: "Score Improvement Tips", desc: "Personalised, actionable advice on exactly which steps will raise your score the most — ranked by impact.", tag: null },
+    { icon: "ð", title: "Full Credit Score (0â850)", desc: "A comprehensive Namibian credit score based on TransUnion bureau data, payment history, and behavioural scoring â the same score banks and lenders see.", tag: null },
+    { icon: "ð", title: "Complete Payment History", desc: "Every credit account, loan, and payment record from all registered Namibian credit providers â presented in a clean, readable report.", tag: null },
+    { icon: "ð¦", title: "Bureau Report", desc: "Official TransUnion Namibia credit bureau report â the same document required by banks, employers, and landlords.", tag: "Powered by TransUnion" },
+    { icon: "ð¯", title: "Lender-Grade Report Card", desc: "A formatted PDF you can hand directly to any lender, employer, or financial institution â no explaining needed.", tag: null },
+    { icon: "ð", title: "Score Change Alerts", desc: "Get notified whenever your credit score changes â good or bad. Stay on top of your credit health automatically.", tag: "Subscription" },
+    { icon: "ð¡", title: "Score Improvement Tips", desc: "Personalised, actionable advice on exactly which steps will raise your score the most â ranked by impact.", tag: null },
   ];
 
   const pricingTiers = [
-    { name: "Once-Off Report", price: "N$99", period: "single purchase", color: DS.colors.info, icon: "📄", features: ["Full credit score", "Bureau report PDF", "Payment history", "Lender-grade report card", "Valid 30 days"] },
-    { name: "Annual Subscription", price: "N$249", period: "per year", color: DS.colors.gold, icon: "⭐", badge: "Best Value", features: ["Everything in once-off", "Monthly score updates", "Score change alerts", "Score improvement tips", "Unlimited downloads", "12-month history tracking"] },
+    { name: "Once-Off Report", price: "N$99", period: "single purchase", color: DS.colors.info, icon: "ð", features: ["Full credit score", "Bureau report PDF", "Payment history", "Lender-grade report card", "Valid 30 days"] },
+    { name: "Annual Subscription", price: "N$249", period: "per year", color: DS.colors.gold, icon: "â­", badge: "Best Value", features: ["Everything in once-off", "Monthly score updates", "Score change alerts", "Score improvement tips", "Unlimited downloads", "12-month history tracking"] },
   ];
 
   return (
@@ -1140,26 +1152,26 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
         <div style={{ position: "absolute", bottom: -30, left: "30%", width: 150, height: 150, background: `radial-gradient(circle, ${DS.colors.info}10 0%, transparent 70%)`, pointerEvents: "none" }} />
 
         <div style={{ display: "flex", alignItems: "flex-start", gap: 24, position: "relative", zIndex: 1 }}>
-          <div style={{ width: 72, height: 72, background: DS.colors.goldDim, border: `2px solid ${DS.colors.gold}55`, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, flexShrink: 0 }}>⭐</div>
+          <div style={{ width: 72, height: 72, background: DS.colors.goldDim, border: `2px solid ${DS.colors.gold}55`, borderRadius: 20, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, flexShrink: 0 }}>â­</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 8 }}>
               <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold, letterSpacing: "-0.02em" }}>Credit Score & Profile Report</h1>
               <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: "0.1em", background: DS.colors.goldDim, color: DS.colors.gold, border: `1px solid ${DS.colors.gold}55`, borderRadius: 6, padding: "3px 10px", textTransform: "uppercase" }}>Coming Soon</span>
             </div>
             <p style={{ fontSize: 16, color: DS.colors.textSecondary, lineHeight: 1.6, maxWidth: 580 }}>
-              Know exactly where you stand. Get your full Namibian credit score, bureau report, and a lender-grade profile — everything you need to walk into any financial negotiation with confidence.
+              Know exactly where you stand. Get your full Namibian credit score, bureau report, and a lender-grade profile â everything you need to walk into any financial negotiation with confidence.
             </p>
-            <p style={{ fontSize: 13, color: DS.colors.gold, marginTop: 12, fontWeight: 500 }}>Powered by TransUnion Namibia · Fee-based service · Launching Q3 2025</p>
+            <p style={{ fontSize: 13, color: DS.colors.gold, marginTop: 12, fontWeight: 500 }}>Powered by TransUnion Namibia Â· Fee-based service Â· Launching Q3 2025</p>
           </div>
           <div style={{ flexShrink: 0 }}>
             {notified ? (
               <div style={{ padding: "10px 20px", background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}44`, borderRadius: 10, textAlign: "center" }}>
-                <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 700 }}>✓ You're on the list!</p>
+                <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 700 }}>â You're on the list!</p>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>We'll notify you on launch</p>
               </div>
             ) : (
               <button onClick={handleNotifyMe} style={{ padding: "12px 24px", background: DS.colors.gold, color: "#0A0F1E", borderRadius: 10, border: "none", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-                🔔 Notify Me on Launch
+                ð Notify Me on Launch
               </button>
             )}
           </div>
@@ -1172,7 +1184,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <div>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Your Current Risk Score Preview</h3>
-              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>Based on your profile — your full credit score will be more comprehensive</p>
+              <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>Based on your profile â your full credit score will be more comprehensive</p>
             </div>
             <div style={{ padding: "4px 12px", background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 8, fontSize: 12, color: DS.colors.gold, fontWeight: 600 }}>Preview Only</div>
           </div>
@@ -1197,7 +1209,7 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
                 ))}
               </div>
               <div style={{ padding: 12, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}33`, borderRadius: 10, fontSize: 13, color: DS.colors.textSecondary, lineHeight: 1.6 }}>
-                💡 Your full credit score from TransUnion will include bureau data, credit history from all Namibian lenders, and a 0–850 score — giving lenders a far more complete picture than our platform score alone.
+                ð¡ Your full credit score from TransUnion will include bureau data, credit history from all Namibian lenders, and a 0â850 score â giving lenders a far more complete picture than our platform score alone.
               </div>
             </div>
           </div>
@@ -1236,12 +1248,12 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
             <ul style={{ listStyle: "none", marginBottom: 24 }}>
               {(tier.features||[]).map((f, j) => (
                 <li key={j} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 8 }}>
-                  <span style={{ color: tier.color, fontWeight: 700 }}>✓</span> {f}
+                  <span style={{ color: tier.color, fontWeight: 700 }}>â</span> {f}
                 </li>
               ))}
             </ul>
             <button onClick={handleNotifyMe} style={{ width: "100%", padding: 12, borderRadius: 10, border: `1px solid ${tier.color}`, background: i === 1 ? tier.color : "transparent", color: i === 1 ? "#0A0F1E" : tier.color, fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-              {notified ? "✓ You're on the list" : "Notify Me"}
+              {notified ? "â You're on the list" : "Notify Me"}
             </button>
           </div>
         ))}
@@ -1252,10 +1264,10 @@ const BorrowerCreditScore = ({ user, borrower, setView, showToast }) => {
         <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 12 }}>Why Your Credit Score Matters in Namibia</h3>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
           {[
-            { title: "Access Better Interest Rates", body: "A strong credit score unlocks lower interest rates from banks and lenders — potentially saving thousands of dollars over the life of a loan." },
+            { title: "Access Better Interest Rates", body: "A strong credit score unlocks lower interest rates from banks and lenders â potentially saving thousands of dollars over the life of a loan." },
             { title: "Faster Loan Approvals", body: "Lenders approve borrowers faster when a verified credit report is already available. No waiting for manual checks." },
             { title: "Employer & Landlord Trust", body: "Many Namibian employers and landlords now request a credit report as part of their application process." },
-            { title: "Know Before They Do", body: "See exactly what lenders see before you apply — so there are no surprises and you can fix issues proactively." },
+            { title: "Know Before They Do", body: "See exactly what lenders see before you apply â so there are no surprises and you can fix issues proactively." },
           ].map((item, i) => (
             <div key={i} style={{ padding: 14, background: DS.colors.surface, borderRadius: 10 }}>
               <p style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{item.title}</p>
@@ -1332,13 +1344,13 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
     // 1. Update React state immediately (optimistic)
     setBorrower(updated);
     setEditMode(false);
-    // 2. Persist to storage (source of truth — survives refresh/re-login)
+    // 2. Persist to storage (source of truth â survives refresh/re-login)
     try {
       await StorageService.saveBorrowerProfile(user.id, updated);
       // 3. Sync updated profile into LENDER_DB in-memory so lender/admin portals
       //    see the change immediately in the same session
       StorageService.syncToLenderDB(user.id, updated);
-      showToast("Profile saved — visible to lenders and admin ✓");
+      showToast("Profile saved â visible to lenders and admin â");
     } catch (e) {
       showToast("Profile updated in session (storage unavailable)", "info");
     }
@@ -1346,7 +1358,7 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
 
   const handleCancel = () => { resetForm(); setEditMode(false); };
 
-  // Check if borrower has an active/pending loan — block edits if so
+  // Check if borrower has an active/pending loan â block edits if so
   const [hasActiveLoan, setHasActiveLoan] = useState(false);
   useEffect(function() {
     if (!user?.id) return;
@@ -1363,40 +1375,40 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
   const editActions = editMode
     ? <div style={{ display:"flex", gap:8 }}>
         <Btn variant="ghost" onClick={handleCancel}>Cancel</Btn>
-        <Btn onClick={handleSave} icon="💾">Save Changes</Btn>
+        <Btn onClick={handleSave} icon="ð¾">Save Changes</Btn>
       </div>
     : hasActiveLoan
       ? <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 12, color: DS.colors.warning }}>🔒 Locked — active loan</span>
+          <span style={{ fontSize: 12, color: DS.colors.warning }}>ð Locked â active loan</span>
           <button style={{ padding: "6px 14px", borderRadius: 8, border: "1px solid " + DS.colors.border, background: DS.colors.surfaceAlt, color: DS.colors.textMuted, fontSize: 12, fontWeight: 500, cursor: "not-allowed", opacity: 0.5 }} disabled>Contact admin to edit</button>
         </div>
-      : <Btn variant="outline" onClick={() => setEditMode(true)} icon="✏️">Edit Profile</Btn>;
+      : <Btn variant="outline" onClick={() => setEditMode(true)} icon="âï¸">Edit Profile</Btn>;
 
   return (
     <div className="fade-in">
-      <PageHeader title="My Profile" subtitle="Personal & financial information — changes persist across sessions" actions={editActions} />
+      <PageHeader title="My Profile" subtitle="Personal & financial information â changes persist across sessions" actions={editActions} />
 
-      {/* ── Completion checklist ── */}
+      {/* ââ Completion checklist ââ */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
         {[
-          { label: "Profile", done: !!(borrower?.idNumber && borrower?.employer && borrower?.salary), icon: "👤", hint: borrower?.idNumber ? "Complete" : "Fill in your details", action: null },
-          { label: "Documents", done: (borrower?.documents?.length || 0) >= 3, icon: "📁", hint: `${borrower?.documents?.length || 0}/3 required files`, action: "borrower-docs" },
-          { label: "Identity KYC", done: borrower?.kycStatus === "verified", icon: "🪪", hint: borrower?.kycStatus === "verified" ? "Home Affairs confirmed" : "Verify your ID", action: "borrower-docs" },
-          { label: "Bank Account", done: !!borrower?.bankVerified, icon: "🏦", hint: borrower?.bankVerified ? "Penny test passed" : "Verify your account", action: "borrower-docs" },
+          { label: "Profile", done: !!(borrower?.idNumber && borrower?.employer && borrower?.salary), icon: "ð¤", hint: borrower?.idNumber ? "Complete" : "Fill in your details", action: null },
+          { label: "Documents", done: (borrower?.documents?.length || 0) >= 3, icon: "ð", hint: `${borrower?.documents?.length || 0}/3 required files`, action: "borrower-docs" },
+          { label: "Identity KYC", done: borrower?.kycStatus === "verified", icon: "ðªª", hint: borrower?.kycStatus === "verified" ? "Home Affairs confirmed" : "Verify your ID", action: "borrower-docs" },
+          { label: "Bank Account", done: !!borrower?.bankVerified, icon: "ð¦", hint: borrower?.bankVerified ? "Penny test passed" : "Verify your account", action: "borrower-docs" },
         ].map((item, i) => (
           <div key={i} onClick={() => item.action && setView(item.action)} className={item.action ? "card-hover" : ""}
             style={{ padding: "12px 14px", borderRadius: 10, background: item.done ? DS.colors.accentDim : DS.colors.surfaceAlt, border: `1px solid ${item.done ? DS.colors.accent + "44" : DS.colors.border}`, display: "flex", alignItems: "center", gap: 10, cursor: item.action ? "pointer" : "default", transition: "all .2s" }}>
             <span style={{ fontSize: 18 }}>{item.icon}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ fontSize: 12, fontWeight: 700, color: item.done ? DS.colors.accent : DS.colors.textPrimary }}>{item.label}</p>
-              <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{item.done ? item.hint : (item.action ? "Click to complete →" : item.hint)}</p>
+              <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{item.done ? item.hint : (item.action ? "Click to complete â" : item.hint)}</p>
             </div>
-            <span style={{ fontSize: 14, color: item.done ? DS.colors.accent : DS.colors.textMuted, flexShrink: 0 }}>{item.done ? "✓" : item.action ? "→" : "○"}</span>
+            <span style={{ fontSize: 14, color: item.done ? DS.colors.accent : DS.colors.textMuted, flexShrink: 0 }}>{item.done ? "â" : item.action ? "â" : "â"}</span>
           </div>
         ))}
       </div>
 
-      {/* ── Personal + Financial info ── */}
+      {/* ââ Personal + Financial info ââ */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
         <Card>
           <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16, fontSize: 15 }}>Personal Information</h3>
@@ -1412,15 +1424,15 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
           {editMode ? (
             <>
               <Input label="Namibian ID Number" value={form.idNumber} onChange={v => setForm({ ...form, idNumber: v })}
-                placeholder="e.g. 90042300543" required hint="11-digit national ID — used for KYC verification" />
+                placeholder="e.g. 90042300543" required hint="11-digit national ID â used for KYC verification" />
               <Input label="Mobile Number" value={form.phone} onChange={v => setForm({ ...form, phone: v })}
                 placeholder="+264 81 000 0000" required hint="Used for 2FA and lender communication" />
             </>
           ) : (
             <>
               {[
-                { label: "Namibian ID Number", value: borrower?.idNumber || "—" },
-                { label: "Mobile Number", value: borrower?.phone || "—" },
+                { label: "Namibian ID Number", value: borrower?.idNumber || "â" },
+                { label: "Mobile Number", value: borrower?.phone || "â" },
               ].map(f => (
                 <div key={f.label} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 8, marginBottom: 10 }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{f.label}</p>
@@ -1463,8 +1475,8 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
                 options={[
                   { value: "", label: "How long at current employer?" },
                   { value: "> 24 months", label: "More than 24 months" },
-                  { value: "12 - 24 months", label: "12 – 24 months" },
-                  { value: "6 - 12 months", label: "6 – 12 months" },
+                  { value: "12 - 24 months", label: "12 â 24 months" },
+                  { value: "6 - 12 months", label: "6 â 12 months" },
                   { value: "< 6 months", label: "Less than 6 months" },
                 ]} />
               <Input label="Gross Monthly Salary (N$)" value={form.salary} onChange={v => setForm({ ...form, salary: v })}
@@ -1481,25 +1493,25 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
                 options={[
                   { value: "", label: "How long have you held your bank account?" },
                   { value: "> 24 months", label: "More than 24 months" },
-                  { value: "12 - 24 months", label: "12 – 24 months" },
-                  { value: "6 - 12 months", label: "6 – 12 months" },
+                  { value: "12 - 24 months", label: "12 â 24 months" },
+                  { value: "6 - 12 months", label: "6 â 12 months" },
                   { value: "< 6 months", label: "Less than 6 months" },
                 ]} />
             </>
           ) : (
             <>
               {[
-                { label: "Employer / Business", value: borrower?.employer || "—" },
-                { label: "Employer Type", value: ({government:"Government",large_private:"Well-known private institution",sme:"SME / small business",informal:"Informal / Self-employed"})[borrower?.employerType] || "—" },
-                { label: "Job Tenure", value: borrower?.jobTenure || "—" },
-                { label: "Income Regularity", value: ({fixed:"Fixed monthly salary",variable:"Variable / commission-based",irregular:"Irregular / seasonal"})[borrower?.incomeRegularity] || "—" },
-                { label: "Gross Monthly Salary", value: borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "—" },
-                { label: "Monthly Expenses", value: borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "—" },
-                { label: "Disposable Income", value: (borrower?.salary && borrower?.expenses) ? "N$" + ((+borrower.salary) - (+borrower.expenses)).toLocaleString() + "/mo" : "—" },
-                { label: "Debt-to-Income Ratio", value: (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses) / (+borrower.salary)) * 100).toFixed(1) + "%" : "—" },
-                { label: "Bank Account Age", value: borrower?.accountAge || "—" },
-                { label: "Credit Tier", value: borrower?.tier ? "Tier " + borrower.tier : "—" },
-                { label: "Max Loan Amount", value: borrower?.maxLoan ? "N$" + Math.round(borrower.maxLoan).toLocaleString() : "—" },
+                { label: "Employer / Business", value: borrower?.employer || "â" },
+                { label: "Employer Type", value: ({government:"Government",large_private:"Well-known private institution",sme:"SME / small business",informal:"Informal / Self-employed"})[borrower?.employerType] || "â" },
+                { label: "Job Tenure", value: borrower?.jobTenure || "â" },
+                { label: "Income Regularity", value: ({fixed:"Fixed monthly salary",variable:"Variable / commission-based",irregular:"Irregular / seasonal"})[borrower?.incomeRegularity] || "â" },
+                { label: "Gross Monthly Salary", value: borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "â" },
+                { label: "Monthly Expenses", value: borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "â" },
+                { label: "Disposable Income", value: (borrower?.salary && borrower?.expenses) ? "N$" + ((+borrower.salary) - (+borrower.expenses)).toLocaleString() + "/mo" : "â" },
+                { label: "Debt-to-Income Ratio", value: (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses) / (+borrower.salary)) * 100).toFixed(1) + "%" : "â" },
+                { label: "Bank Account Age", value: borrower?.accountAge || "â" },
+                { label: "Credit Tier", value: borrower?.tier ? "Tier " + borrower.tier : "â" },
+                { label: "Max Loan Amount", value: borrower?.maxLoan ? "N$" + Math.round(borrower.maxLoan).toLocaleString() : "â" },
               ].map(f => (
                 <div key={f.label} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 8, marginBottom: 10 }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{f.label}</p>
@@ -1508,12 +1520,12 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
               ))}
               {!borrower?.salary && (
                 <div style={{ padding: 12, background: DS.colors.infoDim, borderRadius: 8, border: "1px solid " + DS.colors.info + "33" }}>
-                  <p style={{ fontSize: 12, color: DS.colors.info }}>💡 Click Edit Profile to add your financial details and unlock loan applications.</p>
+                  <p style={{ fontSize: 12, color: DS.colors.info }}>ð¡ Click Edit Profile to add your financial details and unlock loan applications.</p>
                 </div>
               )}
               {borrower?.salary && (
                 <div style={{ padding: 12, background: DS.colors.accentDim, borderRadius: 8, border: "1px solid " + DS.colors.accent + "33", marginTop: 4 }}>
-                  <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>📊 View your full scorecard — <span onClick={() => setView("borrower-scorecard")} style={{textDecoration:"underline",cursor:"pointer"}}>My Scorecard →</span></p>
+                  <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>ð View your full scorecard â <span onClick={() => setView("borrower-scorecard")} style={{textDecoration:"underline",cursor:"pointer"}}>My Scorecard â</span></p>
                 </div>
               )}
             </>
@@ -1522,19 +1534,19 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
       </div>
 
 
-      {/* ── Credit Score Coming Soon ── */}
+      {/* ââ Credit Score Coming Soon ââ */}
       <Card style={{ background: "linear-gradient(135deg, #0f172a 0%, #1a1f35 100%)", border: `1px solid ${DS.colors.gold}44`, marginBottom: 20 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ width: 52, height: 52, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>⭐</div>
+          <div style={{ width: 52, height: 52, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, flexShrink: 0 }}>â­</div>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: DS.colors.gold }}>Full Credit Score & Profile Report</h3>
               <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: "0.08em", background: DS.colors.goldDim, color: DS.colors.gold, border: `1px solid ${DS.colors.gold}55`, borderRadius: 4, padding: "2px 7px", textTransform: "uppercase" }}>Coming Soon</span>
             </div>
             <p style={{ fontSize: 13, color: DS.colors.textSecondary, lineHeight: 1.5 }}>
-              Get a comprehensive Namibian credit score, full payment history, bureau check, and a lender-grade credit report — giving you maximum negotiating power with any financial institution.
+              Get a comprehensive Namibian credit score, full payment history, bureau check, and a lender-grade credit report â giving you maximum negotiating power with any financial institution.
             </p>
-            <p style={{ fontSize: 12, color: DS.colors.gold, marginTop: 6, fontWeight: 500 }}>A small once-off fee will apply · Powered by TransUnion Namibia</p>
+            <p style={{ fontSize: 12, color: DS.colors.gold, marginTop: 6, fontWeight: 500 }}>A small once-off fee will apply Â· Powered by TransUnion Namibia</p>
           </div>
           <button style={{ padding: "8px 18px", background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}55`, borderRadius: 8, color: DS.colors.gold, fontSize: 12, fontWeight: 700, cursor: "pointer", whiteSpace: "nowrap", flexShrink: 0 }}>
             Notify Me
@@ -1549,9 +1561,9 @@ const BorrowerProfile = ({ user, borrower, setBorrower, showToast, setView }) =>
 
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // ENHANCED DOCUMENTS & KYC VERIFICATION
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
   const [uploading, setUploading] = useState(null);
@@ -1580,11 +1592,11 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
   }, [borrower?.userId || borrower?.id]);
 
   const docs = [
-    { key: "id", label: "National ID / Passport", desc: "Clear scan or photo — front and back", icon: "🪪", required: true },
-    { key: "payslip", label: "Latest Payslip", desc: "Not older than 3 months, employer-stamped", icon: "📄", required: true },
-    { key: "bank_stmt", label: "Bank Statement (3 months)", desc: "Official PDF from your bank — used for scorecard analysis", icon: "🏦", required: true },
-    { key: "proof_addr", label: "Proof of Address", desc: "Utility bill or lease not older than 3 months", icon: "🏠", required: false },
-    { key: "employment", label: "Employment Confirmation Letter", desc: "Signed by HR/Manager on company letterhead", icon: "💼", required: false },
+    { key: "id", label: "National ID / Passport", desc: "Clear scan or photo â front and back", icon: "ðªª", required: true },
+    { key: "payslip", label: "Latest Payslip", desc: "Not older than 3 months, employer-stamped", icon: "ð", required: true },
+    { key: "bank_stmt", label: "Bank Statement (3 months)", desc: "Official PDF from your bank â used for scorecard analysis", icon: "ð¦", required: true },
+    { key: "proof_addr", label: "Proof of Address", desc: "Utility bill or lease not older than 3 months", icon: "ð ", required: false },
+    { key: "employment", label: "Employment Confirmation Letter", desc: "Signed by HR/Manager on company letterhead", icon: "ð¼", required: false },
   ];
 
   const uploaded = borrower?.documents || [];
@@ -1643,7 +1655,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         var updated = Object.assign({}, borrower, { documents: updatedDocs });
         setBorrower(updated);
         setUploading(null);
-        showToast((docLabel ? docLabel.label : key) + " uploaded successfully ✓");
+        showToast((docLabel ? docLabel.label : key) + " uploaded successfully â");
 
         // 4. Update borrower profile with new doc count
         await StorageService.saveBorrowerProfile(uid, updated);
@@ -1697,7 +1709,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         var uid = borrower?.userId || borrower?.id;
         await SB.update("borrower_profiles", { user_id: uid }, { kyc_status: "verified", kyc_verified_at: new Date().toISOString(), id_number: idForm.idNumber });
       } catch (e) { console.log("KYC update:", e.message); }
-      showToast("✅ Identity verified successfully via Home Affairs lookup");
+      showToast("â Identity verified successfully via Home Affairs lookup");
     }, 2800);
   };
 
@@ -1714,7 +1726,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         var uid = borrower?.userId || borrower?.id;
         await SB.update("borrower_profiles", { user_id: uid }, { bank_verified: true, bank_name: bankForm.bank, bank_account_number: bankForm.accNumber, bank_verified_at: new Date().toISOString() });
       } catch (e) { console.log("Bank update:", e.message); }
-      showToast("✅ Bank account verified via instant EFT penny test");
+      showToast("â Bank account verified via instant EFT penny test");
     }, 3200);
   };
 
@@ -1722,7 +1734,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
 
   return (
     <div className="fade-in">
-      <PageHeader title="Documents & KYC" subtitle="Upload documents — files are encrypted and stored persistently" />
+      <PageHeader title="Documents & KYC" subtitle="Upload documents â files are encrypted and stored persistently" />
       <div style={{ display: "flex", gap: 8, marginBottom: 28, flexWrap: "wrap" }}>
         <Badge label="AES-256 Encrypted" color={DS.colors.accent} />
         <Badge label="NAMFISA KYC" color={DS.colors.info} />
@@ -1733,9 +1745,9 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
       {/* Verification Status Bar */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12, marginBottom: 28 }}>
         {[
-          { label: "Document Upload", done: uploaded.length >= 3, icon: "📁", sub: `${uploaded.length}/3 required files` },
-          { label: "Identity Verification", done: idVerified, icon: "🪪", sub: idVerified ? "Verified via Home Affairs" : "Pending verification" },
-          { label: "Bank Account Verification", done: bankVerified, icon: "🏦", sub: bankVerified ? `${bankForm.bank || "Account"} confirmed` : "Pending penny test" },
+          { label: "Document Upload", done: uploaded.length >= 3, icon: "ð", sub: `${uploaded.length}/3 required files` },
+          { label: "Identity Verification", done: idVerified, icon: "ðªª", sub: idVerified ? "Verified via Home Affairs" : "Pending verification" },
+          { label: "Bank Account Verification", done: bankVerified, icon: "ð¦", sub: bankVerified ? `${bankForm.bank || "Account"} confirmed` : "Pending penny test" },
         ].map((item, i) => (
           <div key={i} style={{
             padding: 16, borderRadius: 12,
@@ -1747,7 +1759,7 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <p style={{ fontSize: 13, fontWeight: 600 }}>{item.label}</p>
-                <span style={{ fontSize: 14, color: item.done ? DS.colors.accent : DS.colors.textMuted }}>{item.done ? "✓" : "○"}</span>
+                <span style={{ fontSize: 14, color: item.done ? DS.colors.accent : DS.colors.textMuted }}>{item.done ? "â" : "â"}</span>
               </div>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>{item.sub}</p>
             </div>
@@ -1761,20 +1773,20 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         <Card style={{ border: idVerified ? `1px solid ${DS.colors.accent}44` : `1px solid ${DS.colors.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontSize: 24 }}>🪪</span>
+              <span style={{ fontSize: 24 }}>ðªª</span>
               <div>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Identity Verification</h3>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Namibian Home Affairs lookup</p>
               </div>
             </div>
-            {idVerified ? <Badge label="Verified ✓" color={DS.colors.accent} /> : <Badge label="Required" color={DS.colors.danger} />}
+            {idVerified ? <Badge label="Verified â" color={DS.colors.accent} /> : <Badge label="Required" color={DS.colors.danger} />}
           </div>
           <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginBottom: 14, lineHeight: 1.6 }}>
             Your ID number is cross-checked against the <strong>Namibian Home Affairs</strong> population register. Name, date of birth, and ID number must match exactly.
           </p>
           {idVerified ? (
             <div style={{ padding: 12, background: DS.colors.accentDim, borderRadius: 8 }}>
-              <p style={{ fontSize: 12, color: DS.colors.accent }}>✅ Identity confirmed — {idForm.idNumber || borrower?.idNumber}</p>
+              <p style={{ fontSize: 12, color: DS.colors.accent }}>â Identity confirmed â {idForm.idNumber || borrower?.idNumber}</p>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>Verified {new Date().toLocaleDateString()}</p>
             </div>
           ) : (
@@ -1786,20 +1798,20 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
         <Card style={{ border: bankVerified ? `1px solid ${DS.colors.accent}44` : `1px solid ${DS.colors.border}` }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <span style={{ fontSize: 24 }}>🏦</span>
+              <span style={{ fontSize: 24 }}>ð¦</span>
               <div>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Account Verification</h3>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Instant EFT penny test</p>
               </div>
             </div>
-            {bankVerified ? <Badge label="Verified ✓" color={DS.colors.accent} /> : <Badge label="Required" color={DS.colors.danger} />}
+            {bankVerified ? <Badge label="Verified â" color={DS.colors.accent} /> : <Badge label="Required" color={DS.colors.danger} />}
           </div>
           <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginBottom: 14, lineHeight: 1.6 }}>
             A <strong>N$0.01 test credit</strong> is sent to your account to confirm it's active and in your name. The account must match the name on your ID.
           </p>
           {bankVerified ? (
             <div style={{ padding: 12, background: DS.colors.accentDim, borderRadius: 8 }}>
-              <p style={{ fontSize: 12, color: DS.colors.accent }}>✅ {bankForm.bank} ···{bankForm.accNumber?.slice(-4)} confirmed</p>
+              <p style={{ fontSize: 12, color: DS.colors.accent }}>â {bankForm.bank} Â·Â·Â·{bankForm.accNumber?.slice(-4)} confirmed</p>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>Penny test passed {new Date().toLocaleDateString()}</p>
             </div>
           ) : (
@@ -1835,18 +1847,18 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
                   <p style={{ fontWeight: 600, fontSize: 14 }}>{doc.label}</p>
                   {doc.required && !isUploaded && <Badge label="Required" color={DS.colors.danger} />}
-                  {isUploaded && <Badge label="Uploaded ✓" color={DS.colors.accent} />}
+                  {isUploaded && <Badge label="Uploaded â" color={DS.colors.accent} />}
                   {!doc.required && !isUploaded && <Badge label="Optional" color={DS.colors.textMuted} />}
                 </div>
                 <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>{doc.desc}</p>
                 {fileInfo && (
                   <p style={{ fontSize: 11, color: DS.colors.accent, marginTop: 4 }}>
-                    📎 {fileInfo.name} · {fileInfo.size} · AES-256 encrypted
+                    ð {fileInfo.name} Â· {fileInfo.size} Â· AES-256 encrypted
                   </p>
                 )}
                 {isUploaded && !fileInfo && (
                   <p style={{ fontSize: 11, color: DS.colors.accent, marginTop: 4 }}>
-                    ✓ On file · Click Re-upload to replace
+                    â On file Â· Click Re-upload to replace
                   </p>
                 )}
               </div>
@@ -1861,11 +1873,11 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
                         {fileInfo && fileInfo.filePath && (
                           <Btn variant="outline" small onClick={function() {
                             if (fileInfo.filePath) {
-                              window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + fileInfo.filePath, "_blank");
-                            } else { showToast("Could not open file — try re-uploading", "info"); }
-                          }}>👁 View</Btn>
+                              openDocFile(fileInfo.filePath);
+                            } else { showToast("Could not open file â try re-uploading", "info"); }
+                          }}>ð View</Btn>
                         )}
-                        <Btn variant="ghost" small onClick={function() { triggerFileInput(doc.key); }}>🔄 Replace</Btn>
+                        <Btn variant="ghost" small onClick={function() { triggerFileInput(doc.key); }}>ð Replace</Btn>
                         <Btn variant="danger" small onClick={async function() {
                           var uid = borrower?.userId || borrower?.id;
                           var updatedDocs = (borrower?.documents || []).filter(function(d) { return d !== doc.key + ".pdf"; });
@@ -1876,9 +1888,9 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
                           await StorageService.saveBorrowerProfile(uid, updated);
                           StorageService.syncToLenderDB(uid, updated);
                           showToast(doc.label + " removed", "info");
-                        }}>🗑 Delete</Btn>
+                        }}>ð Delete</Btn>
                       </>
-                    : <Btn small onClick={function() { triggerFileInput(doc.key); }}>📎 Choose File</Btn>
+                    : <Btn small onClick={function() { triggerFileInput(doc.key); }}>ð Choose File</Btn>
                 }
               </div>
             </div>
@@ -1888,14 +1900,14 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
 
       <div style={{ marginTop: 20, padding: 14, background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 10 }}>
         <p style={{ fontSize: 13, color: DS.colors.info, lineHeight: 1.6 }}>
-          🔐 <strong>Security & Consent:</strong> All documents are AES-256 encrypted at rest and TLS 1.3 in transit. Documents are stored in compliance with Namibia's FIA 2012. Lenders may only access your documents after you submit a loan application and provide explicit consent. Your data is never sold or shared without authorisation.
+          ð <strong>Security & Consent:</strong> All documents are AES-256 encrypted at rest and TLS 1.3 in transit. Documents are stored in compliance with Namibia's FIA 2012. Lenders may only access your documents after you submit a loan application and provide explicit consent. Your data is never sold or shared without authorisation.
         </p>
       </div>
 
       {/* ID Verification Modal */}
-      <Modal open={idModal} onClose={() => setIdModal(false)} title="Identity Verification — Home Affairs">
+      <Modal open={idModal} onClose={() => setIdModal(false)} title="Identity Verification â Home Affairs">
         <div style={{ padding: 14, background: DS.colors.infoDim, borderRadius: 8, marginBottom: 20, border: `1px solid ${DS.colors.info}33` }}>
-          <p style={{ fontSize: 13, color: DS.colors.info }}>🏛️ Your details will be securely checked against the <strong>Namibian Ministry of Home Affairs</strong> population register in real-time.</p>
+          <p style={{ fontSize: 13, color: DS.colors.info }}>ðï¸ Your details will be securely checked against the <strong>Namibian Ministry of Home Affairs</strong> population register in real-time.</p>
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6 }}>Full Name (as on ID) <span style={{ color: DS.colors.accent }}>*</span></label>
@@ -1924,9 +1936,9 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
       </Modal>
 
       {/* Bank Verification Modal */}
-      <Modal open={bankModal} onClose={() => setBankModal(false)} title="Bank Account Verification — Penny Test">
+      <Modal open={bankModal} onClose={() => setBankModal(false)} title="Bank Account Verification â Penny Test">
         <div style={{ padding: 14, background: DS.colors.accentDim, borderRadius: 8, marginBottom: 20, border: `1px solid ${DS.colors.accent}33` }}>
-          <p style={{ fontSize: 13, color: DS.colors.accent }}>💳 A <strong>N$0.01 EFT</strong> will be sent to your account. Once it reflects, the account is confirmed active and in your name. The cent is yours to keep.</p>
+          <p style={{ fontSize: 13, color: DS.colors.accent }}>ð³ A <strong>N$0.01 EFT</strong> will be sent to your account. Once it reflects, the account is confirmed active and in your name. The cent is yours to keep.</p>
         </div>
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6 }}>Bank <span style={{ color: DS.colors.accent }}>*</span></label>
@@ -1961,9 +1973,9 @@ const BorrowerDocs = ({ borrower, setBorrower, showToast }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-// BORROWER SCORECARD SCREEN — with integrated Risk Profile
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// BORROWER SCORECARD SCREEN â with integrated Risk Profile
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const BorrowerScorecard = ({ borrower, showToast, setView }) => {
   const [analyzing, setAnalyzing] = useState(false);
@@ -1985,7 +1997,7 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
     var e = +borrower?.expenses || 0;
     var dti = s > 0 ? e / s : 0.4;
     return {
-      jobTenure: borrower?.jobTenure || "6 – 12 months",
+      jobTenure: borrower?.jobTenure || "6 â 12 months",
       incomeRegularity: borrower?.incomeRegularity === "fixed" ? "Fixed monthly salary" : borrower?.incomeRegularity === "variable" ? "Mostly regular" : borrower?.incomeRegularity === "irregular" ? "Irregular" : "Fixed monthly salary",
       employerType: borrower?.employerType === "government" || borrower?.employerType === "large_private" ? "Government / large company" : "SME / informal",
       accountAge: borrower?.accountAge || "< 12 months",
@@ -1996,7 +2008,7 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
       unpaidOrders: "0",
       incomeVolatility: "Stable (< 20% variation)",
       overdraftUsage: "None / minimal",
-      dtiRatio: dti < 0.3 ? "< 30%" : dti < 0.5 ? "30 – 50%" : "> 50%",
+      dtiRatio: dti < 0.3 ? "< 30%" : dti < 0.5 ? "30 â 50%" : "> 50%",
       disposableIncome: (s - e) > s * 0.4 ? "Strong surplus" : (s - e) > 0 ? "Moderate" : "Weak / negative",
       loanBurden: borrower?.firstBorrower ? "Medium" : "Low",
       incomeMismatch: "None",
@@ -2018,13 +2030,13 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
 
     try {
       // Step 1: Resolve the real borrower_profiles.id (UUID) from whatever we have
-      // borrower.id  = borrower_profiles.id  (UUID — what documents table uses as borrower_id)
+      // borrower.id  = borrower_profiles.id  (UUID â what documents table uses as borrower_id)
       // borrower.userId = auth user UUID
       var uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       var borrowerProfileId = null;
       var filePath = null;
 
-      // If borrower.id looks like a UUID it IS the borrower_profiles.id — use directly
+      // If borrower.id looks like a UUID it IS the borrower_profiles.id â use directly
       if (borrower?.id && uuidRe.test(String(borrower.id))) {
         borrowerProfileId = borrower.id;
       }
@@ -2035,10 +2047,10 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
           if (bpRows && bpRows[0]) borrowerProfileId = bpRows[0].id;
         } catch(e) { console.log("Profile lookup:", e.message); }
       }
-      // Last resort — try borrower.userId as profile id directly
+      // Last resort â try borrower.userId as profile id directly
       if (!borrowerProfileId && borrower?.userId) borrowerProfileId = borrower.userId;
 
-      console.log("Bank analysis — borrowerProfileId:", borrowerProfileId);
+      console.log("Bank analysis â borrowerProfileId:", borrowerProfileId);
 
       // Step 2: Query documents table for the latest bank_statement file path
       if (borrowerProfileId) {
@@ -2073,11 +2085,11 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
             mimeType = blob.type || mimeType;
             base64Data = await new Promise(function(resolve, reject) {
               var reader = new FileReader();
-              reader.onload = function() { resolve((reader.result||"—").split(",")[1]); };
+              reader.onload = function() { resolve((reader.result||"â").split(",")[1]); };
               reader.onerror = reject;
               reader.readAsDataURL(blob);
             });
-            console.log("Bank statement fetched — size:", blob.size, "bytes, type:", mimeType);
+            console.log("Bank statement fetched â size:", blob.size, "bytes, type:", mimeType);
           } else {
             console.log("File fetch failed:", fileResp.status, fileResp.statusText);
           }
@@ -2085,10 +2097,10 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
           console.log("File fetch error:", fetchErr.message);
         }
       } else {
-        console.log("No bank statement file path found in documents table — falling back to profile data");
+        console.log("No bank statement file path found in documents table â falling back to profile data");
       }
 
-      // Build Claude API request — with real document if available, else text-only
+      // Build Claude API request â with real document if available, else text-only
       var messages;
       if (base64Data) {
         messages = [{
@@ -2100,11 +2112,11 @@ const BorrowerScorecard = ({ borrower, showToast, setView }) => {
             },
             {
               type: "text",
-              text: `You are a Namibian microlender bank statement analyst. Analyse this bank statement and extract the following data. Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks.
+              text: `You are a Namibian microlender bank statement analyst. Analyse this bank statement and extract the following data. Respond ONLY with a valid JSON object â no markdown, no explanation, no backticks.
 
 Required JSON structure:
 {
-  "period": "string — date range covered e.g. Jan–Mar 2026",
+  "period": "string â date range covered e.g. JanâMar 2026",
   "avgCredits": number (average monthly total credits in NAD),
   "avgCoreCredits": number (average monthly salary/core income credits in NAD),
   "avgNonCore": number (average monthly non-core/irregular credits in NAD),
@@ -2112,7 +2124,7 @@ Required JSON structure:
   "avgSurplusDeficit": number (average monthly surplus or deficit: credits minus debits),
   "avgBalance": number (average closing balance in NAD),
   "avgTransfers": number (average monthly transfer amount in NAD),
-  "lowDays": number (average days per month where balance was low — under N$500),
+  "lowDays": number (average days per month where balance was low â under N$500),
   "negativeDays": number (average days per month where balance was negative),
   "unpaidCount": number (total unpaid/returned debit orders across all months),
   "totalDeductionAvg": number (average monthly committed deductions: loans, insurance, subscriptions in NAD),
@@ -2143,7 +2155,7 @@ Required JSON structure:
         var e = +borrower?.expenses || 0;
         messages = [{
           role: "user",
-          content: `You are a Namibian microlender bank statement analyst. The borrower's uploaded bank statement could not be fetched. Based on their declared profile — monthly salary NAD ${s.toLocaleString()}, monthly expenses NAD ${e.toLocaleString()} — generate a realistic 3-month bank statement analysis. Respond ONLY with a valid JSON object — no markdown, no explanation, no backticks.
+          content: `You are a Namibian microlender bank statement analyst. The borrower's uploaded bank statement could not be fetched. Based on their declared profile â monthly salary NAD ${s.toLocaleString()}, monthly expenses NAD ${e.toLocaleString()} â generate a realistic 3-month bank statement analysis. Respond ONLY with a valid JSON object â no markdown, no explanation, no backticks.
 
 Required JSON structure:
 {
@@ -2187,13 +2199,13 @@ Required JSON structure:
       built.analysedFromReal = !!base64Data;
       setScorecard(built);
       showToast(base64Data
-        ? "✅ Bank statement analysed from uploaded document"
-        : "⚠ Analysis based on declared profile — statement could not be read directly"
+        ? "â Bank statement analysed from uploaded document"
+        : "â  Analysis based on declared profile â statement could not be read directly"
       , base64Data ? "success" : "warning");
 
     } catch(err) {
       console.log("Bank analysis error:", err);
-      // Final fallback — use profile numbers directly
+      // Final fallback â use profile numbers directly
       var s = +borrower?.salary || 0;
       var e = +borrower?.expenses || 0;
       setScorecard({
@@ -2214,7 +2226,7 @@ Required JSON structure:
         balanceHistory: [s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e, s-e],
         analysedFromReal: false,
       });
-      showToast("Analysis generated from profile data — bank statement could not be parsed", "warning");
+      showToast("Analysis generated from profile data â bank statement could not be parsed", "warning");
     }
     setAnalyzing(false);
   };
@@ -2223,7 +2235,7 @@ Required JSON structure:
     const result = RISK_SCORECARD.computeScore(answers || NULL_SCORECARD_ANSWERS);
     setRiskResult(result);
     setProfileSaved(true);
-    showToast(`Risk score: ${result.finalScore}/100 — Tier ${result.tier}`);
+    showToast(`Risk score: ${result.finalScore}/100 â Tier ${result.tier}`);
   };
 
   const getAiInsight = async () => {
@@ -2234,7 +2246,7 @@ Required JSON structure:
       const prompt = `You are a senior credit analyst at a Namibian microlender. A borrower's automated risk scorecard has been completed. Provide a professional 4-section credit memo:
 
 RISK SCORE SUMMARY:
-- Overall Score: ${riskResult.finalScore}/100 — Tier ${riskResult.tier} (${riskResult.recommendation})
+- Overall Score: ${riskResult.finalScore}/100 â Tier ${riskResult.tier} (${riskResult.recommendation})
 - Employment: ${(riskResult?.breakdown?.employment?.pct||0).toFixed(0)}/100 (weight 25%)
 - Banking History: ${(riskResult?.breakdown?.banking?.pct||0).toFixed(0)}/100 (weight 15%)
 - Bank Conduct: ${(riskResult?.breakdown?.conduct?.pct||0).toFixed(0)}/100 (weight 35%)
@@ -2276,8 +2288,8 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
       {/* Tab bar */}
       <div style={{ display: "flex", gap: 4, marginBottom: 28, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, padding: 4, width: "fit-content" }}>
         {[
-          { key: "scorecard", label: "📊 Scorecard" },
-          { key: "report", label: "🤖 AI Credit Report", badge: aiInsight ? "✓" : null },
+          { key: "scorecard", label: "ð Scorecard" },
+          { key: "report", label: "ð¤ AI Credit Report", badge: aiInsight ? "â" : null },
         ].map(tab => (
           <button key={tab.key} onClick={() => setActiveTab(tab.key)} style={{
             padding: "9px 20px", borderRadius: 9, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer",
@@ -2291,7 +2303,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
         ))}
       </div>
 
-      {/* ── SCORECARD TAB: Risk Profile + Bank Analysis combined ── */}
+      {/* ââ SCORECARD TAB: Risk Profile + Bank Analysis combined ââ */}
       {activeTab === "scorecard" && (
         <div className="fade-in">
           {/* Risk Score Summary */}
@@ -2329,13 +2341,13 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Profile Data Used for Scoring</h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10 }}>
               {[
-                ["Employer Type", ({government:"Government",large_private:"Large Private",sme:"SME",informal:"Informal"})[borrower?.employerType] || "—"],
-                ["Job Tenure", borrower?.jobTenure || "—"],
-                ["Income Regularity", ({fixed:"Fixed salary",variable:"Variable",irregular:"Irregular"})[borrower?.incomeRegularity] || "—"],
-                ["Gross Salary", borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "—"],
-                ["Monthly Expenses", borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "—"],
-                ["DTI Ratio", (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses)/(+borrower.salary))*100).toFixed(1)+"%" : "—"],
-                ["Bank Account Age", borrower?.accountAge || "—"],
+                ["Employer Type", ({government:"Government",large_private:"Large Private",sme:"SME",informal:"Informal"})[borrower?.employerType] || "â"],
+                ["Job Tenure", borrower?.jobTenure || "â"],
+                ["Income Regularity", ({fixed:"Fixed salary",variable:"Variable",irregular:"Irregular"})[borrower?.incomeRegularity] || "â"],
+                ["Gross Salary", borrower?.salary ? "N$" + (+borrower.salary).toLocaleString() : "â"],
+                ["Monthly Expenses", borrower?.expenses ? "N$" + (+borrower.expenses).toLocaleString() : "â"],
+                ["DTI Ratio", (borrower?.salary && borrower?.expenses && +borrower.salary > 0) ? (((+borrower.expenses)/(+borrower.salary))*100).toFixed(1)+"%" : "â"],
+                ["Bank Account Age", borrower?.accountAge || "â"],
                 ["KYC Status", borrower?.kycStatus || "pending"],
                 ["First Borrower", borrower?.firstBorrower ? "Yes" : "No"],
               ].map(([l,v]) => (
@@ -2346,7 +2358,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               ))}
             </div>
             <div style={{ marginTop: 12, padding: 10, background: DS.colors.infoDim, borderRadius: 8 }}>
-              <p style={{ fontSize: 12, color: DS.colors.info }}>💡 Your score updates automatically when you update your profile. To improve your score: complete your profile fully, upload all documents, and verify your identity.</p>
+              <p style={{ fontSize: 12, color: DS.colors.info }}>ð¡ Your score updates automatically when you update your profile. To improve your score: complete your profile fully, upload all documents, and verify your identity.</p>
             </div>
           </Card>
 
@@ -2356,14 +2368,14 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <div>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Bank Statement Analysis</h3>
                 <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>
-                  {hasStatement ? scorecard?.analysedFromReal ? "✅ Analysed from your uploaded bank statement" : "Bank statement uploaded — generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
+                  {hasStatement ? scorecard?.analysedFromReal ? "â Analysed from your uploaded bank statement" : "Bank statement uploaded â generate your analysis below" : "Upload your bank statement under Documents & KYC to enable this section"}
                 </p>
               </div>
               {hasStatement && !scorecard && !analyzing && (
-                <Btn onClick={runAnalysis}>🔍 Generate Analysis</Btn>
+                <Btn onClick={runAnalysis}>ð Generate Analysis</Btn>
               )}
               {!hasStatement && (
-                <Btn variant="outline" onClick={() => setView("borrower-docs")}>📁 Upload Statement →</Btn>
+                <Btn variant="outline" onClick={() => setView("borrower-docs")}>ð Upload Statement â</Btn>
               )}
             </div>
 
@@ -2393,21 +2405,21 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
                   <Btn variant="ghost" small onClick={() => setScorecard(null)}>Re-generate</Btn>
-                  <Btn small onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn>
+                  <Btn small onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report â</Btn>
                 </div>
               </div>
             )}
 
             {!scorecard && !analyzing && !hasStatement && (
               <div style={{ padding: 24, textAlign: "center", background: DS.colors.surfaceAlt, borderRadius: 12 }}>
-                <p style={{ fontSize: 32, marginBottom: 8 }}>🏦</p>
+                <p style={{ fontSize: 32, marginBottom: 8 }}>ð¦</p>
                 <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>No bank statement uploaded yet. Upload your 3-month bank statement to enable this analysis.</p>
               </div>
             )}
           </Card>
 
           <div style={{ display: "flex", gap: 12 }}>
-            {scorecard && <Btn onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn>}
+            {scorecard && <Btn onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report â</Btn>}
           </div>
 
           {riskResult && (
@@ -2431,8 +2443,8 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginTop: 16, paddingTop: 16, borderTop: `1px solid ${DS.colors.border}` }}>
                     <div style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8, textAlign: "center" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Max Loan Multiple</p>
-                      <p style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, fontSize: 18, color: riskResult.tierColor }}>{riskResult.maxLoanMultiplier}×</p>
-                      <p style={{ fontSize: 10, color: DS.colors.textMuted }}>× disposable income</p>
+                      <p style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, fontSize: 18, color: riskResult.tierColor }}>{riskResult.maxLoanMultiplier}Ã</p>
+                      <p style={{ fontSize: 10, color: DS.colors.textMuted }}>Ã disposable income</p>
                     </div>
                     <div style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8, textAlign: "center" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Interest Rate</p>
@@ -2451,13 +2463,13 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
 
           <div style={{ display: "flex", gap: 12 }}>
             <Btn onClick={computeRisk}>Calculate Risk Score</Btn>
-            {riskResult && scorecard && <Btn variant="outline" onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn>}
-            {riskResult && !scorecard && <Btn variant="ghost" onClick={() => setActiveTab("scorecard")}>Add Bank Statement →</Btn>}
+            {riskResult && scorecard && <Btn variant="outline" onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report â</Btn>}
+            {riskResult && !scorecard && <Btn variant="ghost" onClick={() => setActiveTab("scorecard")}>Add Bank Statement â</Btn>}
           </div>
         </div>
       )}
 
-      {/* ── TAB 2: BANK STATEMENT SCORECARD ── */}
+      {/* ââ TAB 2: BANK STATEMENT SCORECARD ââ */}
       {activeTab === "scorecard" && (
         <div className="fade-in">
           {!scorecard ? (
@@ -2466,17 +2478,17 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 <>
                   <div style={{ width: 48, height: 48, border: `3px solid ${DS.colors.accent}`, borderTopColor: "transparent", borderRadius: "50%", margin: "0 auto 20px" }} className="spin" />
                   <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Analysing Statement...</h3>
-                  <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Reading transactions · Categorising debit orders · Computing ratios</p>
+                  <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Reading transactions Â· Categorising debit orders Â· Computing ratios</p>
                 </>
               ) : (
                 <>
-                  <span style={{ fontSize: 52, display: "block", marginBottom: 16 }}>🏦</span>
+                  <span style={{ fontSize: 52, display: "block", marginBottom: 16 }}>ð¦</span>
                   <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Generate Bank Statement Scorecard</h3>
                   <p style={{ color: DS.colors.textSecondary, fontSize: 14, maxWidth: 440, margin: "0 auto 24px", lineHeight: 1.6 }}>
                     {hasStatement ? "Statement uploaded. Run analysis to extract transactions, categorise debit orders, and compute conduct ratios." : "Upload your 3-month bank statement in the Documents section, or run a demo analysis below."}
                   </p>
-                  <Btn onClick={runAnalysis}>{hasStatement ? "🔍 Analyse My Statement" : "🔍 Run Demo Analysis"}</Btn>
-                  {!hasStatement && <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 10 }}>Demo mode — upload statement for real analysis</p>}
+                  <Btn onClick={runAnalysis}>{hasStatement ? "ð Analyse My Statement" : "ð Run Demo Analysis"}</Btn>
+                  {!hasStatement && <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 10 }}>Demo mode â upload statement for real analysis</p>}
                 </>
               )}
             </Card>
@@ -2487,10 +2499,10 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
                   <div>
                     <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: "#F0F4FF" }}>Bank Statement Scorecard</h2>
-                    <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>Financial analysis — <strong style={{ color: "#e2e8f0" }}>{scorecard.name}</strong> · Acct: {scorecard.account} · {scorecard.bank}</p>
+                    <p style={{ fontSize: 13, color: "#94a3b8", marginTop: 3 }}>Financial analysis â <strong style={{ color: "#e2e8f0" }}>{scorecard.name}</strong> Â· Acct: {scorecard.account} Â· {scorecard.bank}</p>
                   </div>
                   <div style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: 20, padding: "6px 14px", fontSize: 12, color: "#e2e8f0", fontWeight: 500 }}>
-                    3-Month Review · {scorecard.period}
+                    3-Month Review Â· {scorecard.period}
                   </div>
                 </div>
               </Card>
@@ -2518,9 +2530,9 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: DS.colors.textMuted, marginBottom: 12 }}>BALANCE OVERVIEW</p>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 220px", gap: 16, marginBottom: 24 }}>
                 <Card>
-                  <p style={{ fontWeight: 600, marginBottom: 12 }}>Daily Balance History — Last 3 Months</p>
+                  <p style={{ fontWeight: 600, marginBottom: 12 }}>Daily Balance History â Last 3 Months</p>
                   <MiniSparkline data={scorecard.balanceHistory} color={DS.colors.info} />
-                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 8 }}>Range: N${Math.min(...scorecard.balanceHistory).toLocaleString()} – N${Math.max(...scorecard.balanceHistory).toLocaleString()}</p>
+                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 8 }}>Range: N${Math.min(...scorecard.balanceHistory).toLocaleString()} â N${Math.max(...scorecard.balanceHistory).toLocaleString()}</p>
                 </Card>
                 <Card style={{ padding: 0, overflow: "hidden" }}>
                   <div style={{ background: "#0f172a", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "white" }}>Account Health</div>
@@ -2580,9 +2592,9 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                       <tr key={i} style={{ background: i % 2 === 1 ? DS.colors.surfaceAlt : "transparent", borderTop: `1px solid ${DS.colors.border}` }}>
                         <td style={{ padding: "11px 14px" }}><ScorecardBadge type={d.badge} /></td>
                         <td style={{ padding: "11px 14px", fontSize: 12, color: DS.colors.textSecondary }}>{d.desc}</td>
-                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.nov ? d.nov.toLocaleString() : "—"}</td>
-                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.dec ? d.dec.toLocaleString() : "—"}</td>
-                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.jan ? d.jan.toLocaleString() : "—"}</td>
+                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.nov ? d.nov.toLocaleString() : "â"}</td>
+                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.dec ? d.dec.toLocaleString() : "â"}</td>
+                        <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontSize: 12 }}>{d.jan ? d.jan.toLocaleString() : "â"}</td>
                         <td style={{ padding: "11px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 700, color: DS.colors.info, background: DS.colors.infoDim }}>{d.avg.toLocaleString()}</td>
                       </tr>
                     ))}
@@ -2597,7 +2609,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                 </table>
               </Card>
               <div style={{ padding: "12px 16px", background: "#fffbeb", border: "1px solid #fde68a", borderLeft: "3px solid #f59e0b", borderRadius: "0 8px 8px 0", marginBottom: 20 }}>
-                <p style={{ fontSize: 12, color: "#92400e", lineHeight: 1.6 }}>⚠ Committed deductions represent <strong>{((scorecard.totalDeductionAvg/scorecard.avgCoreCredits)*100).toFixed(1)}%</strong> of avg core income. Largest: Sanlam policy N$15,969/mo · Standard Bank bond N$13,840/mo avg.</p>
+                <p style={{ fontSize: 12, color: "#92400e", lineHeight: 1.6 }}>â  Committed deductions represent <strong>{((scorecard.totalDeductionAvg/scorecard.avgCoreCredits)*100).toFixed(1)}%</strong> of avg core income. Largest: Sanlam policy N$15,969/mo Â· Standard Bank bond N$13,840/mo avg.</p>
               </div>
 
               {/* Unpaids */}
@@ -2610,14 +2622,14 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
                     ))}
                   </tr></thead>
                   <tbody>
-                    <tr><td colSpan={4} style={{ padding: "24px 14px", textAlign: "center", color: DS.colors.accent, fontWeight: 600 }}>✓ No unpaid transactions found across the 3-month period</td></tr>
+                    <tr><td colSpan={4} style={{ padding: "24px 14px", textAlign: "center", color: DS.colors.accent, fontWeight: 600 }}>â No unpaid transactions found across the 3-month period</td></tr>
                   </tbody>
                 </table>
               </Card>
 
               <div style={{ display: "flex", gap: 12 }}>
                 <Btn onClick={() => setScorecard(null)} variant="ghost">Re-analyse</Btn>
-                {riskResult ? <Btn onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report →</Btn> : <Btn variant="outline" onClick={() => setActiveTab("riskprofile")}>← Complete Risk Profile First</Btn>}
+                {riskResult ? <Btn onClick={() => { setActiveTab("report"); getAiInsight(); }}>Generate AI Report â</Btn> : <Btn variant="outline" onClick={() => setActiveTab("riskprofile")}>â Complete Risk Profile First</Btn>}
                 <Btn variant="ghost" onClick={() => showToast("Scorecard shared with matched lender")}>Share with Lender</Btn>
               </div>
             </div>
@@ -2625,12 +2637,12 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
         </div>
       )}
 
-      {/* ── TAB 3: AI CREDIT REPORT ── */}
+      {/* ââ TAB 3: AI CREDIT REPORT ââ */}
       {activeTab === "report" && (
         <div className="fade-in">
           {!riskResult || !scorecard ? (
             <Card style={{ textAlign: "center", padding: 40 }}>
-              <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>⚠️</span>
+              <span style={{ fontSize: 40, display: "block", marginBottom: 12 }}>â ï¸</span>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>Complete Both Sections First</h3>
               <p style={{ color: DS.colors.textSecondary, marginBottom: 20 }}>You need a completed Risk Profile and Bank Statement analysis before generating the AI credit report.</p>
               <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
@@ -2689,7 +2701,7 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
               <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                   <div>
-                    <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>🤖 AI Credit Memo <span style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 400 }}>Powered by Claude AI</span></h3>
+                    <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>ð¤ AI Credit Memo <span style={{ fontSize: 12, color: DS.colors.textMuted, fontWeight: 400 }}>Powered by Claude AI</span></h3>
                     <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Automated analysis combining risk scorecard + bank statement data</p>
                   </div>
                   {!aiInsight && !loadingAi && <Btn onClick={getAiInsight} small>Generate Report</Btn>}
@@ -2719,9 +2731,9 @@ Use NAD for currency. Be direct, factual, and decisive. Write as a senior analys
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // LENDER SCORECARD VIEWER
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const LenderScorecard = ({ showToast }) => {
   const [selected, setSelected] = useState(null);
@@ -2766,7 +2778,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
     return (
       <div className="fade-in">
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 20 }}>
-          <Btn variant="ghost" small onClick={() => { setSelected(null); setAiInsight(null); }}>← All Scorecards</Btn>
+          <Btn variant="ghost" small onClick={() => { setSelected(null); setAiInsight(null); }}>â All Scorecards</Btn>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700, flex: 1 }}>{sc.name}</h1>
           <TierBadge tier={selected.tier} /><StatusBadge status={selected.status} />
         </div>
@@ -2813,7 +2825,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
         {/* AI Report */}
         <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33`, marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>🤖 AI Credit Recommendation</h3>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>ð¤ AI Credit Recommendation</h3>
             {!aiInsight && !loadingAi && <Btn small onClick={() => getAiInsight(selected)}>Generate</Btn>}
           </div>
           {loadingAi ? (
@@ -2829,9 +2841,9 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
         </Card>
 
         <div style={{ display: "flex", gap: 10 }}>
-          <Btn onClick={() => showToast("Application approved!")}>✓ Approve Application</Btn>
-          <Btn variant="danger" onClick={() => showToast("Application declined", "error")}>✗ Decline</Btn>
-          <Btn variant="ghost" onClick={() => showToast("Requested additional documents")}>📎 Request Docs</Btn>
+          <Btn onClick={() => showToast("Application approved!")}>â Approve Application</Btn>
+          <Btn variant="danger" onClick={() => showToast("Application declined", "error")}>â Decline</Btn>
+          <Btn variant="ghost" onClick={() => showToast("Requested additional documents")}>ð Request Docs</Btn>
         </div>
       </div>
     );
@@ -2840,7 +2852,7 @@ Para 1: Income & employment quality. Para 2: Conduct & risk flags. Para 3: Decis
   return (
     <div className="fade-in">
       <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 6 }}>Borrower Scorecards</h1>
-      <p style={{ color: DS.colors.textSecondary, marginBottom: 28 }}>Risk-scored borrower profiles — all pre-screened via 5-category scorecard</p>
+      <p style={{ color: DS.colors.textSecondary, marginBottom: 28 }}>Risk-scored borrower profiles â all pre-screened via 5-category scorecard</p>
       <div style={{ display: "grid", gap: 12 }}>
         {borrowers.map(b => {
           const result = RISK_SCORECARD.computeScore(b.answers || NULL_SCORECARD_ANSWERS);
@@ -2933,10 +2945,10 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
     <div className="fade-in">
       <PageHeader title="Apply for a Loan" subtitle="Your account needs to be approved before you can apply" />
       <Card style={{ textAlign: "center", padding: "48px 32px" }}>
-        <div style={{ fontSize: 52, marginBottom: 16, opacity: 0.7 }}>🔒</div>
+        <div style={{ fontSize: 52, marginBottom: 16, opacity: 0.7 }}>ð</div>
         <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, marginBottom: 8 }}>Account Pending Approval</h3>
         <p style={{ color: DS.colors.textSecondary, fontSize: 14, lineHeight: 1.6, maxWidth: 420, margin: "0 auto", marginBottom: 20 }}>
-          Your account is awaiting admin verification. Please make sure your profile is complete and your documents are uploaded. An admin will review and approve your account — you'll be notified once approved.
+          Your account is awaiting admin verification. Please make sure your profile is complete and your documents are uploaded. An admin will review and approve your account â you'll be notified once approved.
         </p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
           <Btn variant="outline" onClick={function() { setView("borrower-profile"); }}>Complete Profile</Btn>
@@ -2989,7 +3001,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
       matchedLender: null,
     };
 
-    // Try to find a matching lender from Supabase — subscription lenders prioritised
+    // Try to find a matching lender from Supabase â subscription lenders prioritised
     (async function() {
       try {
         // Fetch active lenders with preferences from Supabase
@@ -3034,7 +3046,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         (LENDER_DB.applications=LENDER_DB.applications||[]).push({
           id: appRecord.id, borrowerId: borrower.id, borrowerName: borrower.name,
           tier: tier, riskScore: riskScore, amount: amt, term: +form.term,
-          purpose: form.purpose, status: "new_lead", dti: borrower.dti ? (borrower.dti * 100).toFixed(1) + "%" : "—",
+          purpose: form.purpose, status: "new_lead", dti: borrower.dti ? (borrower.dti * 100).toFixed(1) + "%" : "â",
           employer: borrower.employer, salary: borrower.salary,
           receivedAt: new Date().toISOString().slice(0, 16).replace("T", " "),
           lenderId: matchedLender ? matchedLender.id : null,
@@ -3052,7 +3064,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
           charge: matchedLender && matchedLender.plan === "payasyougo" ? DB.riskRules.payAsYouGoFee : 0,
         });
         setStep(4);
-        showToast("Application submitted successfully! ✓");
+        showToast("Application submitted successfully! â");
 
         // Create notification for borrower
         try {
@@ -3071,7 +3083,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
             await SB.insert("notifications", {
               user_id: admins[ai].id,
               title: "New Loan Application",
-              message: borrower.name + " submitted a loan application for N$" + amt.toLocaleString() + " (" + form.purpose + ") — Tier " + tier,
+              message: borrower.name + " submitted a loan application for N$" + amt.toLocaleString() + " (" + form.purpose + ") â Tier " + tier,
               type: "info",
             });
           }
@@ -3124,7 +3136,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
             <span style={{ fontSize: 13, color: step === s ? DS.colors.textPrimary : DS.colors.textMuted }}>
               {s === 1 ? "Eligibility" : s === 2 ? "Loan Details" : "Confirmation"}
             </span>
-            {s < 3 && <span style={{ color: DS.colors.textMuted }}>→</span>}
+            {s < 3 && <span style={{ color: DS.colors.textMuted }}>â</span>}
           </div>
         ))}
       </div>
@@ -3142,7 +3154,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                   { label: "KYC", check: borrower.kycStatus === "verified", text: borrower.kycStatus || "Pending" },
                 ].map(item => (
                   <div key={item.label} style={{ display: "flex", gap: 10, alignItems: "center", padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8 }}>
-                    <span style={{ color: item.check ? DS.colors.accent : DS.colors.warning }}>{item.check ? "✓" : "⚠"}</span>
+                    <span style={{ color: item.check ? DS.colors.accent : DS.colors.warning }}>{item.check ? "â" : "â "}</span>
                     <div>
                       <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{item.label}</p>
                       <p style={{ fontSize: 13, fontWeight: 600 }}>{item.text}</p>
@@ -3156,13 +3168,13 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                 const _ml = hasSalary ? (borrower.maxLoan != null ? borrower.maxLoan : runRiskEngine(+borrower.salary, +borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan) : 0;
                 if (!hasSalary) return (
                   <div style={{ padding: 16, background: DS.colors.infoDim, border: "1px solid " + DS.colors.info + "33", borderRadius: 8, marginBottom: 20 }}>
-                    <p style={{ fontSize: 13, color: DS.colors.info, fontWeight: 600 }}>ℹ Profile incomplete — please go to My Profile and add your salary, expenses and employer details to see your eligibility.</p>
+                    <p style={{ fontSize: 13, color: DS.colors.info, fontWeight: 600 }}>â¹ Profile incomplete â please go to My Profile and add your salary, expenses and employer details to see your eligibility.</p>
                   </div>
                 );
                 return (
                   <div style={{ padding: 16, background: _t === "D" ? DS.colors.dangerDim : DS.colors.accentDim, border: "1px solid " + (_t === "D" ? DS.colors.danger : DS.colors.accent) + "33", borderRadius: 8, marginBottom: 20 }}>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Eligibility</p><p style={{ fontWeight: 700, fontSize: 16, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "❌ High DTI — not eligible" : "✅ Pre-qualified"}</p></div>
+                      <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Eligibility</p><p style={{ fontWeight: 700, fontSize: 16, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "â High DTI â not eligible" : "â Pre-qualified"}</p></div>
                       <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Max Loan</p><p style={{ fontWeight: 700, fontSize: 20, color: _t === "D" ? DS.colors.danger : DS.colors.accent }}>{_t === "D" ? "Reduce expenses first" : "N$" + Math.round(_ml).toLocaleString()}</p></div>
                       <div><p style={{ fontSize: 12, color: DS.colors.textMuted }}>Tier</p><p style={{ fontWeight: 700, fontSize: 14, color: DS.colors[`tier${_t}`] || DS.colors.textMuted }}>Tier {_t}</p></div>
                     </div>
@@ -3172,11 +3184,11 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                   </div>
                 );
               })()}
-              <Btn onClick={() => setStep(2)}>Continue to Loan Details →</Btn>
+              <Btn onClick={() => setStep(2)}>Continue to Loan Details â</Btn>
             </>
           ) : (
             <div style={{ textAlign: "center", padding: 30 }}>
-              <p style={{ fontSize: 40, marginBottom: 12 }}>⚠️</p>
+              <p style={{ fontSize: 40, marginBottom: 12 }}>â ï¸</p>
               <p style={{ color: DS.colors.textSecondary, marginBottom: 16 }}>Please complete your profile and upload documents before applying.</p>
               <Btn onClick={() => setView("borrower-profile")}>Complete Profile</Btn>
             </div>
@@ -3188,7 +3200,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
         <Card className="fade-in">
           <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 16 }}>Loan Details</h3>
           <Input label="Loan Amount (N$)" value={form.amount} onChange={v => setForm({ ...form, amount: v })}
-            type="number" placeholder="e.g. 5000" required hint={`Maximum: N${borrower?.maxLoan ? Math.round(borrower.maxLoan).toLocaleString() : (borrower?.salary && borrower?.expenses ? Math.round(runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan).toLocaleString() : "—")} based on your profile`} />
+            type="number" placeholder="e.g. 5000" required hint={`Maximum: N${borrower?.maxLoan ? Math.round(borrower.maxLoan).toLocaleString() : (borrower?.salary && borrower?.expenses ? Math.round(runRiskEngine(borrower.salary, borrower.expenses, borrower.firstBorrower, DB.riskRules).maxLoan).toLocaleString() : "â")} based on your profile`} />
           <Select label="Repayment Term" value={form.term} onChange={v => setForm({ ...form, term: v })}
             options={[{ value: "1", label: "1 month" }, { value: "3", label: "3 months" }, { value: "6", label: "6 months" }, { value: "12", label: "12 months" }]} />
           <Select label="Loan Purpose" value={form.purpose} onChange={v => setForm({ ...form, purpose: v })} options={purposes} required />
@@ -3209,7 +3221,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                       <div><p style={{ fontSize: 11, color: DS.colors.textMuted }}>Interest</p><p style={{ fontWeight: 600, color: DS.colors.textMuted, fontSize: 12 }}>Determined after approval</p></div>
                     </div>
                     <div style={{ padding: 10, background: DS.colors.infoDim, borderRadius: 8, border: "1px solid " + DS.colors.info + "33" }}>
-                      <p style={{ fontSize: 12, color: DS.colors.info }}>💡 Total repayment amount (including interest) will be disclosed after lender approval. Interest is capped at 30% p.a. or 2× the prime rate per NAMFISA regulations.</p>
+                      <p style={{ fontSize: 12, color: DS.colors.info }}>ð¡ Total repayment amount (including interest) will be disclosed after lender approval. Interest is capped at 30% p.a. or 2Ã the prime rate per NAMFISA regulations.</p>
                     </div>
                   </div>
                 );
@@ -3220,7 +3232,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
           {/* Consent section */}
           <div style={{ marginTop: 8, marginBottom: 16 }}>
             <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 10, color: DS.colors.textPrimary }}>
-              🔐 Required Consents — POPIA &amp; NAMFISA Compliance
+              ð Required Consents â POPIA &amp; NAMFISA Compliance
             </p>
             {[
               { key: "creditCheck",     label: "Credit bureau check", desc: "I authorise MicroLendNA and matched lenders to conduct a credit bureau enquiry on my behalf to assess my creditworthiness." },
@@ -3239,7 +3251,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
                   <div style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, marginTop: 1, display: "flex", alignItems: "center", justifyContent: "center",
                     background: consent[item.key] ? DS.colors.accent : "transparent",
                     border: "2px solid " + (consent[item.key] ? DS.colors.accent : DS.colors.border) }}>
-                    {consent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 12, fontWeight: 900 }}>✓</span>}
+                    {consent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 12, fontWeight: 900 }}>â</span>}
                   </div>
                   <div>
                     <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>{item.label}</p>
@@ -3249,15 +3261,15 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
               );
             })}
             {!allConsented && (
-              <p style={{ fontSize: 12, color: DS.colors.warning, marginTop: 4 }}>⚠ All five consents are required before submitting your application.</p>
+              <p style={{ fontSize: 12, color: DS.colors.warning, marginTop: 4 }}>â  All five consents are required before submitting your application.</p>
             )}
           </div>
 
           <div style={{ display: "flex", gap: 12 }}>
-            <Btn variant="ghost" onClick={function() { setStep(1); }}>← Back</Btn>
+            <Btn variant="ghost" onClick={function() { setStep(1); }}>â Back</Btn>
             <Btn onClick={handleSubmit} disabled={!form.amount || !form.purpose || !allConsented}
               style={{ flex: 1, opacity: (!form.amount || !form.purpose || !allConsented) ? 0.5 : 1 }}>
-              {allConsented ? "Submit Application →" : "Accept all consents to submit"}
+              {allConsented ? "Submit Application â" : "Accept all consents to submit"}
             </Btn>
           </div>
         </Card>
@@ -3273,12 +3285,12 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
 
       {(step === 3 && result || step === 4) && result && (
         <Card className="fade-in" style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 56, marginBottom: 14 }}>🎉</div>
+          <div style={{ fontSize: 56, marginBottom: 14 }}>ð</div>
           <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 24, marginBottom: 8 }}>Application Submitted!</h2>
           <p style={{ color: DS.colors.textSecondary, marginBottom: 24, fontSize: 14 }}>
             {result.lender && result.lender !== "Pending assignment"
               ? "Your application has been sent to " + result.lender + " for review."
-              : "Application queued — a lender will be assigned shortly."}
+              : "Application queued â a lender will be assigned shortly."}
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 10, marginBottom: 20 }}>
@@ -3298,7 +3310,7 @@ const BorrowerApply = ({ borrower, user, showToast, setView }) => {
           </div>
 
           <div style={{ padding: 14, background: DS.colors.goldDim, border: "1px solid " + DS.colors.gold + "33", borderRadius: 12, marginBottom: 16, textAlign: "left" }}>
-            <p style={{ fontWeight: 700, color: DS.colors.gold, fontSize: 13, marginBottom: 6 }}>📋 Loan Agreement</p>
+            <p style={{ fontWeight: 700, color: DS.colors.gold, fontSize: 13, marginBottom: 6 }}>ð Loan Agreement</p>
             <p style={{ fontSize: 12, color: DS.colors.textSecondary, lineHeight: 1.6 }}>
               Once approved, you will receive a full loan agreement detailing the total repayable amount (including interest, stamp duty, and NAMFISA levy). You must e-sign the agreement before funds can be disbursed. The agreement will be saved under both your profile and the lender's records.
             </p>
@@ -3329,7 +3341,7 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("track");
 
-  // Load applications from Supabase on mount — this is the source of truth
+  // Load applications from Supabase on mount â this is the source of truth
   useEffect(function() {
     var uid = user?.id || borrower?.userId || borrower?.id;
     if (!uid) { setLoading(false); return; }
@@ -3353,11 +3365,11 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
     pending: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
     new_lead: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
     under_review: ["Submitted", "Under Review", "Decision Pending", "Awaiting Disbursement"],
-    approved: ["Submitted ✓", "Under Review ✓", "Approved ✓", "Contact Lender"],
-    declined: ["Submitted ✓", "Under Review ✓", "Declined", "—"],
-    rejected: ["Submitted ✓", "Under Review ✓", "Declined", "—"],
-    disbursed: ["Submitted ✓", "Approved ✓", "Disbursed ✓", "Repaying"],
-    completed: ["Submitted ✓", "Approved ✓", "Disbursed ✓", "Completed ✓"],
+    approved: ["Submitted â", "Under Review â", "Approved â", "Contact Lender"],
+    declined: ["Submitted â", "Under Review â", "Declined", "â"],
+    rejected: ["Submitted â", "Under Review â", "Declined", "â"],
+    disbursed: ["Submitted â", "Approved â", "Disbursed â", "Repaying"],
+    completed: ["Submitted â", "Approved â", "Disbursed â", "Completed â"],
   };
 
   const stepIdx = { pending: 1, new_lead: 0, under_review: 1, approved: 2, declined: 2, rejected: 2, disbursed: 3, completed: 3 };
@@ -3369,10 +3381,10 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
       <PageHeader
         title="My Applications"
         subtitle="Track the status of all your loan applications in real time"
-        actions={<Btn onClick={() => setView("borrower-apply")} icon="📝">New Application</Btn>}
+        actions={<Btn onClick={() => setView("borrower-apply")} icon="ð">New Application</Btn>}
       />
 
-      {/* Tab buttons — styled to match the site design */}
+      {/* Tab buttons â styled to match the site design */}
       <div style={{ display: "flex", gap: 4, marginBottom: 24, background: DS.colors.surface, border: "1px solid " + DS.colors.border, borderRadius: 10, padding: 4, width: "fit-content" }}>
         <button onClick={function() { setTab("track"); }} style={{
           padding: "8px 20px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer",
@@ -3395,11 +3407,11 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
         </Card>
       ) : displayApps.length === 0 ? (
         <EmptyState
-          icon={tab === "track" ? "📋" : "📂"}
+          icon={tab === "track" ? "ð" : "ð"}
           title={tab === "track" ? "No Pending Applications" : "No Loan History"}
           message={tab === "track" ? "You don't have any applications awaiting a decision right now." : "You don't have any completed or decided applications yet."}
           action={tab === "track" ? function() { setView("borrower-apply"); } : null}
-          actionLabel="Apply Now →"
+          actionLabel="Apply Now â"
         />
       ) : (
         <div style={{ display: "grid", gap: 16 }}>
@@ -3420,9 +3432,9 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
                       <StatusBadge status={app.status === "new_lead" ? "pending" : app.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      Submitted {app.createdAt ? app.createdAt.slice(0, 10) : "—"} ·
-                      {app.amount ? " N$" + (app.amount||0).toLocaleString() : " amount pending"} ·
-                      {app.term ? " " + app.term + " months" : ""} ·
+                      Submitted {app.createdAt ? app.createdAt.slice(0, 10) : "â"} Â·
+                      {app.amount ? " N$" + (app.amount||0).toLocaleString() : " amount pending"} Â·
+                      {app.term ? " " + app.term + " months" : ""} Â·
                       {app.purpose ? " " + app.purpose : ""}
                     </p>
                   </div>
@@ -3451,7 +3463,7 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
                             border: "2px solid " + (i <= activeStep ? statusColor : DS.colors.border),
                             flexShrink: 0,
                           }}>
-                            {i <= activeStep ? "✓" : i + 1}
+                            {i <= activeStep ? "â" : i + 1}
                           </div>
                           <p style={{ fontSize: 10, color: i <= activeStep ? statusColor : DS.colors.textMuted, whiteSpace: "nowrap", fontWeight: i === activeStep ? 700 : 400 }}>{step}</p>
                         </div>
@@ -3466,17 +3478,17 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
                 {/* Status message */}
                 {app.status === "approved" && (
                   <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 8, border: "1px solid " + DS.colors.accent + "33" }}>
-                    <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500 }}>✅ Your application is approved. Your lender will contact you within 24 hours to arrange disbursement.</p>
+                    <p style={{ fontSize: 13, color: DS.colors.accent, fontWeight: 500 }}>â Your application is approved. Your lender will contact you within 24 hours to arrange disbursement.</p>
                   </div>
                 )}
                 {(app.status === "pending" || app.status === "new_lead" || app.status === "under_review") && (
                   <div style={{ padding: "10px 14px", background: DS.colors.goldDim, borderRadius: 8, border: "1px solid " + DS.colors.gold + "33" }}>
-                    <p style={{ fontSize: 13, color: DS.colors.gold, fontWeight: 500 }}>⏳ Your application is being reviewed. Most decisions are made within 24 hours.</p>
+                    <p style={{ fontSize: 13, color: DS.colors.gold, fontWeight: 500 }}>â³ Your application is being reviewed. Most decisions are made within 24 hours.</p>
                   </div>
                 )}
                 {(app.status === "declined" || app.status === "rejected") && (
                   <div style={{ padding: "10px 14px", background: DS.colors.dangerDim, borderRadius: 8, border: "1px solid " + DS.colors.danger + "33" }}>
-                    <p style={{ fontSize: 13, color: DS.colors.danger, fontWeight: 500 }}>❌ This application was not approved. Improving your DTI ratio or reducing monthly obligations may help in a future application.</p>
+                    <p style={{ fontSize: 13, color: DS.colors.danger, fontWeight: 500 }}>â This application was not approved. Improving your DTI ratio or reducing monthly obligations may help in a future application.</p>
                   </div>
                 )}
               </Card>
@@ -3488,38 +3500,38 @@ const BorrowerStatus = ({ borrower, user, setView }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // LENDER VIEWS
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ── EXPANDED LENDER DATA STORE ────────────────────────────────────────────────
+// ââ EXPANDED LENDER DATA STORE ââââââââââââââââââââââââââââââââââââââââââââââââ
 const LENDER_DB = {
   borrowers: [],
   lenderPrefs: {},
   applications: [],
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // AGENT DATABASE
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AGENT_DB = { agents: [], borrowers: [] };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // WHATSAPP DATABASE
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const WHATSAPP_DB = { leads: [], conversations: {} };
 
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// STORAGE SERVICE — Now backed by Supabase (PostgreSQL + Storage)
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// STORAGE SERVICE â Now backed by Supabase (PostgreSQL + Storage)
 // Falls back to in-memory when Supabase is unavailable
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const _MLNA_MEM = {};
 
 const StorageService = {
-  // ── Borrower Profile (Supabase: borrower_profiles table) ──
+  // ââ Borrower Profile (Supabase: borrower_profiles table) ââ
   getBorrowerProfile: async function(uid) {
     try {
       var rows = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=*");
@@ -3610,20 +3622,20 @@ const StorageService = {
     return [];
   },
 
-  // ── Documents (Supabase: documents table + storage bucket) ──
+  // ââ Documents (Supabase: documents table + storage bucket) ââ
   saveDocument: async function(uid, key, meta, dataUrl) {
     _MLNA_MEM["docmeta:" + uid + ":" + key] = meta;
     try {
       var bp = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=id");
       if (!bp || !bp.length) {
-        // No borrower_profile — try lender_profiles documents or just store in memory
-        console.log("saveDocument: no borrower_profile for uid", uid, "— storing metadata only");
+        // No borrower_profile â try lender_profiles documents or just store in memory
+        console.log("saveDocument: no borrower_profile for uid", uid, "â storing metadata only");
         return;
       }
       var borrowerId = bp[0].id;
       var typeMap = { id: "national_id", payslip: "payslip", bank_stmt: "bank_statement", proof_addr: "proof_of_address", employment: "employment_letter" };
       var filePath = meta.filePath || (uid + "/" + key);
-      // Check if doc already exists for this type — update instead of insert
+      // Check if doc already exists for this type â update instead of insert
       var existing = await SB.query("documents", "borrower_id=eq." + borrowerId + "&doc_type=eq." + (typeMap[key] || "national_id") + "&select=id");
       if (existing && existing.length > 0) {
         await SB.update("documents", { id: existing[0].id }, {
@@ -3650,7 +3662,7 @@ const StorageService = {
     try {
       var bp = await SB.query("borrower_profiles", "user_id=eq." + uid + "&select=id");
       if (!bp || !bp.length) return _MLNA_MEM["allmetas:" + uid] || {};
-      var rows = await SB.query("documents", "borrower_id=eq." + bp[0].id + "&select=*");
+      var rows = await SB.query("documents", "borrower_id=eq." + bp[0].id + "&deleted_at=is.null&select=*&order=uploaded_at.desc");
       var out = {};
       var reverseMap = { national_id: "id", payslip: "payslip", bank_statement: "bank_stmt", proof_of_address: "proof_addr", employment_letter: "employment" };
       (rows || []).forEach(function(r) {
@@ -3675,7 +3687,7 @@ const StorageService = {
     return _MLNA_MEM["allmetas:" + uid] || {};
   },
 
-  // ── Delete Document ──
+  // ââ Delete Document ââ
   deleteDocument: async function(uid, key, dbId) {
     delete _MLNA_MEM["docmeta:" + uid + ":" + key];
     try {
@@ -3694,7 +3706,7 @@ const StorageService = {
     } catch (e) { console.log("deleteDocument error:", e.message); }
   },
 
-  // ── Applications (Supabase: applications table) ──
+  // ââ Applications (Supabase: applications table) ââ
   saveApplication: async function(app) {
     _MLNA_MEM["app:" + app.id] = app;
     try {
@@ -3731,7 +3743,7 @@ const StorageService = {
     return [];
   },
 
-  // ── Seed (no-op for Supabase — data is in the database) ──
+  // ââ Seed (no-op for Supabase â data is in the database) ââ
   seedIfEmpty: async function() { /* no-op */ },
 
   // Sync to LENDER_DB (keep for compatibility with UI components)
@@ -3751,19 +3763,19 @@ const StorageService = {
   },
 };
 
-// ── LENDER HOME ───────────────────────────────────────────────────────────────
+// ââ LENDER HOME âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const LenderHome = ({ user, setView }) => {
   const [lenderProfile, setLenderProfile] = useState(null);
   const [allB, setAllB] = useState([]);
   const [allApps, setAllApps] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load this lender's own profile — check approval status
+  // Load this lender's own profile â check approval status
   useEffect(function() {
     SB.query("lender_profiles", "user_id=eq." + user.id + "&select=plan_type,name,status,user_id").then(function(rows) {
       if (rows && rows[0]) setLenderProfile(rows[0]);
       else {
-        // No lender_profiles row — create one
+        // No lender_profiles row â create one
         SB.upsert("lender_profiles", {
           user_id: user.id, email: user.email, name: user.name,
           contact_person: user.name, status: "pending_review",
@@ -3778,7 +3790,7 @@ const LenderHome = ({ user, setView }) => {
   useEffect(function() {
     (async function() {
       try {
-        // Step 1: Load ONLY applications assigned to THIS lender — nothing else
+        // Step 1: Load ONLY applications assigned to THIS lender â nothing else
         var appRows = await SB.query(
           "applications",
           "select=*&order=created_at.desc"
@@ -3788,11 +3800,11 @@ const LenderHome = ({ user, setView }) => {
         });
         setAllApps(myAppRows.length === 0 ? [] : myAppRows.map(function(r) {
           return {
-            id: r.id, tier: r.tier_at_application || "—",
+            id: r.id, tier: r.tier_at_application || "â",
             amount: r.amount_cents ? r.amount_cents / 100 : 0,
             purpose: r.purpose || "Personal", status: r.status || "pending",
-            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
-            borrowerId: r.borrower_id, borrowerName: "Loading…",
+            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "â",
+            borrowerId: r.borrower_id, borrowerName: "Loadingâ¦",
           };
         }));
 
@@ -3800,7 +3812,7 @@ const LenderHome = ({ user, setView }) => {
         var myBpIds = [...new Set(myAppRows.map(function(r) { return r.borrower_id; }).filter(Boolean))];
 
         if (myBpIds.length === 0) {
-          // No assigned borrowers — show empty state, not all borrowers
+          // No assigned borrowers â show empty state, not all borrowers
           setAllB([]);
           setLoading(false);
           return;
@@ -3825,7 +3837,7 @@ const LenderHome = ({ user, setView }) => {
           return {
             id: bp.id, userId: bp.user_id,
             name: u.name || "Unknown",
-            tier: bp.tier || "—",
+            tier: bp.tier || "â",
             riskScore: bp.risk_score || 0,
             status: bp.kyc_status === "verified" ? "active" : "pending",
             loans: [],
@@ -3839,10 +3851,10 @@ const LenderHome = ({ user, setView }) => {
           var u = userMap[bp.user_id] || {};
           return {
             id: r.id, borrowerName: u.name || "Unknown",
-            tier: r.tier_at_application || bp.tier || "—",
+            tier: r.tier_at_application || bp.tier || "â",
             amount: r.amount_cents ? r.amount_cents / 100 : 0,
             purpose: r.purpose || "Personal", status: r.status || "pending",
-            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "â",
             borrowerId: r.borrower_id,
           };
         }));
@@ -3857,7 +3869,7 @@ const LenderHome = ({ user, setView }) => {
   const totalDisbursed = allB.flatMap(b => b.loans||[]).filter(l => l && l.status === "approved" && l.disbursed).reduce((s, l) => s + (l.amount||0), 0);
   const newLeads = allApps.filter(a => a.status === "new_lead" || a.status === "pending").length;
 
-  // ── Block unapproved lenders ──────────────────────────────────────────────
+  // ââ Block unapproved lenders ââââââââââââââââââââââââââââââââââââââââââââââ
   if (loading) return (
     <div style={{ display:"flex", justifyContent:"center", alignItems:"center", minHeight:300 }}>
       <Spinner />
@@ -3867,17 +3879,17 @@ const LenderHome = ({ user, setView }) => {
   if (lenderProfile && lenderProfile.status === "pending_review") return (
     <div className="fade-in" style={{ maxWidth:560, margin:"60px auto", textAlign:"center" }}>
       <div style={{ padding:40, background:DS.colors.surface, border:"1px solid "+DS.colors.border, borderRadius:20 }}>
-        <div style={{ fontSize:52, marginBottom:16 }}>⏳</div>
+        <div style={{ fontSize:52, marginBottom:16 }}>â³</div>
         <h2 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:800, fontSize:24, marginBottom:12 }}>Account Pending Review</h2>
         <p style={{ color:DS.colors.textSecondary, lineHeight:1.7, marginBottom:24 }}>
           Your lender account is awaiting admin verification. An admin will review your submitted documents and complete due diligence before granting you access to borrower applications.
         </p>
         <div style={{ padding:"12px 16px", background:DS.colors.goldDim, border:"1px solid "+DS.colors.gold+"44", borderRadius:10, marginBottom:24 }}>
           <p style={{ fontSize:13, color:DS.colors.gold }}>
-            📋 <strong>While you wait:</strong> Complete your company profile under Settings &amp; Billing to speed up the review process.
+            ð <strong>While you wait:</strong> Complete your company profile under Settings &amp; Billing to speed up the review process.
           </p>
         </div>
-        <Btn onClick={() => setView("lender-settings")}>Complete Profile →</Btn>
+        <Btn onClick={() => setView("lender-settings")}>Complete Profile â</Btn>
       </div>
     </div>
   );
@@ -3885,7 +3897,7 @@ const LenderHome = ({ user, setView }) => {
   if (lenderProfile && lenderProfile.status === "rejected") return (
     <div className="fade-in" style={{ maxWidth:560, margin:"60px auto", textAlign:"center" }}>
       <div style={{ padding:40, background:DS.colors.surface, border:"1px solid "+DS.colors.danger+"44", borderRadius:20 }}>
-        <div style={{ fontSize:52, marginBottom:16 }}>❌</div>
+        <div style={{ fontSize:52, marginBottom:16 }}>â</div>
         <h2 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:800, fontSize:24, marginBottom:12, color:DS.colors.danger }}>Application Not Approved</h2>
         <p style={{ color:DS.colors.textSecondary, lineHeight:1.7, marginBottom:24 }}>
           Your lender application was not approved at this time. Please contact MicroLendNA admin for more information or to resubmit with corrected documentation.
@@ -3897,14 +3909,14 @@ const LenderHome = ({ user, setView }) => {
 
   return (
     <div className="fade-in">
-      <PageHeader title="Lender Dashboard" subtitle={<>{user.name} · Plan: <span style={{ color: DS.colors.gold, fontWeight: 600, textTransform: "capitalize" }}>{lenderProfile ? lenderProfile.plan_type || "—" : "—"}</span></>} />
+      <PageHeader title="Lender Dashboard" subtitle={<>{user.name} Â· Plan: <span style={{ color: DS.colors.gold, fontWeight: 600, textTransform: "capitalize" }}>{lenderProfile ? lenderProfile.plan_type || "â" : "â"}</span></>} />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 14, marginBottom: 28 }}>
-        <Stat label="Total Borrowers" value={allB.length} icon="👥" onClick={() => setView("lender-borrowers")} />
-        <Stat label="Active" value={active} color={DS.colors.accent} icon="✅" onClick={() => setView("lender-borrowers")} />
-        <Stat label="New Leads" value={newLeads} color={DS.colors.gold} icon="🔔" sub="Awaiting review" onClick={() => setView("lender-apps")} />
-        <Stat label="Declined" value={declined} color={DS.colors.danger} icon="❌" onClick={() => setView("lender-borrowers")} />
-        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} color={DS.colors.info} icon="💰" onClick={() => setView("lender-scorecard")} />
+        <Stat label="Total Borrowers" value={allB.length} icon="ð¥" onClick={() => setView("lender-borrowers")} />
+        <Stat label="Active" value={active} color={DS.colors.accent} icon="â" onClick={() => setView("lender-borrowers")} />
+        <Stat label="New Leads" value={newLeads} color={DS.colors.gold} icon="ð" sub="Awaiting review" onClick={() => setView("lender-apps")} />
+        <Stat label="Declined" value={declined} color={DS.colors.danger} icon="â" onClick={() => setView("lender-borrowers")} />
+        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} color={DS.colors.info} icon="ð°" onClick={() => setView("lender-scorecard")} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -3928,7 +3940,7 @@ const LenderHome = ({ user, setView }) => {
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>New Leads Queue</h3>
-            {newLeads > 0 && <Btn small onClick={() => setView("lender-apps")}>View All →</Btn>}
+            {newLeads > 0 && <Btn small onClick={() => setView("lender-apps")}>View All â</Btn>}
           </div>
           {allApps.filter(a => a.status === "new_lead" || a.status === "pending").length === 0 && (
             <p style={{ color: DS.colors.textMuted, fontSize: 13, padding: "12px 0" }}>No applications assigned to you yet. Admin will route borrowers here.</p>
@@ -3938,11 +3950,11 @@ const LenderHome = ({ user, setView }) => {
               <div style={{ width: 38, height: 38, background: (DS.colors[`tier${a.tier}`]||DS.colors.textMuted) + "22", border: `1px solid ${(DS.colors[`tier${a.tier}`]||DS.colors.textMuted)}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 700, color: DS.colors[`tier${a.tier}`]||DS.colors.textMuted }}>{(a.borrowerName||"?")[0]}</div>
               <div style={{ flex: 1 }}>
                 <p style={{ fontSize: 13, fontWeight: 600 }}>{a.borrowerName||"Unknown"}</p>
-                <div style={{ display: "flex", gap: 6, marginTop: 3 }}><TierBadge tier={a.tier} /><span style={{ fontSize: 11, color: DS.colors.textMuted }}>N${(a.amount||0).toLocaleString()} · {a.purpose||"—"}</span></div>
+                <div style={{ display: "flex", gap: 6, marginTop: 3 }}><TierBadge tier={a.tier} /><span style={{ fontSize: 11, color: DS.colors.textMuted }}>N${(a.amount||0).toLocaleString()} Â· {a.purpose||"â"}</span></div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontSize: 13, fontWeight: 600, color: DS.colors.accent }}>N${(a.amount||0).toLocaleString()}</p>
-                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{(a.receivedAt||"—").split(" ")[0]}</p>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{(a.receivedAt||"â").split(" ")[0]}</p>
               </div>
             </div>
           ))}
@@ -3963,7 +3975,7 @@ const LenderHome = ({ user, setView }) => {
             <div key={i} onClick={() => setView(s.view)} className="card-hover" style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10, cursor: "pointer", border: `1px solid ${DS.colors.border}`, transition: "all .2s" }}>
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
               <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: s.color }}>{s.value}</p>
-              <p style={{ fontSize: 10, color: s.color, marginTop: 6, fontWeight: 600 }}>View →</p>
+              <p style={{ fontSize: 10, color: s.color, marginTop: 6, fontWeight: 600 }}>View â</p>
             </div>
           ))}
         </div>
@@ -3973,7 +3985,7 @@ const LenderHome = ({ user, setView }) => {
 };
 
 
-// ── LENDER APPLICATIONS (new leads + under review only) ─────────────────────
+// ââ LENDER APPLICATIONS (new leads + under review only) âââââââââââââââââââââ
 const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const [selectedApp, setSelectedApp] = useState(null);
   const [storedBorrower, setStoredBorrower] = useState(null);
@@ -3985,7 +3997,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   // Load applications from Supabase
   const loadAppsFromDB = async function() {
     try {
-      // ── CRITICAL: Only load applications explicitly assigned to THIS APPROVED lender ──
+      // ââ CRITICAL: Only load applications explicitly assigned to THIS APPROVED lender ââ
       var allRows = await SB.query("applications", "select=*&order=created_at.desc");
       // Filter strictly to apps where lender_user_id matches this lender's user ID
       var rows = (allRows || []).filter(function(r) {
@@ -4014,7 +4026,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
       // Load documents for assigned borrowers
       var docsByBpId = {};
       try {
-        var allDocs = await SB.query("documents", "select=*&order=uploaded_at.desc");
+        var allDocs = await SB.query("documents", "deleted_at=is.null&select=*&order=uploaded_at.desc");
         var revMap = {national_id:"id",payslip:"payslip",bank_statement:"bank_stmt",proof_of_address:"proof_addr",employment_letter:"employment"};
         (allDocs||[]).forEach(function(d) {
           if (!docsByBpId[d.borrower_id]) docsByBpId[d.borrower_id] = [];
@@ -4023,10 +4035,10 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
             docsByBpId[d.borrower_id].push({
               key: k,
               label: ({national_id:"National ID",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type]||d.doc_type,
-              type: ({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type]||"📎",
+              type: ({national_id:"ðªª",payslip:"ð",bank_statement:"ð¦",proof_of_address:"ð ",employment_letter:"ð¼"})[d.doc_type]||"ð",
               verified: d.verified||false,
-              date: d.uploaded_at?d.uploaded_at.slice(0,10):"—",
-              size: d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"—",
+              date: d.uploaded_at?d.uploaded_at.slice(0,10):"â",
+              size: d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"â",
               filePath: d.file_path||null, dbId: d.id,
             });
           }
@@ -4041,17 +4053,17 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
           borrowerId: r.borrower_id,
           borrowerUserId: bp.user_id || null,
           borrowerName: u.name || "Unknown",
-          tier: r.tier_at_application || bp.tier || "—",
+          tier: r.tier_at_application || bp.tier || "â",
           riskScore: r.risk_score_at_application || bp.risk_score || 0,
           amount: r.amount_cents ? r.amount_cents / 100 : 0,
           term: r.term_months || 0,
           purpose: r.purpose || "Personal",
           status: r.status || "new_lead",
-          dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : (bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "—"),
+          dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : (bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "â"),
           employer: bp.employer || "",
           salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
           expenses: bp.expenses_cents ? bp.expenses_cents / 100 : 0,
-          receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+          receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "â",
           kycStatus: bp.kyc_status || "pending",
           amlStatus: bp.aml_status || "pending",
           bankVerified: bp.bank_verified || false,
@@ -4097,7 +4109,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
         var u = userRows && userRows[0] ? userRows[0] : {};
 
         // Load documents for this borrower
-        var docRows = await SB.query("documents", "borrower_id=eq." + bp.id + "&select=*&order=uploaded_at.desc");
+        var docRows = await SB.query("documents", "borrower_id=eq." + bp.id + "&deleted_at=is.null&select=*&order=uploaded_at.desc");
         var reverseMap = {national_id:"id",payslip:"payslip",bank_statement:"bank_stmt",proof_of_address:"proof_addr",employment_letter:"employment"};
         var docs = [];
         var docMetas = {};
@@ -4107,10 +4119,10 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
             var docItem = {
               key: k,
               label: ({national_id:"National ID/Passport",payslip:"Latest Payslip",bank_statement:"Bank Statement (3 months)",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type] || d.doc_type,
-              type: ({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type] || "📎",
+              type: ({national_id:"ðªª",payslip:"ð",bank_statement:"ð¦",proof_of_address:"ð ",employment_letter:"ð¼"})[d.doc_type] || "ð",
               verified: d.verified || false,
-              date: d.uploaded_at ? d.uploaded_at.slice(0,10) : "—",
-              size: d.file_size_bytes ? Math.round(d.file_size_bytes/1024) + " KB" : "—",
+              date: d.uploaded_at ? d.uploaded_at.slice(0,10) : "â",
+              size: d.file_size_bytes ? Math.round(d.file_size_bytes/1024) + " KB" : "â",
               filePath: d.file_path || null,
               fileUrl: d.file_path ? (SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + d.file_path) : null,
               dbId: d.id,
@@ -4133,9 +4145,9 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
           employer: bp.employer || "",
           salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
           expenses: bp.expenses_cents ? bp.expenses_cents / 100 : 0,
-          tier: bp.tier || "—",
+          tier: bp.tier || "â",
           riskScore: bp.risk_score || 0,
-          dti: bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "—",
+          dti: bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "â",
           maxLoan: bp.max_loan_cents ? bp.max_loan_cents / 100 : 0,
           kycStatus: bp.kyc_status || "pending",
           amlStatus: bp.aml_status || "pending",
@@ -4145,7 +4157,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
           incomeRegularity: bp.income_regularity || null,
           employerType: bp.employer_type || null,
           accountAge: bp.account_age || null,
-          assignedDate: bp.created_at ? bp.created_at.slice(0,10) : "—",
+          assignedDate: bp.created_at ? bp.created_at.slice(0,10) : "â",
           status: bp.kyc_status === "verified" ? "active" : "pending",
           documents: docs,
           loans: [],
@@ -4165,7 +4177,7 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState(null);
 
-  // Only show apps assigned to this lender — NO mock data fallback
+  // Only show apps assigned to this lender â NO mock data fallback
   const apps = sbApps;
   const filtered = filter === "all" ? apps : apps.filter(a => a.status === filter);
   // Use storage-loaded profile as primary (reflects latest edits); fall back to LENDER_DB seed
@@ -4180,20 +4192,20 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     employer: selectedApp.employer || "",
     salary: selectedApp.salary || 0,
     expenses: selectedApp.expenses || 0,
-    tier: selectedApp.tier || "—",
+    tier: selectedApp.tier || "â",
     riskScore: selectedApp.riskScore || 0,
-    dti: selectedApp.dti || "—",
+    dti: selectedApp.dti || "â",
     kycStatus: selectedApp.kycStatus || "pending",
     amlStatus: selectedApp.amlStatus || "pending",
     bankVerified: selectedApp.bankVerified || false,
     firstBorrower: selectedApp.firstBorrower || false,
-    assignedDate: selectedApp.receivedAt || "—",
+    assignedDate: selectedApp.receivedAt || "â",
     documents: selectedApp.docsData || [],
     loans: [],
     scorecard: NULL_SCORECARD,
     scorecardAnswers: NULL_SCORECARD_ANSWERS,
   } : null);
-  // Merge storedDocMetas into documents display — shows real uploaded files
+  // Merge storedDocMetas into documents display â shows real uploaded files
   // Build effective docs list with real file URLs from Supabase
   // Build effective docs list from loaded borrower profile (real Supabase data)
   const effectiveDocsList = (selectedBorrower?.documents && selectedBorrower.documents.length > 0)
@@ -4203,10 +4215,10 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
           return {
             key: k,
             label: ({id:"National ID / Passport",payslip:"Latest Payslip",bank_stmt:"Bank Statement",proof_addr:"Proof of Address",employment:"Employment Letter"})[k] || k,
-            type: ({id:"🪪",payslip:"📄",bank_stmt:"🏦",proof_addr:"🏠",employment:"💼"})[k] || "📎",
+            type: ({id:"ðªª",payslip:"ð",bank_stmt:"ð¦",proof_addr:"ð ",employment:"ð¼"})[k] || "ð",
             verified: true,
-            date: meta.uploadedAt ? meta.uploadedAt.slice(0,10) : "—",
-            size: meta.size || "—",
+            date: meta.uploadedAt ? meta.uploadedAt.slice(0,10) : "â",
+            size: meta.size || "â",
             fileUrl: meta.fileUrl || null,
             filePath: meta.filePath || null,
           };
@@ -4219,14 +4231,14 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
     : [];
 
   const handleDecision = async (appId, decision, amount) => {
-    // Convert to string for safe comparison — Supabase UUIDs are always strings
+    // Convert to string for safe comparison â Supabase UUIDs are always strings
     var idStr = String(appId);
     var app = apps.find(function(a) { return String(a.id) === idStr; });
     if (!app) {
       showToast("Application not found. Please refresh the page and try again.", "error");
       return;
     }
-    // Lock the UI immediately — prevents double-clicking
+    // Lock the UI immediately â prevents double-clicking
     setAppStatuses(prev => ({ ...prev, [idStr]: decision }));
     try {
       // Update status in Supabase
@@ -4236,11 +4248,11 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
         decided_by: user?.id || null,
       });
 
-      // Notify borrower (non-blocking — failure doesn't affect decision)
+      // Notify borrower (non-blocking â failure doesn't affect decision)
       if (app.borrowerUserId) {
         SB.insert("notifications", {
           user_id: app.borrowerUserId,
-          title: decision === "approved" ? "Loan Approved! 🎉" : "Loan Application Update",
+          title: decision === "approved" ? "Loan Approved! ð" : "Loan Application Update",
           message: decision === "approved"
             ? "Your loan of N$" + (amount || app.amount || 0).toLocaleString() + " has been approved. Your lender will contact you within 24 hours."
             : "Your loan application has been reviewed and was not approved at this time. Contact support for more details.",
@@ -4251,8 +4263,8 @@ const LenderApplications = ({ user, showToast, showConfirm, setView }) => {
 
       showToast(
         decision === "approved"
-          ? "✅ N$" + (amount || app.amount || 0).toLocaleString() + " approved — borrower notified"
-          : "Application declined — borrower notified.",
+          ? "â N$" + (amount || app.amount || 0).toLocaleString() + " approved â borrower notified"
+          : "Application declined â borrower notified.",
         decision === "approved" ? "success" : "error"
       );
 
@@ -4323,14 +4335,14 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
   };
 
   const downloadApp = (app, borrower) => {
-    const txt = `APPLICATION REVIEW REPORT\n${"=".repeat(40)}\nRef: ${app.id.toUpperCase()}\nBorrower: ${app.borrowerName}\nEmployer: ${app.employer}\nSalary: NAD ${(app.salary||0).toLocaleString()}/mo\nDTI: ${app.dti}\nLoan: NAD ${(app.amount||0).toLocaleString()} over ${app.term} months\nPurpose: ${app.purpose}\nRisk Score: ${app.riskScore}/100 — Tier ${app.tier}\nKYC: ${app.kycStatus} | AML: ${app.amlStatus} | Bank: ${app.bankVerified ? "Verified" : "Unverified"}\nReceived: ${app.receivedAt}\nDocuments: ${borrower?.documents.length || 0} files uploaded\n\nGenerated by MicroLendNA — ${new Date().toLocaleDateString()}`;
+    const txt = `APPLICATION REVIEW REPORT\n${"=".repeat(40)}\nRef: ${app.id.toUpperCase()}\nBorrower: ${app.borrowerName}\nEmployer: ${app.employer}\nSalary: NAD ${(app.salary||0).toLocaleString()}/mo\nDTI: ${app.dti}\nLoan: NAD ${(app.amount||0).toLocaleString()} over ${app.term} months\nPurpose: ${app.purpose}\nRisk Score: ${app.riskScore}/100 â Tier ${app.tier}\nKYC: ${app.kycStatus} | AML: ${app.amlStatus} | Bank: ${app.bankVerified ? "Verified" : "Unverified"}\nReceived: ${app.receivedAt}\nDocuments: ${borrower?.documents.length || 0} files uploaded\n\nGenerated by MicroLendNA â ${new Date().toLocaleDateString()}`;
     const blob = new Blob([txt], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a"); a.href = url; a.download = `application_${app.id}.txt`; a.click();
     showToast("Application report downloaded");
   };
 
-  // ── FULL APPLICATION DETAIL VIEW ──
+  // ââ FULL APPLICATION DETAIL VIEW ââ
   if (selectedApp && selectedBorrower) {
     const app = selectedApp;
   const b = selectedBorrower;
@@ -4351,7 +4363,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
       unpaidOrders: "0",
       incomeVolatility: "Stable (< 20% variation)",
       overdraftUsage: "None / minimal",
-      dtiRatio: dti < 0.3 ? "< 30%" : dti < 0.5 ? "30 – 50%" : "> 50%",
+      dtiRatio: dti < 0.3 ? "< 30%" : dti < 0.5 ? "30 â 50%" : "> 50%",
       disposableIncome: (salary - expenses) > salary * 0.4 ? "Strong surplus" : (salary - expenses) > 0 ? "Moderate" : "Weak / negative",
       loanBurden: (b.firstBorrower || app.firstBorrower) ? "Medium" : "Low",
       incomeMismatch: "None",
@@ -4369,36 +4381,36 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
       { key: "scorecard", label: "Bank Analysis" },
       { key: "riskprofile", label: "Risk Score" },
       { key: "history", label: `Loan History (${(b?.loans || []).length})` },
-      { key: "ai", label: "🤖 AI Recommendation" },
+      { key: "ai", label: "ð¤ AI Recommendation" },
     ];
 
     return (
       <div className="fade-in">
         {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          <Btn variant="ghost" small onClick={() => { setSelectedApp(null); setAiInsight(null); setAppTab("overview"); }}>← Applications</Btn>
+          <Btn variant="ghost" small onClick={() => { setSelectedApp(null); setAiInsight(null); setAppTab("overview"); }}>â Applications</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 20, fontWeight: 700 }}>{app.borrowerName}</h1>
               <TierBadge tier={app.tier} />
               <span style={{ background: app.status === "new_lead" ? DS.colors.goldDim : DS.colors.infoDim, color: app.status === "new_lead" ? DS.colors.gold : DS.colors.info, fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20 }}>
-                {app.status === "new_lead" ? "🔔 New Lead" : "🔍 Under Review"}
+                {app.status === "new_lead" ? "ð New Lead" : "ð Under Review"}
               </span>
               {decided && <span style={{ background: decided === "approved" ? DS.colors.accentDim : DS.colors.dangerDim, color: decided === "approved" ? DS.colors.accent : DS.colors.danger, fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20 }}>Decision: {decided}</span>}
             </div>
-            <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>{app.employer} · Received {app.receivedAt}</p>
+            <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>{app.employer} Â· Received {app.receivedAt}</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Btn small variant="ghost" onClick={() => downloadApp(app, b)}>⬇ Download</Btn>
-            {!decided && <Btn small onClick={() => confirmDecision(app, "approved")}>✓ Approve</Btn>}
-            {!decided && <Btn small variant="danger" onClick={() => confirmDecision(app, "declined")}>✗ Decline</Btn>}
+            <Btn small variant="ghost" onClick={() => downloadApp(app, b)}>â¬ Download</Btn>
+            {!decided && <Btn small onClick={() => confirmDecision(app, "approved")}>â Approve</Btn>}
+            {!decided && <Btn small variant="danger" onClick={() => confirmDecision(app, "declined")}>â Decline</Btn>}
           </div>
         </div>
 
         {/* Decision banner */}
         {decided && (
           <div style={{ padding: "12px 20px", marginBottom: 20, borderRadius: 10, background: decided === "approved" ? DS.colors.accentDim : DS.colors.dangerDim, border: `1px solid ${decided === "approved" ? DS.colors.accent : DS.colors.danger}44`, color: decided === "approved" ? DS.colors.accent : DS.colors.danger, fontWeight: 600 }}>
-            {decided === "approved" ? "✅ You approved this application. The borrower has been notified." : "❌ You declined this application. The borrower has been notified."}
+            {decided === "approved" ? "â You approved this application. The borrower has been notified." : "â You declined this application. The borrower has been notified."}
           </div>
         )}
 
@@ -4424,10 +4436,10 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             { label: "KYC " + app.kycStatus, ok: app.kycStatus === "verified" },
             { label: "AML " + app.amlStatus, ok: app.amlStatus === "clear" },
             { label: app.bankVerified ? "Bank Account Verified" : "Bank Unverified", ok: app.bankVerified },
-            { label: app.firstBorrower ? "⚠ First-Time Borrower" : "Returning Borrower", ok: !app.firstBorrower },
+            { label: app.firstBorrower ? "â  First-Time Borrower" : "Returning Borrower", ok: !app.firstBorrower },
             { label: `${app.docs} Documents Uploaded`, ok: app.docs >= 3 },
           ].map((v, i) => (
-            <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 20, background: v.ok ? DS.colors.accentDim : DS.colors.warningDim, color: v.ok ? DS.colors.accent : DS.colors.warning }}>{v.ok ? "✓" : "⚠"} {v.label}</span>
+            <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 20, background: v.ok ? DS.colors.accentDim : DS.colors.warningDim, color: v.ok ? DS.colors.accent : DS.colors.warning }}>{v.ok ? "â" : "â "} {v.label}</span>
           ))}
         </div>
 
@@ -4438,7 +4450,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           ))}
         </div>
 
-        {/* ── OVERVIEW ── */}
+        {/* ââ OVERVIEW ââ */}
         {appTab === "overview" && (
           <div className="fade-in">
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
@@ -4451,23 +4463,23 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, alignContent: "start" }}>
                 {[
                   { l: "Full Name", v: b.name || app.borrowerName },
-                  { l: "ID Number", v: b.idNumber || "—" },
-                  { l: "Email", v: b.email || "—" },
-                  { l: "Phone", v: b.phone || "—" },
-                  { l: "Employer", v: b.employer || app.employer || "—" },
-                  { l: "Employer Type", v: ({government:"Government",large_private:"Large Private Co.",sme:"SME",informal:"Informal/Self-employed"})[b.employerType] || "—" },
-                  { l: "Job Tenure", v: b.jobTenure || "—" },
-                  { l: "Income Regularity", v: ({fixed:"Fixed monthly salary",variable:"Variable/commission",irregular:"Irregular/seasonal"})[b.incomeRegularity] || "—" },
-                  { l: "Loan Purpose", v: app.purpose || "—" },
+                  { l: "ID Number", v: b.idNumber || "â" },
+                  { l: "Email", v: b.email || "â" },
+                  { l: "Phone", v: b.phone || "â" },
+                  { l: "Employer", v: b.employer || app.employer || "â" },
+                  { l: "Employer Type", v: ({government:"Government",large_private:"Large Private Co.",sme:"SME",informal:"Informal/Self-employed"})[b.employerType] || "â" },
+                  { l: "Job Tenure", v: b.jobTenure || "â" },
+                  { l: "Income Regularity", v: ({fixed:"Fixed monthly salary",variable:"Variable/commission",irregular:"Irregular/seasonal"})[b.incomeRegularity] || "â" },
+                  { l: "Loan Purpose", v: app.purpose || "â" },
                   { l: "Monthly Salary", v: `N${(b.salary||app.salary||0).toLocaleString()}` },
                   { l: "Monthly Expenses", v: `N${(b.expenses||app.expenses||0).toLocaleString()}` },
                   { l: "Disposable Income", v: `N${((b.salary||0) - (b.expenses||0)).toLocaleString()}` },
-                  { l: "Bank Account Age", v: b.accountAge || "—" },
-                  { l: "Member Since", v: b.assignedDate || "—" },
+                  { l: "Bank Account Age", v: b.accountAge || "â" },
+                  { l: "Member Since", v: b.assignedDate || "â" },
                 ].map(([l, v]) => (
                   <div key={l} style={{ padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{l}</p>
-                    <p style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{v||"—"}</p>
+                    <p style={{ fontSize: 13, fontWeight: 600, marginTop: 2 }}>{v||"â"}</p>
                   </div>
                 ))}
               </div>
@@ -4493,20 +4505,20 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
 
             {!decided && (
               <div style={{ display: "flex", gap: 12 }}>
-                <Btn onClick={() => confirmDecision(app, "approved")} style={{ flex: 1 }}>✓ Approve — N${(app.amount||0).toLocaleString()} over {app.term} months</Btn>
-                <Btn variant="danger" onClick={() => confirmDecision(app, "declined")}>✗ Decline</Btn>
-                <Btn variant="ghost" onClick={() => showToast("Additional info requested — borrower notified")}>📎 Request More Info</Btn>
+                <Btn onClick={() => confirmDecision(app, "approved")} style={{ flex: 1 }}>â Approve â N${(app.amount||0).toLocaleString()} over {app.term} months</Btn>
+                <Btn variant="danger" onClick={() => confirmDecision(app, "declined")}>â Decline</Btn>
+                <Btn variant="ghost" onClick={() => showToast("Additional info requested â borrower notified")}>ð Request More Info</Btn>
               </div>
             )}
           </div>
         )}
 
-        {/* ── DOCUMENTS ── */}
+        {/* ââ DOCUMENTS ââ */}
         {appTab === "documents" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents</h3>
-              <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as ZIP")}>⬇ Download All (ZIP)</Btn>
+              <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as ZIP")}>â¬ Download All (ZIP)</Btn>
             </div>
             <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
               {effectiveDocsList.length === 0 && (
@@ -4517,9 +4529,9 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               {effectiveDocsList.map(function(doc) {
                 var docKey = typeof doc === "string" ? doc : doc.key;
                 var docLabel = typeof doc === "object" ? doc.label : docKey;
-                var docType = typeof doc === "object" ? doc.type : "📎";
-                var docDate = typeof doc === "object" ? doc.date : "—";
-                var docSize = typeof doc === "object" ? doc.size : "—";
+                var docType = typeof doc === "object" ? doc.type : "ð";
+                var docDate = typeof doc === "object" ? doc.date : "â";
+                var docSize = typeof doc === "object" ? doc.size : "â";
                 var docUrl = typeof doc === "object" ? doc.fileUrl : null;
                 var docVerified = typeof doc === "object" ? doc.verified : false;
                 return (
@@ -4528,26 +4540,26 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                     <div style={{ flex: 1 }}>
                       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
                         <p style={{ fontWeight: 600 }}>{docLabel}</p>
-                        {docVerified && <Badge label="Verified ✓" color={DS.colors.accent} />}
+                        {docVerified && <Badge label="Verified â" color={DS.colors.accent} />}
                       </div>
-                      <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Uploaded {docDate} · {docSize} · AES-256 encrypted</p>
-                      {docUrl && <p style={{ fontSize: 11, color: DS.colors.info, marginTop: 2 }}>✓ File available for viewing</p>}
+                      <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Uploaded {docDate} Â· {docSize} Â· AES-256 encrypted</p>
+                      {docUrl && <p style={{ fontSize: 11, color: DS.colors.info, marginTop: 2 }}>â File available for viewing</p>}
                     </div>
                     <div style={{ display: "flex", gap: 8 }}>
                       <Btn small variant="outline" onClick={async function() {
                         var path = typeof doc === "object" ? doc.filePath : null;
                         if (path) {
-                          if (path) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + path, "_blank"); return; }
+                          if (path) { openDocFile(path); return; }
                         }
-                        showToast("File not available — borrower may need to re-upload", "info");
-                      }}>👁 View</Btn>
+                        showToast("File not available â borrower may need to re-upload", "info");
+                      }}>ð View</Btn>
                       <Btn small variant="ghost" onClick={async function() {
                         var path = typeof doc === "object" ? doc.filePath : null;
                         if (path) {
-                          if (path) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + path, "_blank"); return; }
+                          if (path) { openDocFile(path); return; }
                         }
                         showToast("Download not available", "info");
-                      }}>⬇ Download</Btn>
+                      }}>â¬ Download</Btn>
                     </div>
                   </div>
                 );
@@ -4555,19 +4567,19 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             </div>
             {effectiveDocsList.length < 3 && (
               <div style={{ padding: 14, background: DS.colors.warningDim, border: `1px solid ${DS.colors.warning}33`, borderRadius: 10 }}>
-                <p style={{ fontSize: 13, color: DS.colors.warning }}>⚠ Only {(b?.documents || []).length} of 3 required documents uploaded. Request missing documents before approving.</p>
+                <p style={{ fontSize: 13, color: DS.colors.warning }}>â  Only {(b?.documents || []).length} of 3 required documents uploaded. Request missing documents before approving.</p>
                 <Btn small style={{ marginTop: 10 }} onClick={() => showToast("Document request sent to borrower")}>Request Missing Documents</Btn>
               </div>
             )}
           </div>
         )}
 
-        {/* ── BANK ANALYSIS ── */}
+        {/* ââ BANK ANALYSIS ââ */}
         {appTab === "scorecard" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Analysis — {b?.scorecard.period}</h3>
-              <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>⬇ Download PDF</Btn>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Analysis â {b?.scorecard.period}</h3>
+              <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>â¬ Download PDF</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
               {[
@@ -4587,7 +4599,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
             <Card style={{ marginBottom: 16 }}>
               <p style={{ fontWeight: 600, marginBottom: 10 }}>Balance Trend</p>
               <MiniSparkline data={b?.scorecard.balanceHistory} color={DS.colors.info} />
-              <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 6 }}>Range: N${Math.min(...b?.scorecard.balanceHistory).toLocaleString()} – N${Math.max(...b?.scorecard.balanceHistory).toLocaleString()}</p>
+              <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 6 }}>Range: N${Math.min(...b?.scorecard.balanceHistory).toLocaleString()} â N${Math.max(...b?.scorecard.balanceHistory).toLocaleString()}</p>
             </Card>
             <Card style={{ padding: 0, overflow: "hidden" }}>
               <div style={{ background: "#1e3a5f", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "#e2e8f0", display: "flex", justifyContent: "space-between" }}>
@@ -4607,12 +4619,12 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           </div>
         )}
 
-        {/* ── RISK SCORE ── */}
+        {/* ââ RISK SCORE ââ */}
         {appTab === "riskprofile" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${(v?.pct||0).toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${(app.borrowerName||"borrower").replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt=`RISK SCORECARD\n${app.borrowerName}\nScore: ${rr.finalScore}/100 â Tier ${rr.tier}\n${Object.entries(rr?.breakdown||{}).map(([k,v])=>`${v.label}: ${(v?.pct||0).toFixed(0)}/100`).join("\n")}`; const blob=new Blob([txt],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`riskprofile_${(app.borrowerName||"borrower").replace(" ","_")}.txt`; a.click(); showToast("Risk profile downloaded"); }}>â¬ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -4638,7 +4650,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                   {[
                     { l: "Max Loan", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
-                    { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}× disposable`, c: DS.colors.info },
+                    { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}Ã disposable`, c: DS.colors.info },
                   ].map((s, i) => (
                     <div key={i} style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{s.l}</p>
@@ -4651,32 +4663,32 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           </div>
         )}
 
-        {/* ── LOAN HISTORY ── */}
+        {/* ââ LOAN HISTORY ââ */}
         {appTab === "history" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Loan History — {b.name}</h3>
-              <Btn small variant="ghost" onClick={() => showToast("Loan history exported")}>⬇ Export</Btn>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Loan History â {b.name}</h3>
+              <Btn small variant="ghost" onClick={() => showToast("Loan history exported")}>â¬ Export</Btn>
             </div>
             {(b?.loans || []).map(loan => (
               <Card key={loan.id} style={{ marginBottom: 14, borderLeft: `4px solid ${loan.status === "approved" ? DS.colors.accent : loan.status === "pending" ? DS.colors.gold : DS.colors.danger}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: (loan.repayments||[]).length > 0 ? 14 : 0 }}>
                   <div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
-                      <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
+                      <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} â {loan.purpose}</p>
                       <StatusBadge status={loan.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
-                      {loan.disbursed ? ` · Disbursed: ${loan.disbursed}` : ""}
-                      {loan.dueDate ? ` · Due: ${loan.dueDate}` : ""}
+                      {loan.term} months Â· Rate: {loan.rate || "N/A"} Â· Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
+                      {loan.disbursed ? ` Â· Disbursed: ${loan.disbursed}` : ""}
+                      {loan.dueDate ? ` Â· Due: ${loan.dueDate}` : ""}
                     </p>
                   </div>
                   {loan.outstanding !== null && (
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Outstanding</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: loan.outstanding > 0 ? DS.colors.warning : DS.colors.accent }}>
-                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "✓ Settled"}
+                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "â Settled"}
                       </p>
                     </div>
                   )}
@@ -4689,7 +4701,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
                           <span style={{ fontSize: 13 }}>{r.date}</span>
                           <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>N${r.amount.toLocaleString()}</span>
-                          <span style={{ fontSize: 12, color: r.status === "paid" ? DS.colors.accent : DS.colors.warning, fontWeight: 600 }}>{r.status === "paid" ? "✓ Paid" : "⏳ Pending"}</span>
+                          <span style={{ fontSize: 12, color: r.status === "paid" ? DS.colors.accent : DS.colors.warning, fontWeight: 600 }}>{r.status === "paid" ? "â Paid" : "â³ Pending"}</span>
                         </div>
                       ))}
                     </div>
@@ -4700,18 +4712,18 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
           </div>
         )}
 
-        {/* ── AI RECOMMENDATION ── */}
+        {/* ââ AI RECOMMENDATION ââ */}
         {appTab === "ai" && (
           <div className="fade-in">
             <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Recommendation</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>ð¤ AI Credit Recommendation</h3>
                   <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Automated analysis for this specific loan application</p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {!loadingAi && <Btn small onClick={() => getAiRec(app, b)}>{aiInsight ? "Regenerate" : "Generate"}</Btn>}
-                  {aiInsight && !loadingAi && <Btn small variant="ghost" onClick={() => { const blob=new Blob([aiInsight],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`ai_recommendation_${app.id}.txt`; a.click(); showToast("AI memo downloaded"); }}>⬇ Download</Btn>}
+                  {aiInsight && !loadingAi && <Btn small variant="ghost" onClick={() => { const blob=new Blob([aiInsight],{type:"text/plain"}); const url=URL.createObjectURL(blob); const a=document.createElement("a"); a.href=url; a.download=`ai_recommendation_${app.id}.txt`; a.click(); showToast("AI memo downloaded"); }}>â¬ Download</Btn>}
                 </div>
               </div>
               {loadingAi ? (
@@ -4723,15 +4735,15 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                 <div style={{ whiteSpace: "pre-wrap", fontSize: 14, color: DS.colors.textSecondary, lineHeight: 1.9, borderTop: `1px solid ${DS.colors.border}`, paddingTop: 16 }}>{aiInsight}</div>
               ) : (
                 <div style={{ padding: "32px 0", textAlign: "center" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🤖</p>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>ð¤</p>
                   <p style={{ color: DS.colors.textMuted, fontSize: 14 }}>Click Generate to produce an AI credit recommendation for this specific loan application.</p>
                 </div>
               )}
             </Card>
             {!decided && aiInsight && (
               <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
-                <Btn onClick={() => confirmDecision(app, "approved")} style={{ flex: 1 }}>✓ Approve Based on Analysis</Btn>
-                <Btn variant="danger" onClick={() => confirmDecision(app, "declined")}>✗ Decline</Btn>
+                <Btn onClick={() => confirmDecision(app, "approved")} style={{ flex: 1 }}>â Approve Based on Analysis</Btn>
+                <Btn variant="danger" onClick={() => confirmDecision(app, "declined")}>â Decline</Btn>
               </div>
             )}
           </div>
@@ -4740,16 +4752,16 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
     );
   }
 
-  // ── APPLICATIONS LIST ──
+  // ââ APPLICATIONS LIST ââ
   return (
     <div className="fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Applications</h1>
-          <p style={{ color: DS.colors.textSecondary }}>New leads and applications under review — pre-screened, risk-scored, KYC verified</p>
+          <p style={{ color: DS.colors.textSecondary }}>New leads and applications under review â pre-screened, risk-scored, KYC verified</p>
         </div>
         <div style={{ display: "flex", gap: 4, padding: 4, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10 }}>
-          {[["all", "All", apps.length], ["new_lead", "🔔 New Leads", apps.filter(a => a.status === "new_lead").length], ["under_review", "🔍 Under Review", apps.filter(a => a.status === "under_review").length]].map(([val, label, count]) => (
+          {[["all", "All", apps.length], ["new_lead", "ð New Leads", apps.filter(a => a.status === "new_lead").length], ["under_review", "ð Under Review", apps.filter(a => a.status === "under_review").length]].map(([val, label, count]) => (
             <button key={val} onClick={() => setFilter(val)} style={{ padding: "7px 16px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: filter === val ? DS.colors.accent : "transparent", color: filter === val ? "#0A0F1E" : DS.colors.textSecondary, transition: "all .2s" }}>
               {label} <span style={{ fontSize: 11, opacity: .7 }}>({count})</span>
             </button>
@@ -4760,17 +4772,17 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
       {/* Summary */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 24 }}>
         <div style={{ padding: 18, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}33`, borderRadius: 12 }}>
-          <p style={{ fontSize: 12, color: DS.colors.gold, fontWeight: 600, marginBottom: 4 }}>🔔 New Leads</p>
+          <p style={{ fontSize: 12, color: DS.colors.gold, fontWeight: 600, marginBottom: 4 }}>ð New Leads</p>
           <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.gold }}>{apps.filter(a => a.status === "new_lead").length}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Awaiting your decision</p>
         </div>
         <div style={{ padding: 18, background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 12 }}>
-          <p style={{ fontSize: 12, color: DS.colors.info, fontWeight: 600, marginBottom: 4 }}>🔍 Under Review</p>
+          <p style={{ fontSize: 12, color: DS.colors.info, fontWeight: 600, marginBottom: 4 }}>ð Under Review</p>
           <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.info }}>{apps.filter(a => a.status === "under_review").length}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Being evaluated</p>
         </div>
         <div style={{ padding: 18, background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 12 }}>
-          <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600, marginBottom: 4 }}>💰 Total Requested</p>
+          <p style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600, marginBottom: 4 }}>ð° Total Requested</p>
           <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 28, fontWeight: 800, color: DS.colors.accent }}>N${filtered.reduce((s, a) => s + a.amount, 0).toLocaleString()}</p>
           <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Open applications value</p>
         </div>
@@ -4785,7 +4797,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
               {app.status === "new_lead" && (
                 <div style={{ background: DS.colors.goldDim, borderBottom: `1px solid ${DS.colors.gold}33`, padding: "6px 20px", display: "flex", alignItems: "center", gap: 8 }}>
                   <span style={{ width: 6, height: 6, background: DS.colors.gold, borderRadius: "50%", display: "inline-block", animation: "pulse 1.5s ease-in-out infinite" }} />
-                  <span style={{ fontSize: 11, color: DS.colors.gold, fontWeight: 700, letterSpacing: "0.06em" }}>NEW LEAD — received {app.receivedAt}</span>
+                  <span style={{ fontSize: 11, color: DS.colors.gold, fontWeight: 700, letterSpacing: "0.06em" }}>NEW LEAD â received {app.receivedAt}</span>
                 </div>
               )}
               <div style={{ padding: 20 }}>
@@ -4796,23 +4808,23 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
                       <p style={{ fontWeight: 700, fontSize: 16 }}>{app.borrowerName}</p>
                       <TierBadge tier={app.tier} />
                       <span style={{ background: app.status === "new_lead" ? DS.colors.goldDim : DS.colors.infoDim, color: app.status === "new_lead" ? DS.colors.gold : DS.colors.info, fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20 }}>{app.status === "new_lead" ? "New Lead" : "Under Review"}</span>
-                      {app.channel === "whatsapp" && <span style={{ background:"#25D36622",color:"#25D366",border:"1px solid #25D36644",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>💬 WhatsApp</span>}
-                      {app.channel === "agent" && <span style={{ background:"#A78BFA22",color:"#A78BFA",border:"1px solid #A78BFA44",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>🧑‍💼 Agent</span>}
-                      {app.kycStatus === "verified" && <Badge label="KYC ✓" color={DS.colors.accent} />}
-                      {app.amlStatus === "clear" && <Badge label="AML ✓" color={DS.colors.accent} />}
-                      {app.bankVerified && <Badge label="Bank ✓" color={DS.colors.info} />}
-                      {app.firstBorrower && <Badge label="⚠ First Borrower" color={DS.colors.warning} />}
+                      {app.channel === "whatsapp" && <span style={{ background:"#25D36622",color:"#25D366",border:"1px solid #25D36644",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>ð¬ WhatsApp</span>}
+                      {app.channel === "agent" && <span style={{ background:"#A78BFA22",color:"#A78BFA",border:"1px solid #A78BFA44",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700 }}>ð§âð¼ Agent</span>}
+                      {app.kycStatus === "verified" && <Badge label="KYC â" color={DS.colors.accent} />}
+                      {app.amlStatus === "clear" && <Badge label="AML â" color={DS.colors.accent} />}
+                      {app.bankVerified && <Badge label="Bank â" color={DS.colors.info} />}
+                      {app.firstBorrower && <Badge label="â  First Borrower" color={DS.colors.warning} />}
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(5, auto)", gap: "4px 24px", width: "fit-content" }}>
-                      {[["Amount", `N${(app.amount||0).toLocaleString()}`], ["Term", `${app.term}mo`], ["Purpose", app.purpose], ["Risk Score", `${app.riskScore}/100`], ["DTI", app.dti], ["Salary", `N${(app.salary||0).toLocaleString()}`], ["Employer", app.employer], ["Docs", `${app.docs} files`], ["First Borrower", app.firstBorrower ? "Yes ⚠" : "No"]].map(([label, val]) => (
+                      {[["Amount", `N${(app.amount||0).toLocaleString()}`], ["Term", `${app.term}mo`], ["Purpose", app.purpose], ["Risk Score", `${app.riskScore}/100`], ["DTI", app.dti], ["Salary", `N${(app.salary||0).toLocaleString()}`], ["Employer", app.employer], ["Docs", `${app.docs} files`], ["First Borrower", app.firstBorrower ? "Yes â " : "No"]].map(([label, val]) => (
                         <div key={label}><p style={{ fontSize: 10, color: DS.colors.textMuted }}>{label}</p><p style={{ fontSize: 13, fontWeight: 600, color: label === "DTI" && parseFloat(app.dti) > 45 ? DS.colors.warning : DS.colors.textPrimary }}>{val}</p></div>
                       ))}
                     </div>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
-                    <Btn small onClick={() => { setSelectedApp(app); setAppTab("overview"); setAiInsight(null); }}>📋 Full Review</Btn>
-                    <Btn small variant="outline" onClick={() => { setSelectedApp(app); setAppTab("documents"); setAiInsight(null); }}>📁 Docs</Btn>
-                    <Btn small variant="ghost" onClick={() => { setSelectedApp(app); setAppTab("ai"); getAiRec(app, (LENDER_DB.borrowers||[]).find(b => b.id === app.borrowerId)); }}>🤖 AI</Btn>
+                    <Btn small onClick={() => { setSelectedApp(app); setAppTab("overview"); setAiInsight(null); }}>ð Full Review</Btn>
+                    <Btn small variant="outline" onClick={() => { setSelectedApp(app); setAppTab("documents"); setAiInsight(null); }}>ð Docs</Btn>
+                    <Btn small variant="ghost" onClick={() => { setSelectedApp(app); setAppTab("ai"); getAiRec(app, (LENDER_DB.borrowers||[]).find(b => b.id === app.borrowerId)); }}>ð¤ AI</Btn>
                   </div>
                 </div>
               </div>
@@ -4827,7 +4839,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         )}
         {!loadingApps && apps.length === 0 && (
           <Card style={{ textAlign: "center", padding: 56 }}>
-            <p style={{ fontSize: 52, marginBottom: 16 }}>📬</p>
+            <p style={{ fontSize: 52, marginBottom: 16 }}>ð¬</p>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8, fontSize: 20 }}>No Applications Assigned Yet</h3>
             <p style={{ color: DS.colors.textMuted, fontSize: 14, maxWidth: 420, margin: "0 auto", lineHeight: 1.6 }}>
               The admin will review borrower profiles and route approved applications to you. You will receive a notification when an application is assigned.
@@ -4836,7 +4848,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
         )}
         {!loadingApps && apps.length > 0 && filtered.filter(a => !appStatuses[a.id]).length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
-            <p style={{ fontSize: 40, marginBottom: 12 }}>📭</p>
+            <p style={{ fontSize: 40, marginBottom: 12 }}>ð­</p>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 8 }}>No applications here</h3>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>
               {filter === "new_lead" ? "No new leads in this filter." : filter === "under_review" ? "No applications under review." : "All applications have been processed."}
@@ -4848,7 +4860,7 @@ Write 3 concise paragraphs: 1) Borrower creditworthiness summary 2) Risk factors
   );
 };
 
-// ── LENDER BORROWERS (full CRM — all statuses) ────────────────────────────────
+// ââ LENDER BORROWERS (full CRM â all statuses) ââââââââââââââââââââââââââââââââ
 const LenderBorrowers = ({ user, showToast, showConfirm }) => {
   const [selectedBorrower, setSelectedBorrower] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
@@ -4881,12 +4893,12 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
             if(!docsByBpId[d.borrower_id])docsByBpId[d.borrower_id]=[];
             var k=revMap[d.doc_type]||d.doc_type;
             if(!docsByBpId[d.borrower_id].find(function(x){return x.key===k;})){
-              docsByBpId[d.borrower_id].push({key:k,label:({national_id:"National ID",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type]||d.doc_type,type:({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type]||"📎",verified:d.verified||false,date:d.uploaded_at?d.uploaded_at.slice(0,10):"—",size:d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"—",filePath:d.file_path||null,dbId:d.id});
+              docsByBpId[d.borrower_id].push({key:k,label:({national_id:"National ID",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type]||d.doc_type,type:({national_id:"ðªª",payslip:"ð",bank_statement:"ð¦",proof_of_address:"ð ",employment_letter:"ð¼"})[d.doc_type]||"ð",verified:d.verified||false,date:d.uploaded_at?d.uploaded_at.slice(0,10):"â",size:d.file_size_bytes?Math.round(d.file_size_bytes/1024)+" KB":"â",filePath:d.file_path||null,dbId:d.id});
             }
           });
           var mapped=(bpRows||[]).map(function(bp){
             var u=userMap[bp.user_id]||{};
-            return safeBorrower({id:bp.id,userId:bp.user_id,name:u.name||"Unknown",email:u.email||"",phone:u.phone||"",idNumber:bp.id_number||"",employer:bp.employer||"",salary:bp.salary_cents?bp.salary_cents/100:0,expenses:bp.expenses_cents?bp.expenses_cents/100:0,tier:bp.tier||"—",riskScore:bp.risk_score||0,dti:bp.dti_ratio?(bp.dti_ratio*100).toFixed(1)+"%":"—",kycStatus:bp.kyc_status||"pending",amlStatus:bp.aml_status||"pending",bankVerified:bp.bank_verified||false,firstBorrower:bp.is_first_borrower||false,status:bp.kyc_status==="verified"?"active":"pending",assignedDate:bp.created_at?bp.created_at.slice(0,10):"—",loans:[],documents:docsByBpId[bp.id]||[]});
+            return safeBorrower({id:bp.id,userId:bp.user_id,name:u.name||"Unknown",email:u.email||"",phone:u.phone||"",idNumber:bp.id_number||"",employer:bp.employer||"",salary:bp.salary_cents?bp.salary_cents/100:0,expenses:bp.expenses_cents?bp.expenses_cents/100:0,tier:bp.tier||"â",riskScore:bp.risk_score||0,dti:bp.dti_ratio?(bp.dti_ratio*100).toFixed(1)+"%":"â",kycStatus:bp.kyc_status||"pending",amlStatus:bp.aml_status||"pending",bankVerified:bp.bank_verified||false,firstBorrower:bp.is_first_borrower||false,status:bp.kyc_status==="verified"?"active":"pending",assignedDate:bp.created_at?bp.created_at.slice(0,10):"â",loans:[],documents:docsByBpId[bp.id]||[]});
           });
           setAllBorrowers(mapped);
         } else {
@@ -4923,7 +4935,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
     const b = safeBorrower(rawB);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
     const txt = [
-      `BORROWER REPORT — ${b.name}`,
+      `BORROWER REPORT â ${b.name}`,
       "=".repeat(50),
       `Generated: ${new Date().toLocaleDateString()} by MicroLendNA`,
       "",
@@ -4945,7 +4957,7 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       `Overall Risk Score: ${rr.finalScore}/100`,
       `Credit Tier: ${rr.tier}`,
       `Recommendation: ${rr.recommendation}`,
-      `Max Loan Multiplier: ${rr.maxLoanMultiplier}× disposable income`,
+      `Max Loan Multiplier: ${rr.maxLoanMultiplier}Ã disposable income`,
       `Interest Rate: ${rr.interestRate ? rr.interestRate + "% p.a." : "N/A"}`,
       `Max Loan Amount: NAD ${rr.maxLoanMultiplier > 0 ? Math.round(((b.salary||0) - (b.expenses||0)) * rr.maxLoanMultiplier).toLocaleString() : "0"}`,
       "",
@@ -4956,10 +4968,10 @@ const LenderBorrowers = ({ user, showToast, showConfirm }) => {
       `First-Time Borrower: ${b.firstBorrower ? "Yes" : "No"}`,
       "",
       "DOCUMENTS UPLOADED",
-      ...(b.documents || []).map(d => typeof d === "string" ? `- ${d}` : `- ${d.label || d.key || "doc"} (${d.date || "—"}, ${d.size || "—"}) — ${d.verified ? "Verified" : "Pending"}`),
+      ...(b.documents || []).map(d => typeof d === "string" ? `- ${d}` : `- ${d.label || d.key || "doc"} (${d.date || "â"}, ${d.size || "â"}) â ${d.verified ? "Verified" : "Pending"}`),
       "",
       "LOAN HISTORY",
-      ...(b.loans || []).map(l => `- NAD ${(l.amount||0).toLocaleString()} | ${l.purpose||"—"} | ${l.term||0}mo | ${l.status||"—"}`),
+      ...(b.loans || []).map(l => `- NAD ${(l.amount||0).toLocaleString()} | ${l.purpose||"â"} | ${l.term||0}mo | ${l.status||"â"}`),
       "",
       "BANK STATEMENT SUMMARY",
       `Period: ${b.scorecard?.period || "N/A"}`,
@@ -5003,7 +5015,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
     setLoadingAi(false);
   };
 
-  // ── BORROWER DETAIL VIEW ──
+  // ââ BORROWER DETAIL VIEW ââ
   if (selectedBorrower) {
     const b = safeBorrower(selectedBorrower);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
@@ -5017,32 +5029,32 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
       { key: "scorecard", label: "Bank Analysis" },
       { key: "riskprofile", label: "Risk Profile" },
       { key: "history", label: `Loan History (${(b.loans||[]).length})` },
-      { key: "memo", label: "🤖 AI Memo" },
+      { key: "memo", label: "ð¤ AI Memo" },
     ];
 
     return (
       <div className="fade-in">
         {/* Header */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          <Btn variant="ghost" small onClick={() => { setSelectedBorrower(null); setActiveTab("overview"); setAiInsight(null); }}>← Borrowers</Btn>
+          <Btn variant="ghost" small onClick={() => { setSelectedBorrower(null); setActiveTab("overview"); setAiInsight(null); }}>â Borrowers</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700 }}>{b.name}</h1>
               <TierBadge tier={b.tier} />
               <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: statusColors[b.status] + "22", color: statusColors[b.status] || DS.colors.textMuted, textTransform: "capitalize" }}>{b.status}</span>
-              {b.amlStatus === "flagged" && <Badge label="⚠ AML Flag" color={DS.colors.danger} />}
+              {b.amlStatus === "flagged" && <Badge label="â  AML Flag" color={DS.colors.danger} />}
               {b.firstBorrower && <Badge label="First Borrower" color={DS.colors.warning} />}
             </div>
-            <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>{b.employer} · ID: {b.idNumber} · {b.phone} · Member since {b.assignedDate}</p>
+            <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>{b.employer} Â· ID: {b.idNumber} Â· {b.phone} Â· Member since {b.assignedDate}</p>
           </div>
-          <Btn small variant="ghost" onClick={() => downloadBorrowerReport(b)}>⬇ Full Report</Btn>
+          <Btn small variant="ghost" onClick={() => downloadBorrowerReport(b)}>â¬ Full Report</Btn>
         </div>
 
         {/* Summary ribbon */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
           {[
             { l: "Total Loaned", v: `N${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
-            { l: "Outstanding", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "✓ Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
+            { l: "Outstanding", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "â Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
             { l: "Total Repaid", v: `N${totalRepaid.toLocaleString()}`, c: DS.colors.info },
             { l: "Risk Score", v: `${rr.finalScore}/100`, c: rr.tierColor },
           ].map((s, i) => (
@@ -5062,7 +5074,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           ))}
         </div>
 
-        {/* ── OVERVIEW ── */}
+        {/* ââ OVERVIEW ââ */}
         {activeTab === "overview" && (
           <div className="fade-in">
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
@@ -5095,9 +5107,9 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                     { label: "KYC " + b.kycStatus, ok: b.kycStatus === "verified" },
                     { label: "AML " + b.amlStatus, ok: b.amlStatus === "clear" },
                     { label: b.bankVerified ? "Bank Verified" : "Bank Unverified", ok: b.bankVerified },
-                    { label: b.firstBorrower ? "First Borrower ⚠" : "Returning Borrower", ok: !b.firstBorrower },
+                    { label: b.firstBorrower ? "First Borrower â " : "Returning Borrower", ok: !b.firstBorrower },
                   ].map((v, i) => (
-                    <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 20, background: v.ok ? DS.colors.accentDim : DS.colors.warningDim, color: v.ok ? DS.colors.accent : DS.colors.warning }}>{v.ok ? "✓" : "⚠"} {v.label}</span>
+                    <span key={i} style={{ fontSize: 12, fontWeight: 600, padding: "5px 12px", borderRadius: 20, background: v.ok ? DS.colors.accentDim : DS.colors.warningDim, color: v.ok ? DS.colors.accent : DS.colors.warning }}>{v.ok ? "â" : "â "} {v.label}</span>
                   ))}
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -5113,12 +5125,12 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           </div>
         )}
 
-        {/* ── DOCUMENTS ── */}
+        {/* ââ DOCUMENTS ââ */}
         {activeTab === "documents" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents — {b.name}</h3>
-              <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as encrypted ZIP")}>⬇ Download All (ZIP)</Btn>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>KYC Documents â {b.name}</h3>
+              <Btn small variant="ghost" onClick={() => showToast("All documents downloaded as encrypted ZIP")}>â¬ Download All (ZIP)</Btn>
             </div>
             <div style={{ display: "grid", gap: 10, marginBottom: 20 }}>
               {(b.documents||[]).map(doc => (
@@ -5127,32 +5139,32 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
                       <p style={{ fontWeight: 600 }}>{doc.label}</p>
-                      {doc.verified && <Badge label="Verified ✓" color={DS.colors.accent} />}
+                      {doc.verified && <Badge label="Verified â" color={DS.colors.accent} />}
                     </div>
-                    <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Uploaded {doc.date} · {doc.size} · AES-256 encrypted</p>
+                    <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Uploaded {doc.date} Â· {doc.size} Â· AES-256 encrypted</p>
                   </div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    <Btn small variant="outline" onClick={() => showToast(`Viewing ${doc.label}`)}>👁 View</Btn>
-                    <Btn small variant="ghost" onClick={() => { const blob = new Blob([`[Document: ${doc.label} — ${doc.size}]`], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = doc.key; a.click(); showToast(`${doc.label} downloaded`); }}>⬇ Download</Btn>
+                    <Btn small variant="outline" onClick={() => showToast(`Viewing ${doc.label}`)}>ð View</Btn>
+                    <Btn small variant="ghost" onClick={() => { const blob = new Blob([`[Document: ${doc.label} â ${doc.size}]`], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = doc.key; a.click(); showToast(`${doc.label} downloaded`); }}>â¬ Download</Btn>
                   </div>
                 </div>
               ))}
             </div>
             {(b.documents||[]).length < 3 && (
               <div style={{ padding: 14, background: DS.colors.warningDim, border: `1px solid ${DS.colors.warning}33`, borderRadius: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <p style={{ fontSize: 13, color: DS.colors.warning }}>⚠ Only {(b.documents||[]).length} of 3 required documents on file. Consider requesting the missing documents.</p>
+                <p style={{ fontSize: 13, color: DS.colors.warning }}>â  Only {(b.documents||[]).length} of 3 required documents on file. Consider requesting the missing documents.</p>
                 <Btn small onClick={() => showToast("Document request sent to borrower")}>Request Docs</Btn>
               </div>
             )}
           </div>
         )}
 
-        {/* ── BANK ANALYSIS ── */}
+        {/* ââ BANK ANALYSIS ââ */}
         {activeTab === "scorecard" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Scorecard — {b.scorecard.period}</h3>
-              <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>⬇ Download PDF</Btn>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Bank Statement Scorecard â {b.scorecard.period}</h3>
+              <Btn small variant="ghost" onClick={() => showToast("Bank scorecard PDF downloaded")}>â¬ Download PDF</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 20 }}>
               {[
@@ -5172,7 +5184,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
             <Card style={{ marginBottom: 16 }}>
               <p style={{ fontWeight: 600, marginBottom: 10 }}>Balance Trend (3 months)</p>
               <MiniSparkline data={b.scorecard.balanceHistory} color={DS.colors.info} />
-              <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 6 }}>Range: N${Math.min(...b.scorecard.balanceHistory).toLocaleString()} – N${Math.max(...b.scorecard.balanceHistory).toLocaleString()}</p>
+              <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 6 }}>Range: N${Math.min(...b.scorecard.balanceHistory).toLocaleString()} â N${Math.max(...b.scorecard.balanceHistory).toLocaleString()}</p>
             </Card>
             <Card style={{ padding: 0, overflow: "hidden", marginBottom: 16 }}>
               <div style={{ background: "#1e3a5f", padding: "10px 14px", fontSize: 12, fontWeight: 600, color: "#e2e8f0", display: "flex", justifyContent: "space-between" }}>
@@ -5192,12 +5204,12 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           </div>
         )}
 
-        {/* ── RISK PROFILE ── */}
+        {/* ââ RISK PROFILE ââ */}
         {activeTab === "riskprofile" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>5-Category Risk Scorecard</h3>
-              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD — ${b.name}\nScore: ${rr.finalScore}/100 — Tier ${rr.tier} — ${rr.recommendation}\n\n${Object.entries(rr?.breakdown||{}).map(([k, v]) => `${v.label}: ${(v?.pct||0).toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>⬇ Export</Btn>
+              <Btn small variant="ghost" onClick={() => { const txt = `RISK SCORECARD â ${b.name}\nScore: ${rr.finalScore}/100 â Tier ${rr.tier} â ${rr.recommendation}\n\n${Object.entries(rr?.breakdown||{}).map(([k, v]) => `${v.label}: ${(v?.pct||0).toFixed(0)}/100 (weight ${(v.weight * 100).toFixed(0)}%)`).join("\n")}\n\nMax Loan: NAD ${rr.maxLoanMultiplier > 0 ? Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString() : "0"}\nInterest Rate: ${rr.interestRate || "N/A"}% p.a.`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `risk_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Risk profile exported"); }}>â¬ Export</Btn>
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: 16, marginBottom: 20 }}>
               <div style={{ padding: 20, background: rr.tierColor + "0D", border: `1px solid ${rr.tierColor}33`, borderRadius: 14, textAlign: "center" }}>
@@ -5223,7 +5235,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                   {[
                     { l: "Max Loan Amount", v: rr.maxLoanMultiplier > 0 ? `N${Math.round((b.salary - b.expenses) * rr.maxLoanMultiplier).toLocaleString()}` : "Declined", c: rr.maxLoanMultiplier > 0 ? DS.colors.accent : DS.colors.danger },
                     { l: "Interest Rate", v: rr.interestRate ? `${rr.interestRate}% p.a.` : "N/A", c: DS.colors.gold },
-                    { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}× disposable`, c: DS.colors.info },
+                    { l: "Loan Multiplier", v: `${rr.maxLoanMultiplier}Ã disposable`, c: DS.colors.info },
                   ].map((s, i) => (
                     <div key={i} style={{ padding: 12, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{s.l}</p>
@@ -5236,12 +5248,12 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           </div>
         )}
 
-        {/* ── LOAN HISTORY ── */}
+        {/* ââ LOAN HISTORY ââ */}
         {activeTab === "history" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Complete Loan History — {b.name}</h3>
-              <Btn small variant="ghost" onClick={() => { const txt = `LOAN HISTORY — ${b.name}\n${"=".repeat(40)}\n${(b.loans||[]).map(l => [`Loan: NAD ${l.amount} — ${l.purpose}`, `Status: ${l.status} | Term: ${l.term} months | Rate: ${l.rate || "N/A"}`, `Monthly: ${l.monthly ? "NAD " + l.monthly.toLocaleString() : "N/A"} | Disbursed: ${l.disbursed || "N/A"}`, `Outstanding: ${l.outstanding !== null ? "NAD " + (l.outstanding || 0).toLocaleString() : "N/A"}`, `Repayments: ${(l.repayments||[]).length > 0 ? (l.repayments||[]).map(r => r.date + " NAD " + r.amount + " " + r.status).join(", ") : "None"}`, ""].join("\n")).join("\n")}`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `loan_history_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Loan history exported"); }}>⬇ Export History</Btn>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>Complete Loan History â {b.name}</h3>
+              <Btn small variant="ghost" onClick={() => { const txt = `LOAN HISTORY â ${b.name}\n${"=".repeat(40)}\n${(b.loans||[]).map(l => [`Loan: NAD ${l.amount} â ${l.purpose}`, `Status: ${l.status} | Term: ${l.term} months | Rate: ${l.rate || "N/A"}`, `Monthly: ${l.monthly ? "NAD " + l.monthly.toLocaleString() : "N/A"} | Disbursed: ${l.disbursed || "N/A"}`, `Outstanding: ${l.outstanding !== null ? "NAD " + (l.outstanding || 0).toLocaleString() : "N/A"}`, `Repayments: ${(l.repayments||[]).length > 0 ? (l.repayments||[]).map(r => r.date + " NAD " + r.amount + " " + r.status).join(", ") : "None"}`, ""].join("\n")).join("\n")}`; const blob = new Blob([txt], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `loan_history_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("Loan history exported"); }}>â¬ Export History</Btn>
             </div>
 
             {/* Loan summary */}
@@ -5249,7 +5261,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
               {[
                 { l: "Total Disbursed", v: `N${totalLoaned.toLocaleString()}`, c: DS.colors.accent },
                 { l: "Total Repaid", v: `N${totalRepaid.toLocaleString()}`, c: DS.colors.info },
-                { l: "Outstanding Balance", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "✓ All Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
+                { l: "Outstanding Balance", v: totalOutstanding > 0 ? `N${totalOutstanding.toLocaleString()}` : "â All Clear", c: totalOutstanding > 0 ? DS.colors.warning : DS.colors.accent },
               ].map((s, i) => (
                 <div key={i} style={{ padding: 14, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12 }}>
                   <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -5263,20 +5275,20 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: (loan.repayments||[]).length > 0 ? 14 : 0 }}>
                   <div>
                     <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 6 }}>
-                      <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
+                      <p style={{ fontWeight: 700, fontSize: 15 }}>N${loan.amount.toLocaleString()} â {loan.purpose}</p>
                       <StatusBadge status={loan.status} />
                     </div>
                     <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>
-                      {loan.term} months · Rate: {loan.rate || "N/A"} · Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
-                      {loan.disbursed ? ` · Disbursed: ${loan.disbursed}` : ""}
-                      {loan.dueDate ? ` · Due: ${loan.dueDate}` : ""}
+                      {loan.term} months Â· Rate: {loan.rate || "N/A"} Â· Monthly: {loan.monthly ? `N${loan.monthly.toLocaleString()}` : "N/A"}
+                      {loan.disbursed ? ` Â· Disbursed: ${loan.disbursed}` : ""}
+                      {loan.dueDate ? ` Â· Due: ${loan.dueDate}` : ""}
                     </p>
                   </div>
                   {loan.outstanding !== null && (
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Outstanding</p>
                       <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 20, fontWeight: 700, color: loan.outstanding > 0 ? DS.colors.warning : DS.colors.accent }}>
-                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "✓ Settled"}
+                        {loan.outstanding > 0 ? `N${loan.outstanding.toLocaleString()}` : "â Settled"}
                       </p>
                     </div>
                   )}
@@ -5289,7 +5301,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                         <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 12px", background: DS.colors.surfaceAlt, borderRadius: 8, borderLeft: `3px solid ${r.status === "paid" ? DS.colors.accent : DS.colors.warning}` }}>
                           <span style={{ fontSize: 13 }}>{r.date}</span>
                           <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "'DM Mono',monospace" }}>N${r.amount.toLocaleString()}</span>
-                          <span style={{ fontSize: 12, color: r.status === "paid" ? DS.colors.accent : DS.colors.warning, fontWeight: 600 }}>{r.status === "paid" ? "✓ Paid" : "⏳ Pending"}</span>
+                          <span style={{ fontSize: 12, color: r.status === "paid" ? DS.colors.accent : DS.colors.warning, fontWeight: 600 }}>{r.status === "paid" ? "â Paid" : "â³ Pending"}</span>
                         </div>
                       ))}
                     </div>
@@ -5303,18 +5315,18 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
           </div>
         )}
 
-        {/* ── AI MEMO ── */}
+        {/* ââ AI MEMO ââ */}
         {activeTab === "memo" && (
           <div className="fade-in">
             <Card style={{ background: "#080d1a", border: `1px solid ${DS.colors.accent}33` }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
                 <div>
-                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>🤖 AI Credit Memo — {b.name}</h3>
+                  <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16 }}>ð¤ AI Credit Memo â {b.name}</h3>
                   <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 2 }}>Combines risk scorecard, bank statement, and full loan history</p>
                 </div>
                 <div style={{ display: "flex", gap: 8 }}>
                   {!loadingAi && <Btn small onClick={() => getAiMemo(b)}>{aiInsight ? "Regenerate" : "Generate Memo"}</Btn>}
-                  {aiInsight && !loadingAi && <Btn small variant="ghost" onClick={() => { const blob = new Blob([aiInsight], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `ai_memo_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("AI memo downloaded"); }}>⬇ Download</Btn>}
+                  {aiInsight && !loadingAi && <Btn small variant="ghost" onClick={() => { const blob = new Blob([aiInsight], { type: "text/plain" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = `ai_memo_${b.name.replace(/\s+/g, "_")}.txt`; a.click(); showToast("AI memo downloaded"); }}>â¬ Download</Btn>}
                 </div>
               </div>
               {loadingAi ? (
@@ -5326,7 +5338,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                 <div style={{ whiteSpace: "pre-wrap", fontSize: 14, color: DS.colors.textSecondary, lineHeight: 1.9, borderTop: `1px solid ${DS.colors.border}`, paddingTop: 16 }}>{aiInsight}</div>
               ) : (
                 <div style={{ padding: "32px 0", textAlign: "center" }}>
-                  <p style={{ fontSize: 40, marginBottom: 12 }}>🤖</p>
+                  <p style={{ fontSize: 40, marginBottom: 12 }}>ð¤</p>
                   <p style={{ color: DS.colors.textMuted, fontSize: 14, maxWidth: 400, margin: "0 auto" }}>Click "Generate Memo" to produce a comprehensive AI credit memo combining all available data on {b.name}.</p>
                 </div>
               )}
@@ -5337,18 +5349,18 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
     );
   }
 
-  // ── BORROWERS LIST ──
+  // ââ BORROWERS LIST ââ
   return (
     <div className="fade-in">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 700, marginBottom: 4 }}>Borrowers</h1>
-          <p style={{ color: DS.colors.textSecondary }}>All borrowers — active, inactive, approved, declined. Full profiles, documents & history.</p>
+          <p style={{ color: DS.colors.textSecondary }}>All borrowers â active, inactive, approved, declined. Full profiles, documents & history.</p>
         </div>
-        <Btn small variant="ghost" onClick={downloadCSV}>⬇ Export CSV</Btn>
+        <Btn small variant="ghost" onClick={downloadCSV}>â¬ Export CSV</Btn>
       </div>
 
-      {/* Summary stats — clickable filters */}
+      {/* Summary stats â clickable filters */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, marginBottom: 20 }}>
         {[
           { label: "All Borrowers", count: allBorrowers.length, color: DS.colors.textPrimary, filter: "all" },
@@ -5395,7 +5407,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                     <p style={{ fontWeight: 700, fontSize: 15 }}>{b.name}</p>
                     <TierBadge tier={b.tier} />
                     <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: (statusColors[b.status] || DS.colors.textMuted) + "22", color: statusColors[b.status] || DS.colors.textMuted, textTransform: "capitalize" }}>{b.status}</span>
-                    {b.amlStatus === "flagged" && <Badge label="⚠ AML" color={DS.colors.danger} />}
+                    {b.amlStatus === "flagged" && <Badge label="â  AML" color={DS.colors.danger} />}
                     {b.firstBorrower && <Badge label="1st Borrower" color={DS.colors.warning} />}
                   </div>
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
@@ -5405,7 +5417,7 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                       ["DTI", b.dti],
                       ["Score", `${rr.finalScore}/100`],
                       ["Loans", (b.loans||[]).length],
-                      ["Outstanding", activeLoan ? `N${activeLoan.outstanding.toLocaleString()}` : settled > 0 ? "✓ Settled" : "None"],
+                      ["Outstanding", activeLoan ? `N${activeLoan.outstanding.toLocaleString()}` : settled > 0 ? "â Settled" : "None"],
                       ["Docs", `${(b.documents||[]).length} files`],
                     ].map(([l, v]) => (
                       <div key={l}><p style={{ fontSize: 10, color: DS.colors.textMuted }}>{l}</p><p style={{ fontSize: 13, fontWeight: 600 }}>{v}</p></div>
@@ -5414,8 +5426,8 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
                 </div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 6, flexShrink: 0 }}>
                   <Btn small onClick={() => { setSelectedBorrower(b); setActiveTab("overview"); setAiInsight(null); }}>View Profile</Btn>
-                  <Btn small variant="outline" onClick={() => { setSelectedBorrower(b); setActiveTab("documents"); setAiInsight(null); }}>📁 Docs</Btn>
-                  <Btn small variant="ghost" onClick={() => { setSelectedBorrower(b); setActiveTab("history"); setAiInsight(null); }}>📋 History</Btn>
+                  <Btn small variant="outline" onClick={() => { setSelectedBorrower(b); setActiveTab("documents"); setAiInsight(null); }}>ð Docs</Btn>
+                  <Btn small variant="ghost" onClick={() => { setSelectedBorrower(b); setActiveTab("history"); setAiInsight(null); }}>ð History</Btn>
                 </div>
               </div>
             </Card>
@@ -5429,14 +5441,14 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
         )}
         {!loadingBorr && allBorrowers.length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
-            <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
+            <p style={{ fontSize: 36, marginBottom: 12 }}>ð</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers assigned yet</p>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Admin will assign approved borrowers to you. Check Applications for new leads.</p>
           </Card>
         )}
         {!loadingBorr && allBorrowers.length > 0 && filtered.length === 0 && (
           <Card style={{ textAlign: "center", padding: 48 }}>
-            <p style={{ fontSize: 36, marginBottom: 12 }}>🔍</p>
+            <p style={{ fontSize: 36, marginBottom: 12 }}>ð</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 6 }}>No borrowers match</p>
             <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Try adjusting your search or filter criteria.</p>
           </Card>
@@ -5451,91 +5463,228 @@ Write 3 concise professional paragraphs: 1) Borrower profile & income quality 2)
 
 
 
-// ── ADMIN ALL APPLICATIONS ────────────────────────────────────────────────────
+// ââ ADMIN ALL APPLICATIONS ââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AdminAllApplications = ({ showToast }) => {
   const [allApps, setAllApps] = useState([]);
   const [loadingApps, setLoadingApps] = useState(true);
-  useEffect(function() {
-    (async function() {
-      try {
-        var rows = await SB.query("applications", "select=*&order=created_at.desc");
-        var bpRows = await SB.query("borrower_profiles", "select=*");
-        var bpMap = {};
-        (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
-        var users = await SB.query("profiles", "select=id,name,email");
-        var userMap = {};
-        (users || []).forEach(function(u) { userMap[u.id] = u; });
-        var mapped = (rows || []).map(function(r) {
-          var bp = bpMap[r.borrower_id] || {};
-          var u = userMap[bp.user_id] || {};
-          return {
-            id: r.id, borrowerName: u.name || "Unknown",
-            tier: r.tier_at_application || bp.tier || "—",
-            amount: r.amount_cents ? r.amount_cents / 100 : 0,
-            purpose: r.purpose || "Personal", status: r.status || "pending",
-            dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : "—",
-            employer: bp.employer || "", salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
-            receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
-            kycStatus: bp.kyc_status || "pending", amlStatus: bp.aml_status || "pending",
-            bankVerified: bp.bank_verified || false, firstBorrower: bp.is_first_borrower || false,
-            lenderId: r.lender_id || null,
-          };
-        });
-        if (mapped.length > 0) setAllApps(mapped);
-        else setAllApps([]);
-      } catch(e) { setAllApps([]); }
-      setLoadingApps(false);
-    })();
-  }, []);
+  const [sbLenders, setSbLenders] = useState([]);
+  const [assigningId, setAssigningId] = useState(null);
+  const [selectedLender, setSelectedLender] = useState({});
+
+  const loadData = async function() {
+    try {
+      var rows = await SB.query("applications", "select=*&order=created_at.desc");
+      var bpRows = await SB.query("borrower_profiles", "select=*");
+      var bpMap = {};
+      (bpRows || []).forEach(function(bp) { bpMap[bp.id] = bp; });
+      var users = await SB.query("profiles", "select=id,name,email");
+      var userMap = {};
+      (users || []).forEach(function(u) { userMap[u.id] = u; });
+      var lpRows = await SB.query("lender_profiles", "select=user_id,name,email,plan_type,status");
+      var lenderList = (lpRows || []).map(function(lp) {
+        var u = userMap[lp.user_id] || {};
+        return { id: lp.user_id, name: lp.name || u.name || "Unknown Lender", plan: lp.plan_type || "payasyougo", status: lp.status || "pending_review" };
+      });
+      setSbLenders(lenderList);
+      var mapped = (rows || []).map(function(r) {
+        var bp = bpMap[r.borrower_id] || {};
+        var u = userMap[bp.user_id] || {};
+        var lender = lenderList.find(function(l) { return l.id === (r.lender_user_id || r.lender_id); });
+        return {
+          id: r.id, borrowerId: r.borrower_id, borrowerUserId: bp.user_id || null,
+          borrowerName: u.name || "Unknown",
+          tier: r.tier_at_application || bp.tier || "—",
+          amount: r.amount_cents ? r.amount_cents / 100 : 0,
+          purpose: r.purpose || "Personal", status: r.status || "pending",
+          dti: r.dti_at_application ? (r.dti_at_application * 100).toFixed(1) + "%" : "—",
+          employer: bp.employer || "", salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
+          receivedAt: r.created_at ? r.created_at.slice(0, 16).replace("T", " ") : "—",
+          kycStatus: bp.kyc_status || "pending", amlStatus: bp.aml_status || "pending",
+          bankVerified: bp.bank_verified || false, firstBorrower: bp.is_first_borrower || false,
+          lenderId: r.lender_user_id || r.lender_id || null,
+          lenderName: lender ? lender.name : null,
+        };
+      });
+      setAllApps(mapped);
+    } catch(e) { console.log("AdminAllApps:", e.message); setAllApps([]); }
+    setLoadingApps(false);
+  };
+
+  useEffect(function() { loadData(); }, []);
+
   const [filter, setFilter] = useState("all");
-  const filtered = filter === "all" ? allApps : allApps.filter(a => a.status === filter);
+  const filtered = filter === "all" ? allApps
+    : filter === "unassigned" ? allApps.filter(a => !a.lenderId)
+    : allApps.filter(a => a.status === filter);
+
+  const handleAssign = async function(app) {
+    var lenderId = selectedLender[app.id];
+    if (!lenderId) { showToast("Please select a lender first", "error"); return; }
+    var lender = sbLenders.find(function(l) { return l.id === lenderId; });
+    setAssigningId(app.id);
+    try {
+      await SB.update("applications", { id: app.id }, {
+        lender_user_id: lenderId,
+        lender_name: lender ? lender.name : "",
+        status: "new_lead",
+      });
+      SB.insert("notifications", {
+        user_id: lenderId,
+        title: "New Application Assigned",
+        message: "An application from " + app.borrowerName + " for N$" + (app.amount||0).toLocaleString() + " has been assigned to you by admin.",
+        type: "info",
+      }).catch(function() {});
+      if (app.borrowerUserId) {
+        SB.insert("notifications", {
+          user_id: app.borrowerUserId,
+          title: "Application Assigned to Lender",
+          message: "Your loan application has been assigned to a lender. You will hear back within 24 hours.",
+          type: "info",
+        }).catch(function() {});
+      }
+      showToast("Application assigned to " + (lender ? lender.name : "lender") + " — lender notified");
+      setSelectedLender(function(p) { var n = Object.assign({}, p); delete n[app.id]; return n; });
+      await loadData();
+    } catch(e) { showToast("Assignment failed: " + e.message, "error"); }
+    setAssigningId(null);
+  };
+
+  const activeLenders = sbLenders.filter(function(l) { return l.status === "active"; });
 
   return (
     <div className="fade-in">
-      <PageHeader title="All Applications" subtitle="Platform-wide view of every application across all lenders" />
+      <PageHeader title="All Applications" subtitle="Platform-wide view — assign applications to lenders from here" />
+
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+        {[
+          { l: "Total", v: allApps.length, c: DS.colors.textPrimary },
+          { l: "Unassigned", v: allApps.filter(a => !a.lenderId).length, c: DS.colors.warning },
+          { l: "Assigned", v: allApps.filter(a => !!a.lenderId).length, c: DS.colors.accent },
+          { l: "Approved", v: allApps.filter(a => a.status === "approved").length, c: DS.colors.info },
+        ].map((s, i) => (
+          <div key={i} style={{ padding: "14px 16px", background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 12, borderTop: `3px solid ${s.c}` }}>
+            <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 800, color: s.c }}>{s.v}</p>
+          </div>
+        ))}
+      </div>
+
       <div style={{ display: "flex", gap: 4, marginBottom: 20, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, padding: 4, width: "fit-content" }}>
-        {[["all","All",allApps.length],["new_lead","New Leads",allApps.filter(a=>a.status==="new_lead").length],["under_review","Under Review",allApps.filter(a=>a.status==="under_review").length]].map(([val,label,count])=>(
+        {[
+          ["all", "All", allApps.length],
+          ["unassigned", "Unassigned", allApps.filter(a => !a.lenderId).length],
+          ["new_lead", "New Leads", allApps.filter(a => a.status === "new_lead").length],
+          ["approved", "Approved", allApps.filter(a => a.status === "approved").length],
+        ].map(([val, label, count]) => (
           <button key={val} onClick={() => setFilter(val)} style={{ padding: "7px 16px", borderRadius: 8, border: "none", fontSize: 13, fontWeight: 600, cursor: "pointer", background: filter===val?DS.colors.accent:"transparent", color: filter===val?"#0A0F1E":DS.colors.textSecondary, transition: "all .2s" }}>
             {label} ({count})
           </button>
         ))}
       </div>
-      <Card style={{ padding: 0, overflow: "hidden" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-          <thead><tr style={{ background: "#0f172a" }}>
-            {["Borrower","Tier","Lender","Amount","DTI","Status","AML","Date"].map(h=>(
-              <th key={h} style={{ padding: "12px 14px", textAlign: "left", fontSize: 11, color: "#e2e8f0", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
-            ))}
-          </tr></thead>
-          <tbody>
-            {filtered.map((app,i)=>(
-              <tr key={app.id} style={{ borderTop: `1px solid ${DS.colors.border}`, background: i%2===1?DS.colors.surfaceAlt:"transparent" }}>
-                <td style={{ padding: "12px 14px", fontWeight: 600 }}>{app.borrowerName}</td>
-                <td style={{ padding: "12px 14px" }}><TierBadge tier={app.tier} /></td>
-                <td style={{ padding: "12px 14px", fontSize: 12, color: DS.colors.textMuted }}>Capital Micro</td>
-                <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", color: DS.colors.accent }}>{app.amount>0?`N${(app.amount||0).toLocaleString()}`:"Declined"}</td>
-                <td style={{ padding: "12px 14px", color: parseFloat(app.dti)>45?DS.colors.warning:DS.colors.textPrimary }}>{app.dti}</td>
-                <td style={{ padding: "12px 14px" }}><StatusBadge status={app.status==="new_lead"?"pending":app.status==="under_review"?"pending":app.status} /></td>
-                <td style={{ padding: "12px 14px" }}><Badge label={app.amlStatus} color={app.amlStatus==="clear"?DS.colors.accent:DS.colors.danger} /></td>
-                <td style={{ padding: "12px 14px", fontSize: 12, color: DS.colors.textMuted }}>{app.receivedAt?.split(" ")[0]}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </Card>
+
+      {activeLenders.length === 0 && !loadingApps && (
+        <div style={{ padding: "12px 16px", background: DS.colors.warningDim, border: `1px solid ${DS.colors.warning}33`, borderRadius: 10, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, color: DS.colors.warning }}>⚠ No approved lenders yet. Go to the <strong>Lenders</strong> tab to approve lenders before assigning applications.</p>
+        </div>
+      )}
+
+      <div style={{ display: "grid", gap: 12 }}>
+        {loadingApps && (
+          <Card style={{ textAlign: "center", padding: 40 }}>
+            <div className="spin" style={{ width: 36, height: 36, border: "3px solid " + DS.colors.border, borderTop: "3px solid " + DS.colors.accent, borderRadius: "50%", margin: "0 auto 14px" }} />
+            <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>Loading applications from database...</p>
+          </Card>
+        )}
+        {!loadingApps && filtered.map(function(app, i) {
+          var tierColor = DS.colors["tier" + app.tier] || DS.colors.textMuted;
+          var isAssigning = assigningId === app.id;
+          return (
+            <div key={app.id} style={{ background: DS.colors.surface, border: `1px solid ${app.lenderId ? DS.colors.accent + "33" : DS.colors.border}`, borderRadius: 14, overflow: "hidden" }}>
+              <div style={{ height: 3, background: app.lenderId ? DS.colors.accent : DS.colors.warning }} />
+              <div style={{ padding: "16px 20px" }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 14 }}>
+                  <div style={{ width: 44, height: 44, background: tierColor + "22", border: `2px solid ${tierColor}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 17, color: tierColor, flexShrink: 0 }}>
+                    {(app.borrowerName||"?")[0]}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap", marginBottom: 6 }}>
+                      <p style={{ fontWeight: 700, fontSize: 15 }}>{app.borrowerName}</p>
+                      <TierBadge tier={app.tier} />
+                      <StatusBadge status={app.status === "new_lead" ? "pending" : app.status} />
+                      {app.kycStatus === "verified" && <Badge label="KYC ✓" color={DS.colors.accent} />}
+                      {app.amlStatus === "clear" && <Badge label="AML ✓" color={DS.colors.accent} />}
+                    </div>
+                    <div style={{ display: "flex", gap: 18, flexWrap: "wrap" }}>
+                      {[["Amount", "N$" + (app.amount||0).toLocaleString()], ["Purpose", app.purpose], ["DTI", app.dti], ["Salary", "N$" + (app.salary||0).toLocaleString()], ["Date", (app.receivedAt||"—").split(" ")[0]]].map(function(kv) {
+                        return <div key={kv[0]}><p style={{ fontSize: 10, color: DS.colors.textMuted }}>{kv[0]}</p><p style={{ fontSize: 13, fontWeight: 600 }}>{kv[1]}</p></div>;
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lender Assignment Row */}
+                <div style={{ padding: "12px 16px", background: app.lenderId ? DS.colors.accentDim : DS.colors.surfaceAlt, border: `1px solid ${app.lenderId ? DS.colors.accent + "33" : DS.colors.border}`, borderRadius: 10 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+                    <div style={{ minWidth: 180 }}>
+                      {app.lenderId ? (
+                        <div>
+                          <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 2 }}>Currently assigned to</p>
+                          <p style={{ fontSize: 14, fontWeight: 700, color: DS.colors.accent }}>✅ {app.lenderName || "Assigned lender"}</p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p style={{ fontSize: 11, fontWeight: 700, color: DS.colors.warning, marginBottom: 2 }}>🔔 Not yet assigned</p>
+                          <p style={{ fontSize: 12, color: DS.colors.textMuted }}>Select a lender and click Assign</p>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", flexShrink: 0 }}>
+                      <select
+                        value={selectedLender[app.id] || ""}
+                        onChange={function(e) { var v = e.target.value; setSelectedLender(function(p) { var n = Object.assign({}, p); n[app.id] = v; return n; }); }}
+                        style={{ fontSize: 12, padding: "8px 12px", borderRadius: 8, border: "1px solid " + DS.colors.border, background: DS.colors.surface, color: DS.colors.textPrimary, minWidth: 220 }}>
+                        <option value="">{app.lenderId ? "Re-assign to a different lender..." : "Select a lender to assign..."}</option>
+                        {activeLenders.map(function(l) {
+                          return <option key={l.id} value={l.id}>{l.name} ({l.plan === "subscription" ? "Subscription" : "Pay-As-You-Go"})</option>;
+                        })}
+                        {activeLenders.length === 0 && <option disabled value="">No approved lenders — approve lenders first</option>}
+                      </select>
+                      <Btn
+                        small
+                        variant={app.lenderId ? "outline" : "primary"}
+                        onClick={function() { handleAssign(app); }}
+                        disabled={isAssigning || !selectedLender[app.id]}
+                        style={{ minWidth: 90 }}>
+                        {isAssigning ? "Saving..." : app.lenderId ? "Re-assign" : "Assign →"}
+                      </Btn>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {!loadingApps && filtered.length === 0 && (
+          <Card style={{ textAlign: "center", padding: 48 }}>
+            <p style={{ fontSize: 36, marginBottom: 12 }}>📋</p>
+            <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginBottom: 6 }}>No applications found</p>
+            <p style={{ color: DS.colors.textMuted, fontSize: 13 }}>When borrowers submit loan applications, they will appear here for assignment.</p>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // ADMIN VIEWS
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ADMIN BORROWERS — Full platform-wide borrower view
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ADMIN BORROWERS â Full platform-wide borrower view
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const AdminBorrowers = ({ showToast, setView }) => {
   const [search, setSearch] = useState("");
@@ -5555,7 +5704,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
     (async function() {
       try {
         var lpRows = await SB.query("lender_profiles", "status=eq.active&select=user_id,name,email,plan_type,status");
-        // Also load pending so admin can see them — filter in UI
+        // Also load pending so admin can see them â filter in UI
         var allLpRows = await SB.query("lender_profiles", "select=user_id,name,email,plan_type,status");
         var profRows = await SB.query("profiles", "select=id,name,email");
         var profMap = {};
@@ -5585,7 +5734,8 @@ const AdminBorrowers = ({ showToast, setView }) => {
     (async function() {
       try {
         var profiles = await SB.query("borrower_profiles", "select=*");
-        var users = await SB.query("profiles", "select=id,name,email,phone,created_at");
+        // FIXED: Only load borrower-role users so lenders do not appear in this list
+        var users = await SB.query("profiles", "role=eq.borrower&select=id,name,email,phone,created_at");
         var userMap = {};
         (users || []).forEach(function(u) { userMap[u.id] = u; });
         var mapped = (profiles || []).map(function(bp) {
@@ -5595,12 +5745,12 @@ const AdminBorrowers = ({ showToast, setView }) => {
             phone: u.phone || bp.phone || "", idNumber: bp.id_number || "",
             employer: bp.employer || "", salary: bp.salary_cents ? bp.salary_cents / 100 : 0,
             expenses: bp.expenses_cents ? bp.expenses_cents / 100 : 0,
-            tier: bp.tier || "—", riskScore: bp.risk_score || 0,
-            dti: bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "—",
+            tier: bp.tier || "â", riskScore: bp.risk_score || 0,
+            dti: bp.dti_ratio ? (bp.dti_ratio * 100).toFixed(1) + "%" : "â",
             kycStatus: bp.kyc_status || "pending", amlStatus: bp.aml_status || "pending",
             bankVerified: bp.bank_verified || false, firstBorrower: bp.is_first_borrower,
             status: bp.kyc_status === "verified" ? "active" : "pending",
-            assignedDate: bp.created_at ? bp.created_at.slice(0, 10) : "—",
+            assignedDate: bp.created_at ? bp.created_at.slice(0, 10) : "â",
             documents: [], loans: [],
             // Risk data fields (task 7)
             jobTenure: bp.job_tenure || null,
@@ -5609,7 +5759,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             accountAge: bp.account_age || null,
           };
         });
-        // Also include borrower users who registered but don't have a profile yet
+        // Also include borrower-role users who registered but don't have a borrower_profile yet
         var bpUserIds = {};
         mapped.forEach(function(m) { bpUserIds[m.userId] = true; });
         (users || []).forEach(function(u) {
@@ -5617,10 +5767,10 @@ const AdminBorrowers = ({ showToast, setView }) => {
             mapped.push({
               id: u.id, userId: u.id, name: u.name || "Unknown", email: u.email || "",
               phone: u.phone || "", idNumber: "", employer: "", salary: 0, expenses: 0,
-              tier: "—", riskScore: 0, dti: "—",
+              tier: "â", riskScore: 0, dti: "â",
               kycStatus: "pending", amlStatus: "pending",
               bankVerified: false, firstBorrower: true,
-              status: "pending", assignedDate: u.created_at ? u.created_at.slice(0, 10) : "—",
+              status: "pending", assignedDate: u.created_at ? u.created_at.slice(0, 10) : "â",
               documents: [], loans: [],
             });
           }
@@ -5628,7 +5778,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
 
         // Load ALL documents from DB and attach to borrowers
         try {
-          var allDocs = await SB.query("documents", "select=*&order=uploaded_at.desc");
+          var allDocs = await SB.query("documents", "deleted_at=is.null&select=*&order=uploaded_at.desc");
           var reverseMap = { national_id: "id", payslip: "payslip", bank_statement: "bank_stmt", proof_of_address: "proof_addr", employment_letter: "employment" };
           var docsByProfileId = {};
           (allDocs || []).forEach(function(d) {
@@ -5639,10 +5789,10 @@ const AdminBorrowers = ({ showToast, setView }) => {
               docsByProfileId[d.borrower_id].push({
                 key: k,
                 label: ({national_id:"National ID/Passport",payslip:"Payslip",bank_statement:"Bank Statement",proof_of_address:"Proof of Address",employment_letter:"Employment Letter"})[d.doc_type] || d.doc_type,
-                type: ({national_id:"🪪",payslip:"📄",bank_statement:"🏦",proof_of_address:"🏠",employment_letter:"💼"})[d.doc_type] || "📎",
+                type: ({national_id:"ðªª",payslip:"ð",bank_statement:"ð¦",proof_of_address:"ð ",employment_letter:"ð¼"})[d.doc_type] || "ð",
                 verified: d.verified || false,
-                date: d.uploaded_at ? d.uploaded_at.slice(0,10) : "—",
-                size: d.file_size_bytes ? Math.round(d.file_size_bytes/1024) + " KB" : "—",
+                date: d.uploaded_at ? d.uploaded_at.slice(0,10) : "â",
+                size: d.file_size_bytes ? Math.round(d.file_size_bytes/1024) + " KB" : "â",
                 filePath: d.file_path || null,
                 dbId: d.id,
               });
@@ -5696,7 +5846,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
 
   const downloadCSV = () => {
     const rows = [["Name","ID","Employer","Salary","Tier","Score","DTI","Status","KYC","AML","Bank","Date"]];
-    allBorrowers.forEach(b => rows.push([b.name||"",b.idNumber||"",b.employer||"",b.salary||0,b.tier||"—",b.riskScore||0,b.dti||"—",b.status||"pending",b.kycStatus||"pending",b.amlStatus||"pending",b.bankVerified?"Yes":"No",b.assignedDate||"—"]));
+    allBorrowers.forEach(b => rows.push([b.name||"",b.idNumber||"",b.employer||"",b.salary||0,b.tier||"â",b.riskScore||0,b.dti||"â",b.status||"pending",b.kycStatus||"pending",b.amlStatus||"pending",b.bankVerified?"Yes":"No",b.assignedDate||"â"]));
     const csv = (rows||[]).map(r => (r||[]).map(v=>`"${v}"`).join(",")).join("\n");
     const blob = new Blob([csv],{type:"text/csv"});
     const url = URL.createObjectURL(blob);
@@ -5721,7 +5871,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
     setLoadingAi(false);
   };
 
-  // ── BORROWER DETAIL ──
+  // ââ BORROWER DETAIL ââ
   if (selected) {
     const b = safeBorrower(selected);
     const rr = RISK_SCORECARD.computeScore(b.scorecardAnswers || NULL_SCORECARD_ANSWERS);
@@ -5734,23 +5884,23 @@ const AdminBorrowers = ({ showToast, setView }) => {
       { key:"scorecard", label:"Bank Analysis" },
       { key:"riskprofile", label:"Risk Profile" },
       { key:"history", label:`Loan History (${(b.loans||[]).length})` },
-      { key:"memo", label:"🤖 AI Memo" },
+      { key:"memo", label:"ð¤ AI Memo" },
     ];
 
     return (
       <div className="fade-in">
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:20}}>
-          <Btn variant="ghost" small onClick={()=>{setSelected(null);setActiveTab("overview");setAiInsight(null);}}>← All Borrowers</Btn>
+          <Btn variant="ghost" small onClick={()=>{setSelected(null);setActiveTab("overview");setAiInsight(null);}}>â All Borrowers</Btn>
           <div style={{flex:1}}>
             <div style={{display:"flex",alignItems:"center",gap:10,flexWrap:"wrap"}}>
               <h1 style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:22,fontWeight:700}}>{b.name}</h1>
               <TierBadge tier={b.tier} />
               <span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:(statusColors[b.status]||DS.colors.textMuted)+"22",color:statusColors[b.status]||DS.colors.textMuted,textTransform:"capitalize"}}>{b.status}</span>
-              {b.amlStatus==="flagged"&&<Badge label="⚠ AML Flag" color={DS.colors.danger}/>}
+              {b.amlStatus==="flagged"&&<Badge label="â  AML Flag" color={DS.colors.danger}/>}
               {b.firstBorrower&&<Badge label="1st Borrower" color={DS.colors.warning}/>}
               {b.kycStatus!=="verified"&&<Badge label="KYC Pending" color={DS.colors.warning}/>}
             </div>
-            <p style={{fontSize:13,color:DS.colors.textMuted,marginTop:2}}>{b.employer} · ID: {b.idNumber} · {b.phone}</p>
+            <p style={{fontSize:13,color:DS.colors.textMuted,marginTop:2}}>{b.employer} Â· ID: {b.idNumber} Â· {b.phone}</p>
           </div>
           <Btn small variant="ghost" onClick={()=>{
             const txt=`ADMIN BORROWER REPORT\n${b.name}\nID: ${b.idNumber}\nEmployer: ${b.employer}\nSalary: N${(b.salary||0).toLocaleString()}\nTier: ${b.tier}\nRisk: ${b.riskScore}/100\nKYC: ${b.kycStatus} | AML: ${b.amlStatus}\nStatus: ${b.status}`;
@@ -5758,7 +5908,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             const url=URL.createObjectURL(blob);
             const a=document.createElement("a");a.href=url;a.download=`${b.name.replace(/\s+/g,"_")}.txt`;a.click();
             showToast("Report downloaded");
-          }}>⬇ Download</Btn>
+          }}>â¬ Download</Btn>
           {b.kycStatus !== "verified" ? (
             <Btn small onClick={async function() {
               try {
@@ -5766,7 +5916,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 try {
                   await SB.insert("notifications", {
                     user_id: b.userId,
-                    title: "Account Approved! ✅",
+                    title: "Account Approved! â",
                     message: "Your account has been verified and approved by an administrator. You can now apply for loans on MicroLendNA.",
                     type: "success",
                   });
@@ -5777,12 +5927,12 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 });
                 setSbBorrowers(updatedBorrowers);
                 setSelected(Object.assign({}, b, { kycStatus: "verified", status: "active" }));
-                showToast("✅ " + b.name + " approved — they can now apply for loans");
+                showToast("â " + b.name + " approved â they can now apply for loans");
               } catch(e) { showToast("Failed to approve: " + e.message, "error"); }
-            }} style={{background: DS.colors.accent, color: "#0A0F1E"}}>✓ Approve Borrower</Btn>
+            }} style={{background: DS.colors.accent, color: "#0A0F1E"}}>â Approve Borrower</Btn>
           ) : (
             <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>✅ Approved</span>
+              <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>â Approved</span>
               <Btn small variant="danger" onClick={async function() {
                 try {
                   await SB.update("borrower_profiles", { user_id: b.userId }, { kyc_status: "pending" });
@@ -5798,7 +5948,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
         <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,marginBottom:20}}>
           {[
             {l:"Total Loaned",v:`N${totalLoaned.toLocaleString()}`,c:DS.colors.accent},
-            {l:"Outstanding",v:totalOutstanding>0?`N${totalOutstanding.toLocaleString()}`:"✓ Clear",c:totalOutstanding>0?DS.colors.warning:DS.colors.accent},
+            {l:"Outstanding",v:totalOutstanding>0?`N${totalOutstanding.toLocaleString()}`:"â Clear",c:totalOutstanding>0?DS.colors.warning:DS.colors.accent},
             {l:"Risk Score",v:`${rr.finalScore}/100`,c:rr.tierColor},
             {l:"Credit Tier",v:`Tier ${rr.tier}`,c:rr.tierColor},
           ].map((s,i)=>(
@@ -5847,108 +5997,18 @@ const AdminBorrowers = ({ showToast, setView }) => {
                     {label:"KYC "+b.kycStatus,ok:b.kycStatus==="verified"},
                     {label:"AML "+b.amlStatus,ok:b.amlStatus==="clear"},
                     {label:b.bankVerified?"Bank Verified":"Bank Unverified",ok:b.bankVerified},
-                    {label:b.firstBorrower?"1st Borrower ⚠":"Returning",ok:!b.firstBorrower},
+                    {label:b.firstBorrower?"1st Borrower â ":"Returning",ok:!b.firstBorrower},
                   ].map((v,i)=>(
-                    <span key={i} style={{fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:20,background:v.ok?DS.colors.accentDim:DS.colors.warningDim,color:v.ok?DS.colors.accent:DS.colors.warning}}>{v.ok?"✓":"⚠"} {v.label}</span>
+                    <span key={i} style={{fontSize:12,fontWeight:600,padding:"5px 12px",borderRadius:20,background:v.ok?DS.colors.accentDim:DS.colors.warningDim,color:v.ok?DS.colors.accent:DS.colors.warning}}>{v.ok?"â":"â "} {v.label}</span>
                   ))}
                 </div>
 
-                {/* ── ASSIGN TO LENDER ── */}
-                {b.kycStatus==="verified" && (
-                  <div style={{padding:16,background:DS.colors.surfaceAlt,borderRadius:12,border:`1px solid ${DS.colors.border}`}}>
-                    <p style={{fontSize:13,fontWeight:700,marginBottom:10,color:DS.colors.textPrimary}}>🏦 Assign to Lender</p>
-                    <div style={{display:"flex",gap:10,alignItems:"center",flexWrap:"wrap"}}>
-                      <select
-                        defaultValue=""
-                        id={"lender-select-"+b.userId}
-                        style={{flex:1,minWidth:200,background:DS.colors.surface,border:`1px solid ${DS.colors.border}`,color:DS.colors.textPrimary,borderRadius:8,padding:"8px 12px",fontSize:13}}>
-                        <option value="">Select a lender to assign...</option>
-                        {sbLenders.filter(function(l){return l.status==="active";}).map(function(l) {
-                          return <option key={l.id} value={l.id}>{l.name} ({l.plan==="subscription"?"Sub":"PAYG"}) — Tier {rr.tier} {["A","B"].includes(rr.tier)?"✓":"⚠"}</option>;
-                        })}
-                        {sbLenders.filter(function(l){return l.status==="active";}).length === 0 && (
-                          <option disabled value="">No approved lenders yet — approve lenders in the Lenders tab first</option>
-                        )}
-                      </select>
-                      <Btn small onClick={async function() {
-                        var sel = document.getElementById("lender-select-"+b.userId);
-                        var lenderId = sel ? sel.value : "";
-                        if (!lenderId) { showToast("Please select a lender first","error"); return; }
-
-                        // Validate that b.id is a real Supabase UUID (not a local lb/b mock ID)
-                        var uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-                        var borrowerProfileId = b.id;
-
-                        // If b.id is not a UUID, it means this borrower has no borrower_profile yet
-                        // In that case look it up from Supabase using the user's UUID
-                        if (!uuidPattern.test(String(borrowerProfileId))) {
-                          showToast("This borrower has not completed their profile yet. Ask them to fill in their profile before assigning.", "error");
-                          return;
-                        }
-
-                        // Also validate lenderId is a UUID
-                        if (!uuidPattern.test(String(lenderId))) {
-                          showToast("Invalid lender ID. Please refresh and try again.", "error");
-                          return;
-                        }
-
-                        var lender = sbLenders.find(function(l){return l.id===lenderId;}) || (DB.lenders||[]).find(function(l){return l.id===lenderId;});
-                        try {
-                          // Update all pending/new_lead applications for this borrower
-                          var existingApps = await SB.query(
-                            "applications",
-                            "borrower_id=eq."+borrowerProfileId+"&select=id,status"
-                          );
-                          var pendingApps = (existingApps||[]).filter(function(a){
-                            return a.status==="pending"||a.status==="new_lead";
-                          });
-
-                          if (pendingApps.length > 0) {
-                            for (var i=0; i<pendingApps.length; i++) {
-                              await SB.update("applications",{id:pendingApps[i].id},{
-                                lender_user_id: lenderId,
-                                lender_name: lender?.name||"",
-                                status: "new_lead"
-                              });
-                            }
-                          } else {
-                            // No pending apps — create a new lead
-                            await SB.insert("applications",{
-                              borrower_id: borrowerProfileId,
-                              lender_user_id: lenderId,
-                              lender_name: lender?.name||"",
-                              amount_cents: Math.round((b.salary||0)*100),
-                              term_months: 3,
-                              purpose: "Admin Assigned",
-                              tier_at_application: b.tier||"—",
-                              risk_score_at_application: b.riskScore||0,
-                              status: "new_lead",
-                            });
-                          }
-
-                          // Notify lender (non-blocking)
-                          SB.insert("notifications",{
-                            user_id: lenderId,
-                            title: "🔔 New Loan Application Assigned",
-                            message: "A vetted borrower application from " + b.name + " (Tier " + rr.tier + ", DTI " + rr.dti + ") has been assigned to you by admin. Log in to review and approve or decline.",
-                            type: "info",
-                          }).catch(function(ne){ console.log("Notify lender:", ne.message); });
-
-                          showToast("✅ " + b.name + " assigned to " + (lender?.name||"lender") + " — lender notified");
-                        } catch(e){
-                          console.error("Assignment error:", e);
-                          showToast("Assignment error: "+e.message,"error");
-                        }
-                      }} style={{background:DS.colors.accent,color:"#0A0F1E"}}>Assign →</Btn>
-                    </div>
-                    <p style={{fontSize:11,color:DS.colors.textMuted,marginTop:8}}>Only approved (KYC verified) borrowers can be assigned to lenders. The lender will see this borrower in their Applications queue.</p>
-                  </div>
-                )}
-                {b.kycStatus!=="verified" && (
-                  <div style={{padding:12,background:DS.colors.warningDim,border:`1px solid ${DS.colors.warning}33`,borderRadius:10}}>
-                    <p style={{fontSize:12,color:DS.colors.warning}}>⚠ Borrower must be KYC verified before being assigned to a lender. Use the Approve button above.</p>
-                  </div>
-                )}
+                {/* ââ APPLICATIONS NOTE ââ */}
+                <div style={{padding:12,background:DS.colors.infoDim,border:`1px solid ${DS.colors.info}33`,borderRadius:10}}>
+                  <p style={{fontSize:13,color:DS.colors.info}}>
+                    â¹ To assign this borrower's applications to a lender, go to <strong>All Applications</strong> in the admin sidebar. Applications can be assigned individually from there.
+                  </p>
+                </div>
 
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
                   {[["Email",b.email],["Phone",b.phone],["Employer",b.employer],["Since",b.assignedDate]].map(([l,v])=>(
@@ -5967,21 +6027,21 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 {activeTab==="documents"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents — {b.name}</h3>
+              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>KYC Documents â {b.name}</h3>
               <span style={{fontSize:13,color:DS.colors.textMuted}}>{(b.documents||[]).length} document{(b.documents||[]).length!==1?"s":""} on file</span>
             </div>
             {(b.documents||[]).length === 0 && (
               <div style={{padding:24,background:DS.colors.surfaceAlt,borderRadius:12,textAlign:"center",marginBottom:16}}>
-                <p style={{fontSize:32,marginBottom:8}}>📂</p>
+                <p style={{fontSize:32,marginBottom:8}}>ð</p>
                 <p style={{color:DS.colors.textMuted,fontSize:13}}>No documents uploaded yet by this borrower.</p>
               </div>
             )}
             {(b.documents||[]).map(function(doc) {
               var docKey = typeof doc === "string" ? doc : doc.key;
               var docLabel = typeof doc === "object" ? doc.label : docKey;
-              var docType = typeof doc === "object" ? doc.type : "📎";
-              var docDate = typeof doc === "object" ? doc.date : "—";
-              var docSize = typeof doc === "object" ? doc.size : "—";
+              var docType = typeof doc === "object" ? doc.type : "ð";
+              var docDate = typeof doc === "object" ? doc.date : "â";
+              var docSize = typeof doc === "object" ? doc.size : "â";
               var filePath = typeof doc === "object" ? doc.filePath : null;
               var verified = typeof doc === "object" ? doc.verified : false;
               var dbId = typeof doc === "object" ? doc.dbId : null;
@@ -5991,26 +6051,26 @@ const AdminBorrowers = ({ showToast, setView }) => {
                   <div style={{flex:1}}>
                     <div style={{display:"flex",gap:8,alignItems:"center",marginBottom:3}}>
                       <p style={{fontWeight:600}}>{docLabel}</p>
-                      <Badge label={verified?"Verified ✓":"Uploaded"} color={verified?DS.colors.accent:DS.colors.gold}/>
+                      <Badge label={verified?"Verified â":"Uploaded"} color={verified?DS.colors.accent:DS.colors.gold}/>
                     </div>
-                    <p style={{fontSize:12,color:DS.colors.textMuted}}>Uploaded {docDate} · {docSize} · AES-256 encrypted</p>
-                    {filePath && <p style={{fontSize:11,color:DS.colors.info,marginTop:2}}>✓ Stored in Supabase</p>}
+                    <p style={{fontSize:12,color:DS.colors.textMuted}}>Uploaded {docDate} Â· {docSize} Â· AES-256 encrypted</p>
+                    {filePath && <p style={{fontSize:11,color:DS.colors.info,marginTop:2}}>â Stored in Supabase</p>}
                   </div>
                   <div style={{display:"flex",gap:8}}>
                     <Btn small variant="outline" onClick={async function() {
-                      if (filePath) { if (filePath) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath, "_blank"); return; } }
-                      showToast("File not available — borrower may need to re-upload","info");
-                    }}>👁 View</Btn>
+                      if (filePath) { openDocFile(filePath); return; }
+                      showToast("File not available â borrower may need to re-upload","info");
+                    }}>ð View</Btn>
                     <Btn small variant="ghost" onClick={async function() {
-                      if (filePath) { if (filePath) { window.open(SUPABASE_URL + "/storage/v1/object/public/kyc-documents/" + filePath, "_blank"); return; } }
+                      if (filePath) { openDocFile(filePath); return; }
                       showToast("Download not available","info");
-                    }}>⬇</Btn>
+                    }}>â¬</Btn>
                     {!verified && <Btn small onClick={async function() {
                       try {
                         if (dbId) await SB.update("documents", {id:dbId}, {verified:true});
                         showToast(docLabel+" marked as verified");
                       } catch(e) { showToast("Error: "+e.message,"error"); }
-                    }}>✓ Verify</Btn>}
+                    }}>â Verify</Btn>}
                   </div>
                 </div>
               );
@@ -6021,16 +6081,16 @@ const AdminBorrowers = ({ showToast, setView }) => {
                   try {
                     await SB.update("borrower_profiles",{user_id:b.userId},{kyc_status:"verified",kyc_verified_at:new Date().toISOString()});
                     setSelected(Object.assign({},b,{kycStatus:"verified",status:"active"}));
-                    showToast("KYC verified — borrower can now apply for loans ✓");
+                    showToast("KYC verified â borrower can now apply for loans â");
                   } catch(e) { showToast("Error: "+e.message,"error"); }
-                }}>✓ Verify & Approve Borrower</Btn>
+                }}>â Verify & Approve Borrower</Btn>
                 <Btn variant="danger" onClick={async function() {
                   try {
                     await SB.update("borrower_profiles",{user_id:b.userId},{kyc_status:"flagged"});
                     setSelected(Object.assign({},b,{kycStatus:"flagged"}));
                     showToast("Flagged for review","warning");
                   } catch(e) { showToast("Error: "+e.message,"error"); }
-                }}>⚠ Flag</Btn>
+                }}>â  Flag</Btn>
               </div>
             )}
           </div>
@@ -6038,8 +6098,8 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 {activeTab==="scorecard"&&(
           <div className="fade-in">
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
-              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>Bank Statement — {b.scorecard.period}</h3>
-              <Btn small variant="ghost" onClick={()=>showToast("Scorecard PDF downloaded")}>⬇ Download</Btn>
+              <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>Bank Statement â {b.scorecard.period}</h3>
+              <Btn small variant="ghost" onClick={()=>showToast("Scorecard PDF downloaded")}>â¬ Download</Btn>
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:12,marginBottom:20}}>
               {[
@@ -6094,14 +6154,14 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
                   <div>
                     <div style={{display:"flex",gap:10,alignItems:"center",marginBottom:6}}>
-                      <p style={{fontWeight:700,fontSize:15}}>N${loan.amount.toLocaleString()} — {loan.purpose}</p>
+                      <p style={{fontWeight:700,fontSize:15}}>N${loan.amount.toLocaleString()} â {loan.purpose}</p>
                       <StatusBadge status={loan.status}/>
                     </div>
-                    <p style={{fontSize:13,color:DS.colors.textSecondary}}>{loan.term} months · Rate: {loan.rate||"N/A"} · Monthly: {loan.monthly?`N${loan.monthly.toLocaleString()}`:"N/A"}{loan.disbursed?` · Disbursed: ${loan.disbursed}`:""}</p>
+                    <p style={{fontSize:13,color:DS.colors.textSecondary}}>{loan.term} months Â· Rate: {loan.rate||"N/A"} Â· Monthly: {loan.monthly?`N${loan.monthly.toLocaleString()}`:"N/A"}{loan.disbursed?` Â· Disbursed: ${loan.disbursed}`:""}</p>
                   </div>
                   {loan.outstanding!==null&&(
                     <p style={{fontFamily:"'DM Mono',monospace",fontSize:18,fontWeight:700,color:loan.outstanding>0?DS.colors.warning:DS.colors.accent}}>
-                      {loan.outstanding>0?`N${loan.outstanding.toLocaleString()}`:"✓ Settled"}
+                      {loan.outstanding>0?`N${loan.outstanding.toLocaleString()}`:"â Settled"}
                     </p>
                   )}
                 </div>
@@ -6116,12 +6176,12 @@ const AdminBorrowers = ({ showToast, setView }) => {
             <Card style={{background:"#080d1a",border:`1px solid ${DS.colors.accent}33`}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
                 <div>
-                  <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>🤖 AI Admin Credit Memo</h3>
+                  <h3 style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16}}>ð¤ AI Admin Credit Memo</h3>
                   <p style={{fontSize:12,color:DS.colors.textMuted,marginTop:2}}>Platform-level risk assessment combining all available data</p>
                 </div>
                 <div style={{display:"flex",gap:8}}>
                   {!loadingAi&&<Btn small onClick={()=>getAiMemo(b)}>{aiInsight?"Regenerate":"Generate"}</Btn>}
-                  {aiInsight&&!loadingAi&&<Btn small variant="ghost" onClick={()=>{const blob=new Blob([aiInsight],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`admin_memo_${b.name.replace(/\s+/g,"_")}.txt`;a.click();showToast("Memo downloaded");}}>⬇</Btn>}
+                  {aiInsight&&!loadingAi&&<Btn small variant="ghost" onClick={()=>{const blob=new Blob([aiInsight],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download=`admin_memo_${b.name.replace(/\s+/g,"_")}.txt`;a.click();showToast("Memo downloaded");}}>â¬</Btn>}
                 </div>
               </div>
               {loadingAi?(
@@ -6133,7 +6193,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                 <div style={{whiteSpace:"pre-wrap",fontSize:14,color:DS.colors.textSecondary,lineHeight:1.9,borderTop:`1px solid ${DS.colors.border}`,paddingTop:16}}>{aiInsight}</div>
               ):(
                 <div style={{padding:"28px 0",textAlign:"center"}}>
-                  <p style={{fontSize:40,marginBottom:12}}>🤖</p>
+                  <p style={{fontSize:40,marginBottom:12}}>ð¤</p>
                   <p style={{color:DS.colors.textMuted,fontSize:14}}>Click Generate for an AI credit memo on {b.name}.</p>
                 </div>
               )}
@@ -6144,13 +6204,13 @@ const AdminBorrowers = ({ showToast, setView }) => {
     );
   }
 
-  // ── BORROWERS LIST ──
+  // ââ BORROWERS LIST ââ
   return (
     <div className="fade-in">
       <PageHeader
         title="All Borrowers"
-        subtitle={`Platform-wide borrower registry — ${allBorrowers.length} total across all lenders`}
-        actions={<Btn variant="ghost" small onClick={downloadCSV} icon="⬇">Export CSV</Btn>}
+        subtitle={`Platform-wide borrower registry â ${allBorrowers.length} total across all lenders`}
+        actions={<Btn variant="ghost" small onClick={downloadCSV} icon="â¬">Export CSV</Btn>}
       />
 
       {/* Summary stat tiles */}
@@ -6167,7 +6227,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
             style={{padding:"14px 16px",background:DS.colors.surface,border:`1px solid ${s.filter||s.kycF?s.color+"44":DS.colors.border}`,borderRadius:12,cursor:s.filter||s.kycF?"pointer":"default",transition:"all .2s",borderTop:`3px solid ${s.color}`}}>
             <p style={{fontSize:11,color:DS.colors.textMuted,marginBottom:4}}>{s.label}</p>
             <p style={{fontFamily:"'Space Grotesk',sans-serif",fontSize:24,fontWeight:800,color:s.color}}>{s.value}</p>
-            {(s.filter||s.kycF)&&<p style={{fontSize:10,color:s.color,marginTop:4,fontWeight:600}}>Click to filter →</p>}
+            {(s.filter||s.kycF)&&<p style={{fontSize:10,color:s.color,marginTop:4,fontWeight:600}}>Click to filter â</p>}
           </div>
         ))}
       </div>
@@ -6232,7 +6292,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
                   <td style={{padding:"12px 14px"}}><Badge label={b.amlStatus} color={b.amlStatus==="clear"?DS.colors.accent:DS.colors.danger}/></td>
                   <td style={{padding:"12px 14px",color:DS.colors.textMuted}}>{(b.loans||[]).length}</td>
                   <td style={{padding:"12px 14px"}} onClick={e=>e.stopPropagation()}>
-                    <Btn small variant="outline" onClick={()=>{setSelected(b);setActiveTab("overview");setAiInsight(null);}}>View →</Btn>
+                    <Btn small variant="outline" onClick={()=>{setSelected(b);setActiveTab("overview");setAiInsight(null);}}>View â</Btn>
                   </td>
                 </tr>
               );
@@ -6241,7 +6301,7 @@ const AdminBorrowers = ({ showToast, setView }) => {
         </table>
         {filtered.length===0&&(
           <div style={{padding:"40px",textAlign:"center",color:DS.colors.textMuted}}>
-            <p style={{fontSize:32,marginBottom:10}}>🔍</p>
+            <p style={{fontSize:32,marginBottom:10}}>ð</p>
             <p style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,marginBottom:6}}>No borrowers match</p>
             <p style={{fontSize:13}}>Adjust your filters to see more results.</p>
           </div>
@@ -6274,17 +6334,17 @@ const AdminHome = ({ setView }) => {
 
   return (
     <div className="fade-in">
-      <PageHeader title="Platform Overview" subtitle="MicroLendNA Admin — real-time platform analytics" />
+      <PageHeader title="Platform Overview" subtitle="MicroLendNA Admin â real-time platform analytics" />
 
       {/* Verification Queue Banner */}
       {allB.filter(b=>b.kyc_status!=="verified").length > 0 && (
         <div onClick={() => setView("admin-borrowers")} className="card-hover" style={{padding:"12px 18px",background:DS.colors.warningDim,border:"1px solid "+DS.colors.warning+"33",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center",marginBottom:12}}>
-          <span style={{fontSize:22}}>🔍</span>
+          <span style={{fontSize:22}}>ð</span>
           <div style={{flex:1}}>
             <p style={{fontWeight:700,color:DS.colors.warning,fontSize:13}}>{allB.filter(b=>b.kyc_status!=="verified").length} borrower{allB.filter(b=>b.kyc_status!=="verified").length!==1?"s":""} awaiting KYC verification & approval</p>
-            <p style={{fontSize:12,color:DS.colors.textSecondary}}>Documents uploaded — click to review and approve →</p>
+            <p style={{fontSize:12,color:DS.colors.textSecondary}}>Documents uploaded â click to review and approve â</p>
           </div>
-          <Btn small onClick={() => setView("admin-borrowers")}>Review Now →</Btn>
+          <Btn small onClick={() => setView("admin-borrowers")}>Review Now â</Btn>
         </div>
       )}
 
@@ -6292,43 +6352,43 @@ const AdminHome = ({ setView }) => {
       {((WHATSAPP_DB.leads||[]).filter(l=>l.status==="new_lead").length > 0 || (AGENT_DB.borrowers||[]).filter(b=>b.status==="pending").length > 0) && (
         <div style={{ display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:20 }}>
           <div onClick={() => setView("admin-whatsapp")} className="card-hover" style={{ padding:"12px 18px",background:"#25D36618",border:"1px solid #25D36633",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center" }}>
-            <span style={{ fontSize:22 }}>💬</span>
+            <span style={{ fontSize:22 }}>ð¬</span>
             <div>
               <p style={{ fontWeight:700,color:"#25D366",fontSize:13 }}>{(WHATSAPP_DB.leads||[]).filter(l=>l.status==="new_lead").length} WhatsApp leads pending review</p>
-              <p style={{ fontSize:12,color:DS.colors.textSecondary }}>Click to view and route →</p>
+              <p style={{ fontSize:12,color:DS.colors.textSecondary }}>Click to view and route â</p>
             </div>
           </div>
           <div onClick={() => setView("admin-agents")} className="card-hover" style={{ padding:"12px 18px",background:"#A78BFA18",border:"1px solid #A78BFA33",borderRadius:12,cursor:"pointer",display:"flex",gap:12,alignItems:"center" }}>
-            <span style={{ fontSize:22 }}>🧑‍💼</span>
+            <span style={{ fontSize:22 }}>ð§âð¼</span>
             <div>
               <p style={{ fontWeight:700,color:"#A78BFA",fontSize:13 }}>{(AGENT_DB.borrowers||[]).filter(b=>b.status==="pending").length} agent-captured borrowers pending</p>
-              <p style={{ fontSize:12,color:DS.colors.textSecondary }}>{AGENT_DB.agents.length} field agents active →</p>
+              <p style={{ fontSize:12,color:DS.colors.textSecondary }}>{AGENT_DB.agents.length} field agents active â</p>
             </div>
           </div>
         </div>
       )}
       {/* Clickable stat tiles */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14, marginBottom: 28 }}>
-        <Stat label="Total Borrowers" value={allB.length} icon="👥" color={DS.colors.textPrimary} onClick={() => setView("admin-borrowers")} />
-        <Stat label="Active Lenders" value={allApps.filter(a=>a.status==="new_lead"||a.status==="approved").length > 0 ? "—" : "—"} icon="🏦" color={DS.colors.accent} onClick={() => setView("admin-lenders")} />
-        <Stat label="New Leads" value={newLeads} icon="🔔" color={DS.colors.gold} sub="Awaiting lender review" onClick={() => setView("admin-apps")} />
-        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} icon="💰" color={DS.colors.gold} onClick={() => setView("admin-reports")} />
-        <Stat label="AML Flags" value={amlFlagged} icon="🚨" color={DS.colors.danger} sub="Require review" onClick={() => setView("admin-reports")} />
-        <Stat label="KYC Pending" value={kycPending} icon="🔐" color={DS.colors.warning} sub="Unverified borrowers" onClick={() => setView("admin-borrowers")} />
+        <Stat label="Total Borrowers" value={allB.length} icon="ð¥" color={DS.colors.textPrimary} onClick={() => setView("admin-borrowers")} />
+        <Stat label="Active Lenders" value={allApps.filter(a=>a.status==="new_lead"||a.status==="approved").length > 0 ? "â" : "â"} icon="ð¦" color={DS.colors.accent} onClick={() => setView("admin-lenders")} />
+        <Stat label="New Leads" value={newLeads} icon="ð" color={DS.colors.gold} sub="Awaiting lender review" onClick={() => setView("admin-apps")} />
+        <Stat label="Total Disbursed" value={`N${(totalDisbursed/1000).toFixed(0)}k`} icon="ð°" color={DS.colors.gold} onClick={() => setView("admin-reports")} />
+        <Stat label="AML Flags" value={amlFlagged} icon="ð¨" color={DS.colors.danger} sub="Require review" onClick={() => setView("admin-reports")} />
+        <Stat label="KYC Pending" value={kycPending} icon="ð" color={DS.colors.warning} sub="Unverified borrowers" onClick={() => setView("admin-borrowers")} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 20 }}>
-        {/* Tier Breakdown — clickable rows */}
+        {/* Tier Breakdown â clickable rows */}
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Platform Tier Breakdown <span style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 400 }}>— all 312 registered borrowers</span></h3>
-            <Btn small variant="ghost" onClick={() => setView("admin-borrowers")}>View All Borrowers →</Btn>
+            <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Platform Tier Breakdown <span style={{ fontSize: 11, color: DS.colors.textMuted, fontWeight: 400 }}>â all 312 registered borrowers</span></h3>
+            <Btn small variant="ghost" onClick={() => setView("admin-borrowers")}>View All Borrowers â</Btn>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
             {["A","B","C","D"].map(function(tier) {
               var count = allB.filter(function(b){return b.tier===tier;}).length;
               var pct = allB.length ? Math.round(count/allB.length*100) : 0;
-              var item = { tier, count, pct, loan: tier==="D"?"Declined":"—" };
+              var item = { tier, count, pct, loan: tier==="D"?"Declined":"â" };
               return (
               <div key={item.tier} onClick={() => setView("admin-borrowers")} className="card-hover"
                 style={{ padding: 16, background: DS.colors.surfaceAlt, borderRadius: 12, cursor: "pointer", border: `1px solid ${DS.colors[`tier${item.tier}`]}22`, transition: "all .2s" }}>
@@ -6347,11 +6407,11 @@ const AdminHome = ({ setView }) => {
           </div>
         </Card>
 
-        {/* Lenders — clickable */}
+        {/* Lenders â clickable */}
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Partner Lenders</h3>
-            <Btn small variant="ghost" onClick={() => setView("admin-lenders")}>Manage →</Btn>
+            <Btn small variant="ghost" onClick={() => setView("admin-lenders")}>Manage â</Btn>
           </div>
           {(DB.lenders||[]).map(l => (
             <div key={l.id} onClick={() => setView("admin-lenders")} className="card-hover"
@@ -6363,7 +6423,7 @@ const AdminHome = ({ setView }) => {
                 </div>
                 <StatusBadge status={l.status} />
               </div>
-              <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{l.applications} applications · {l.approved} approved</p>
+              <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{l.applications} applications Â· {l.approved} approved</p>
             </div>
           ))}
           <div style={{ padding: "10px 14px", background: DS.colors.accentDim, borderRadius: 10, marginTop: 8 }}>
@@ -6373,11 +6433,11 @@ const AdminHome = ({ setView }) => {
         </Card>
       </div>
 
-      {/* Recent Applications — clickable */}
+      {/* Recent Applications â clickable */}
       <Card>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
           <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700 }}>Recent Applications</h3>
-          <Btn small variant="ghost" onClick={() => setView("admin-apps")}>View All →</Btn>
+          <Btn small variant="ghost" onClick={() => setView("admin-apps")}>View All â</Btn>
         </div>
         <div style={{ display: "grid", gap: 8 }}>
           {allApps.slice(0, 4).map((app, i) => (
@@ -6390,11 +6450,11 @@ const AdminHome = ({ setView }) => {
                   <TierBadge tier={app.tier} />
                   <span style={{ fontSize: 11, fontWeight: 700, padding: "1px 8px", borderRadius: 20, background: app.status === "new_lead" ? DS.colors.goldDim : DS.colors.infoDim, color: app.status === "new_lead" ? DS.colors.gold : DS.colors.info }}>{app.status === "new_lead" ? "New Lead" : "Under Review"}</span>
                 </div>
-                <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{app.employer} · {(app.receivedAt||"—").split(" ")[0]}</p>
+                <p style={{ fontSize: 12, color: DS.colors.textMuted }}>{app.employer} Â· {(app.receivedAt||"â").split(" ")[0]}</p>
               </div>
               <div style={{ textAlign: "right" }}>
                 <p style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, color: DS.colors.accent }}>N${(app.amount||0).toLocaleString()}</p>
-                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{app.term}mo · {app.purpose}</p>
+                <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{app.term}mo Â· {app.purpose}</p>
               </div>
             </div>
           ))}
@@ -6420,11 +6480,11 @@ const AdminLenders = ({ showToast, showConfirm }) => {
   useEffect(function() {
     (async function() {
       try {
-        // Step 1: Load all lender_profiles rows — no ordering by columns that may not exist
+        // Step 1: Load all lender_profiles rows â no ordering by columns that may not exist
         var lpRows = await SB.query("lender_profiles", "select=*");
         console.log("lender_profiles rows:", (lpRows||[]).length, lpRows);
 
-        // Step 2: Load all profiles to get name/email (no role filter — column may not exist)
+        // Step 2: Load all profiles to get name/email (no role filter â column may not exist)
         var profRows = await SB.query("profiles", "select=id,name,email,phone");
         var profMap = {};
         (profRows || []).forEach(function(p) { profMap[p.id] = p; });
@@ -6450,7 +6510,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             licenseExpiry:  meta.licenseExpiry || lp.license_expiry || "",
             plan: lp.plan_type || lp.plan || "payasyougo",
             status: lp.status || "pending_review",
-            registeredAt: (lp.registered_at || lp.created_at || "—").slice(0,10),
+            registeredAt: (lp.registered_at || lp.created_at || "â").slice(0,10),
             approvedAt: lp.approved_at ? lp.approved_at.slice(0,10) : null,
             approvedBy: lp.approved_by || null,
             notes: lp.notes || "",
@@ -6464,10 +6524,43 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           };
         });
 
+        // Also include lender-role users from profiles who don't have a lender_profiles row yet
+        // This handles lenders who registered before the lender_profiles backfill was added
+        var lpUserIds = {};
+        fromDB.forEach(function(lp) { if (lp.userId) lpUserIds[lp.userId] = true; });
+        var lenderProfiles = [];
+        try {
+          lenderProfiles = await SB.query("profiles", "role=eq.lender&select=id,name,email,phone,created_at") || [];
+        } catch(e) { console.log("profiles role=lender query:", e.message); }
+        (lenderProfiles || []).forEach(function(p) {
+          if (!lpUserIds[p.id]) {
+            // Create a placeholder lender_profiles row for this user automatically
+            SB.upsert("lender_profiles", {
+              user_id: p.id, email: p.email, name: p.name,
+              contact_person: p.name, status: "pending_review",
+              plan_type: "payasyougo", notes: "{}",
+              registered_at: p.created_at || new Date().toISOString(),
+              due_diligence: JSON.stringify({ namfisaVerified:false,regVerified:false,directorCheck:false,amlCheck:false,bankAccountVerified:false,contractSigned:false }),
+            }).catch(function(e) { console.log("Auto-create lender_profiles:", e.message); });
+            fromDB.push({
+              id: p.id, lpId: null, userId: p.id,
+              name: p.name || "Unknown", email: p.email || "",
+              contactPerson: p.name || "", phone: p.phone || "",
+              regNumber: "", namfisaLicense: "", licenseExpiry: "",
+              plan: "payasyougo", status: "pending_review",
+              registeredAt: (p.created_at || "").slice(0,10),
+              approvedAt: null, approvedBy: null, notes: "",
+              dueDiligence: { namfisaVerified:false,regVerified:false,directorCheck:false,amlCheck:false,bankAccountVerified:false,contractSigned:false },
+              leadsTotal: 0, leadsApproved: 0, leadsDeclined: 0, leadsPending: 0, revenue: 0,
+              fromSupabase: true,
+            });
+          }
+        });
+
         // Sort by registeredAt descending
         fromDB.sort(function(a,b){ return (b.registeredAt||"").localeCompare(a.registeredAt||""); });
         setLenders(fromDB);
-        console.log("AdminLenders loaded:", fromDB.length, "lenders");
+        console.log("AdminLenders loaded:", fromDB.length, "lenders (including backfill from profiles table)");
       } catch(e) {
         console.error("AdminLenders load error:", e.message);
         setLenders([]);
@@ -6522,12 +6615,12 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     if (l.userId) {
       SB.insert("notifications", {
         user_id: l.userId,
-        title: "🎉 Lender Account Approved!",
+        title: "ð Lender Account Approved!",
         message: "Your MicroLendNA lender account has been approved. You can now log in to receive vetted borrower applications and start lending.",
         type: "success",
       }).catch(function(e){ console.log("Lender approval notification:", e.message); });
     }
-    showToast("✅ " + l.name + " approved — lender notified and can now receive applications");
+    showToast("â " + l.name + " approved â lender notified and can now receive applications");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -6544,7 +6637,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
         type: "error",
       }).catch(function(e){ console.log("Lender rejection notification:", e.message); });
     }
-    showToast(l.name + " rejected — lender notified", "error");
+    showToast(l.name + " rejected â lender notified", "error");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -6552,7 +6645,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     var changes = { status: "suspended" };
     updateLender(l.id, changes);
     await persistLenderStatus(l, changes);
-    showToast(l.name + " suspended — access revoked", "error");
+    showToast(l.name + " suspended â access revoked", "error");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -6560,7 +6653,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     var changes = { status: "active" };
     updateLender(l.id, changes);
     await persistLenderStatus(l, changes);
-    showToast(l.name + " reactivated — access restored");
+    showToast(l.name + " reactivated â access restored");
     setSelected(s => s?.id === l.id ? { ...s, ...changes } : s);
   };
 
@@ -6587,7 +6680,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     DB.lenders.push(newLender);
     setAddOpen(false);
     setForm({ name: "", email: "", contactPerson: "", phone: "", regNumber: "", namfisaLicense: "", licenseExpiry: "", plan: "payasyougo", notes: "" });
-    showToast(`${newLender.name} added — pending due diligence review`);
+    showToast(`${newLender.name} added â pending due diligence review`);
   };
 
   const saveEdit = () => {
@@ -6610,7 +6703,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
   const ddComplete = (dd) => dd && Object.values(dd).every(Boolean);
   const ddCount = (dd) => dd ? Object.values(dd).filter(Boolean).length : 0;
 
-  // ── LENDER DETAIL VIEW ──
+  // ââ LENDER DETAIL VIEW ââ
   if (selected) {
     const l = selected;
     const currentLender = lenders.find(x => x.id === l.id) || l;
@@ -6630,7 +6723,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
       <div className="fade-in">
         {/* Breadcrumb */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-          <Btn variant="ghost" small onClick={() => { setSelected(null); setActiveTab("overview"); }}>← Lenders</Btn>
+          <Btn variant="ghost" small onClick={() => { setSelected(null); setActiveTab("overview"); }}>â Lenders</Btn>
           <div style={{ flex: 1 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
               <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 22, fontWeight: 700 }}>{currentLender.name}</h1>
@@ -6639,10 +6732,10 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               </span>
               <Badge label={currentLender.plan === "subscription" ? "Subscription" : "PAYG"} color={currentLender.plan === "subscription" ? DS.colors.gold : DS.colors.info} />
             </div>
-            <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>{currentLender.email} · {currentLender.contactPerson} · {currentLender.phone}</p>
+            <p style={{ fontSize: 13, color: DS.colors.textMuted, marginTop: 2 }}>{currentLender.email} Â· {currentLender.contactPerson} Â· {currentLender.phone}</p>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Btn small variant="ghost" onClick={() => { setEditForm({ name: currentLender.name, email: currentLender.email, contactPerson: currentLender.contactPerson, phone: currentLender.phone, regNumber: currentLender.regNumber, namfisaLicense: currentLender.namfisaLicense, licenseExpiry: currentLender.licenseExpiry, plan: currentLender.plan }); setEditOpen(currentLender); }}>✏️ Edit</Btn>
+            <Btn small variant="ghost" onClick={() => { setEditForm({ name: currentLender.name, email: currentLender.email, contactPerson: currentLender.contactPerson, phone: currentLender.phone, regNumber: currentLender.regNumber, namfisaLicense: currentLender.namfisaLicense, licenseExpiry: currentLender.licenseExpiry, plan: currentLender.plan }); setEditOpen(currentLender); }}>âï¸ Edit</Btn>
             {currentLender.status === "active" && (
               <Btn small variant="danger" onClick={() => showConfirm({ title: "Suspend Lender", message: `Suspend ${currentLender.name}? They will lose all platform access immediately.`, danger: true, onConfirm: () => suspendLender(currentLender) })}>Suspend</Btn>
             )}
@@ -6650,7 +6743,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <Btn small onClick={() => reactivateLender(currentLender)}>Reactivate</Btn>
             )}
             {currentLender.status === "pending_review" && canApprove && (
-              <Btn small onClick={() => approveLender(currentLender)}>✅ Approve & Grant Access</Btn>
+              <Btn small onClick={() => approveLender(currentLender)}>â Approve & Grant Access</Btn>
             )}
             {currentLender.status === "pending_review" && (
               <Btn small variant="danger" onClick={() => showConfirm({ title: "Reject Application", message: `Reject ${currentLender.name}? They will be notified and cannot access the platform.`, danger: true, onConfirm: () => rejectLender(currentLender, "Did not meet platform requirements") })}>Reject</Btn>
@@ -6663,14 +6756,14 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <div style={{ padding: "14px 20px", marginBottom: 20, borderRadius: 12, background: canApprove ? DS.colors.accentDim : DS.colors.goldDim, border: `1px solid ${canApprove ? DS.colors.accent : DS.colors.gold}44`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <p style={{ fontWeight: 700, color: canApprove ? DS.colors.accent : DS.colors.gold, fontSize: 14 }}>
-                {canApprove ? "✅ Due diligence complete — ready to approve" : `⏳ Due diligence in progress — ${ddCount(currentLender.dueDiligence)}/6 checks completed`}
+                {canApprove ? "â Due diligence complete â ready to approve" : `â³ Due diligence in progress â ${ddCount(currentLender.dueDiligence)}/6 checks completed`}
               </p>
               <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginTop: 2 }}>
                 {canApprove ? "All checks passed. Click Approve to grant platform access and send credentials." : "Complete all due diligence checks before approving this lender."}
               </p>
             </div>
-            {canApprove && <Btn onClick={() => approveLender(currentLender)}>✅ Approve Now</Btn>}
-            {!canApprove && <Btn variant="outline" onClick={() => setActiveTab("duediligence")}>Complete Checks →</Btn>}
+            {canApprove && <Btn onClick={() => approveLender(currentLender)}>â Approve Now</Btn>}
+            {!canApprove && <Btn variant="outline" onClick={() => setActiveTab("duediligence")}>Complete Checks â</Btn>}
           </div>
         )}
 
@@ -6681,7 +6774,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           ))}
         </div>
 
-        {/* ── OVERVIEW TAB ── */}
+        {/* ââ OVERVIEW TAB ââ */}
         {activeTab === "overview" && (
           <div className="fade-in">
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -6691,13 +6784,13 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                   {[
                     ["Company Name", currentLender.name],
                     ["Email", currentLender.email],
-                    ["Contact Person", currentLender.contactPerson || "—"],
-                    ["Phone", currentLender.phone || "—"],
-                    ["Registration No.", currentLender.regNumber || "—"],
-                    ["NAMFISA License", currentLender.namfisaLicense || "—"],
-                    ["License Expiry", currentLender.licenseExpiry || "—"],
+                    ["Contact Person", currentLender.contactPerson || "â"],
+                    ["Phone", currentLender.phone || "â"],
+                    ["Registration No.", currentLender.regNumber || "â"],
+                    ["NAMFISA License", currentLender.namfisaLicense || "â"],
+                    ["License Expiry", currentLender.licenseExpiry || "â"],
                     ["Billing Plan", currentLender.plan === "subscription" ? "Monthly Subscription (N$2,500/mo)" : "Pay-As-You-Go (N$125/lead)"],
-                    ["Registered", currentLender.registeredAt || "—"],
+                    ["Registered", currentLender.registeredAt || "â"],
                     ["Approved", currentLender.approvedAt || "Pending"],
                   ].map(([l, v]) => (
                     <div key={l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: DS.colors.surfaceAlt, borderRadius: 8 }}>
@@ -6737,9 +6830,9 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                         <div style={{ flex: currentLender.leadsPending, background: DS.colors.gold, borderRadius: 4 }} />
                       </div>
                       <div style={{ display: "flex", gap: 12, marginTop: 6 }}>
-                        <span style={{ fontSize: 10, color: DS.colors.accent }}>■ {convRate}% approved</span>
-                        <span style={{ fontSize: 10, color: DS.colors.danger }}>■ {rejRate}% declined</span>
-                        <span style={{ fontSize: 10, color: DS.colors.gold }}>■ pending</span>
+                        <span style={{ fontSize: 10, color: DS.colors.accent }}>â  {convRate}% approved</span>
+                        <span style={{ fontSize: 10, color: DS.colors.danger }}>â  {rejRate}% declined</span>
+                        <span style={{ fontSize: 10, color: DS.colors.gold }}>â  pending</span>
                       </div>
                     </div>
                   )}
@@ -6749,7 +6842,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                 <Card>
                   <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 12 }}>Revenue Generated</h3>
                   <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color: DS.colors.gold }}>N${(currentLender.revenue || 0).toLocaleString()}</p>
-                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{currentLender.plan === "subscription" ? "Monthly subscription revenue" : `${currentLender.leadsApproved} leads × N$125`}</p>
+                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{currentLender.plan === "subscription" ? "Monthly subscription revenue" : `${currentLender.leadsApproved} leads Ã N$125`}</p>
                 </Card>
               </div>
             </div>
@@ -6758,22 +6851,22 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             <Card>
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Admin Actions</h3>
               <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-                <Btn small variant="outline" onClick={() => { setEditForm({ name: currentLender.name, email: currentLender.email, contactPerson: currentLender.contactPerson, phone: currentLender.phone, regNumber: currentLender.regNumber, namfisaLicense: currentLender.namfisaLicense, licenseExpiry: currentLender.licenseExpiry, plan: currentLender.plan }); setEditOpen(currentLender); }}>✏️ Edit Details</Btn>
-                <Btn small variant="ghost" onClick={() => showToast("Password reset email sent to " + currentLender.email)}>🔑 Reset Password</Btn>
-                <Btn small variant="ghost" onClick={() => showToast("Credentials resent to " + currentLender.email)}>📧 Resend Credentials</Btn>
-                <Btn small variant="ghost" onClick={() => showToast("2FA reset for " + currentLender.name)}>📱 Reset 2FA</Btn>
+                <Btn small variant="outline" onClick={() => { setEditForm({ name: currentLender.name, email: currentLender.email, contactPerson: currentLender.contactPerson, phone: currentLender.phone, regNumber: currentLender.regNumber, namfisaLicense: currentLender.namfisaLicense, licenseExpiry: currentLender.licenseExpiry, plan: currentLender.plan }); setEditOpen(currentLender); }}>âï¸ Edit Details</Btn>
+                <Btn small variant="ghost" onClick={() => showToast("Password reset email sent to " + currentLender.email)}>ð Reset Password</Btn>
+                <Btn small variant="ghost" onClick={() => showToast("Credentials resent to " + currentLender.email)}>ð§ Resend Credentials</Btn>
+                <Btn small variant="ghost" onClick={() => showToast("2FA reset for " + currentLender.name)}>ð± Reset 2FA</Btn>
                 {currentLender.status === "active" && (
-                  <Btn small variant="danger" onClick={() => showConfirm({ title: "Suspend Lender", message: `Suspend ${currentLender.name}?`, danger: true, onConfirm: () => suspendLender(currentLender) })}>🚫 Suspend Access</Btn>
+                  <Btn small variant="danger" onClick={() => showConfirm({ title: "Suspend Lender", message: `Suspend ${currentLender.name}?`, danger: true, onConfirm: () => suspendLender(currentLender) })}>ð« Suspend Access</Btn>
                 )}
                 {currentLender.status === "suspended" && (
-                  <Btn small onClick={() => reactivateLender(currentLender)}>✅ Reactivate</Btn>
+                  <Btn small onClick={() => reactivateLender(currentLender)}>â Reactivate</Btn>
                 )}
               </div>
             </Card>
           </div>
         )}
 
-        {/* ── DUE DILIGENCE TAB ── */}
+        {/* ââ DUE DILIGENCE TAB ââ */}
         {activeTab === "duediligence" && (
           <div className="fade-in">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -6793,7 +6886,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                 return (
                   <div key={item.key} style={{ display: "flex", gap: 16, alignItems: "center", padding: "16px 20px", background: done ? DS.colors.accentDim : DS.colors.surfaceAlt, border: `1px solid ${done ? DS.colors.accent + "44" : DS.colors.border}`, borderRadius: 14, transition: "all .2s" }}>
                     <div onClick={() => toggleDD(currentLender.id, item.key)} style={{ width: 28, height: 28, borderRadius: 8, border: `2px solid ${done ? DS.colors.accent : DS.colors.border}`, background: done ? DS.colors.accent : "transparent", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0, transition: "all .2s" }}>
-                      {done && <span style={{ color: "#0A0F1E", fontSize: 15, fontWeight: 800 }}>✓</span>}
+                      {done && <span style={{ color: "#0A0F1E", fontSize: 15, fontWeight: 800 }}>â</span>}
                     </div>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: 14, fontWeight: 700, color: done ? DS.colors.accent : DS.colors.textPrimary, marginBottom: 3 }}>{item.label}</p>
@@ -6801,7 +6894,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                     </div>
                     <div>
                       {done
-                        ? <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>✅ Verified</span>
+                        ? <span style={{ fontSize: 12, color: DS.colors.accent, fontWeight: 600 }}>â Verified</span>
                         : <Btn small variant="outline" onClick={() => toggleDD(currentLender.id, item.key)}>Mark Done</Btn>
                       }
                     </div>
@@ -6813,24 +6906,24 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             {ddComplete(currentLender.dueDiligence) && currentLender.status === "pending_review" && (
               <div style={{ padding: "16px 20px", background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}44`, borderRadius: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <p style={{ fontWeight: 700, color: DS.colors.accent, fontSize: 15 }}>✅ All checks complete — ready to approve</p>
+                  <p style={{ fontWeight: 700, color: DS.colors.accent, fontSize: 15 }}>â All checks complete â ready to approve</p>
                   <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginTop: 2 }}>Approving will create login credentials and send them to {currentLender.email}</p>
                 </div>
-                <Btn onClick={() => approveLender(currentLender)}>Approve & Grant Access →</Btn>
+                <Btn onClick={() => approveLender(currentLender)}>Approve & Grant Access â</Btn>
               </div>
             )}
           </div>
         )}
 
-        {/* ── PERFORMANCE TAB ── */}
+        {/* ââ PERFORMANCE TAB ââ */}
         {activeTab === "performance" && (
           <div className="fade-in">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 24 }}>
               {[
-                { l: "Total Leads Sent", v: currentLender.leadsTotal, c: DS.colors.textPrimary, icon: "📋" },
-                { l: "Approved", v: currentLender.leadsApproved, c: DS.colors.accent, icon: "✅" },
-                { l: "Declined by Lender", v: currentLender.leadsDeclined, c: DS.colors.danger, icon: "❌" },
-                { l: "Conversion Rate", v: `${convRate}%`, c: +convRate > 60 ? DS.colors.accent : DS.colors.warning, icon: "📈" },
+                { l: "Total Leads Sent", v: currentLender.leadsTotal, c: DS.colors.textPrimary, icon: "ð" },
+                { l: "Approved", v: currentLender.leadsApproved, c: DS.colors.accent, icon: "â" },
+                { l: "Declined by Lender", v: currentLender.leadsDeclined, c: DS.colors.danger, icon: "â" },
+                { l: "Conversion Rate", v: `${convRate}%`, c: +convRate > 60 ? DS.colors.accent : DS.colors.warning, icon: "ð" },
               ].map((s, i) => (
                 <div key={i} style={{ padding: "16px 18px", background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 14, borderTop: `3px solid ${s.c}` }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
@@ -6874,7 +6967,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                 {[
                   { l: "Platform Revenue", v: `N${(currentLender.revenue || 0).toLocaleString()}`, c: DS.colors.gold },
-                  { l: "Billing Model", v: currentLender.plan === "subscription" ? "Flat N$2,500/mo" : `N$125 × ${currentLender?.leadsApproved||0} leads`, c: DS.colors.info },
+                  { l: "Billing Model", v: currentLender.plan === "subscription" ? "Flat N$2,500/mo" : `N$125 Ã ${currentLender?.leadsApproved||0} leads`, c: DS.colors.info },
                 ].map((s, i) => (
                   <div key={i} style={{ padding: "14px 16px", background: DS.colors.surfaceAlt, borderRadius: 12 }}>
                     <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 6 }}>{s.l}</p>
@@ -6886,7 +6979,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           </div>
         )}
 
-        {/* ── NOTES & COMMS TAB ── */}
+        {/* ââ NOTES & COMMS TAB ââ */}
         {activeTab === "notes" && (
           <div className="fade-in">
             <Card style={{ marginBottom: 20 }}>
@@ -6894,7 +6987,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <textarea
                 defaultValue={currentLender.notes || ""}
                 onBlur={e => { updateLender(currentLender.id, { notes: e.target.value }); showToast("Notes saved"); }}
-                placeholder="Add internal notes about this lender — visible to admins only..."
+                placeholder="Add internal notes about this lender â visible to admins only..."
                 style={{ width: "100%", minHeight: 140, background: DS.colors.surfaceAlt, border: `1px solid ${DS.colors.border}`, borderRadius: 10, padding: "12px 14px", color: DS.colors.textPrimary, fontSize: 13, lineHeight: 1.6, resize: "vertical" }}
               />
               <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 6 }}>Notes auto-save when you click outside the text area.</p>
@@ -6904,19 +6997,19 @@ const AdminLenders = ({ showToast, showConfirm }) => {
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 14 }}>Communication Log</h3>
               {[
                 { type: "email", msg: "Welcome email + credentials sent", date: currentLender.approvedAt || currentLender.registeredAt, by: "System" },
-                { type: "system", msg: "Account created — pending due diligence", date: currentLender.registeredAt, by: "System" },
+                { type: "system", msg: "Account created â pending due diligence", date: currentLender.registeredAt, by: "System" },
               ].filter(e => e.date).map((entry, i) => (
                 <div key={i} style={{ display: "flex", gap: 12, padding: "10px 14px", background: DS.colors.surfaceAlt, borderRadius: 10, marginBottom: 8 }}>
-                  <span style={{ fontSize: 18, flexShrink: 0 }}>{entry.type === "email" ? "📧" : "🔔"}</span>
+                  <span style={{ fontSize: 18, flexShrink: 0 }}>{entry.type === "email" ? "ð§" : "ð"}</span>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontSize: 13, fontWeight: 500 }}>{entry.msg}</p>
-                    <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>{entry.date} · by {entry.by}</p>
+                    <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 2 }}>{entry.date} Â· by {entry.by}</p>
                   </div>
                 </div>
               ))}
               <div style={{ display: "flex", gap: 10, marginTop: 14, paddingTop: 14, borderTop: `1px solid ${DS.colors.border}` }}>
-                <Btn small variant="ghost" onClick={() => showToast("Email sent to " + currentLender.email)}>📧 Send Email</Btn>
-                <Btn small variant="ghost" onClick={() => showToast("Notification sent")}>🔔 Send Notification</Btn>
+                <Btn small variant="ghost" onClick={() => showToast("Email sent to " + currentLender.email)}>ð§ Send Email</Btn>
+                <Btn small variant="ghost" onClick={() => showToast("Notification sent")}>ð Send Notification</Btn>
               </div>
             </Card>
           </div>
@@ -6925,12 +7018,12 @@ const AdminLenders = ({ showToast, showConfirm }) => {
     );
   }
 
-  // ── LENDERS LIST ──
+  // ââ LENDERS LIST ââ
   return (
     <div className="fade-in">
       <PageHeader
         title="Lender Management"
-        subtitle="Manage partner microlenders — approvals, due diligence, and performance"
+        subtitle="Manage partner microlenders â approvals, due diligence, and performance"
         actions={
           <div style={{ display: "flex", gap: 8 }}>
             {pendingCount > 0 && (
@@ -6939,7 +7032,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                 <span style={{ fontSize: 13, color: DS.colors.gold, fontWeight: 600 }}>{pendingCount} pending review</span>
               </div>
             )}
-            <Btn onClick={() => setAddOpen(true)} icon="➕">Add Lender Manually</Btn>
+            <Btn onClick={() => setAddOpen(true)} icon="â">Add Lender Manually</Btn>
           </div>
         }
       />
@@ -6956,7 +7049,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
             style={{ padding: "14px 18px", background: DS.colors.surface, border: `2px solid ${filterStatus === s.filter ? s.color + "66" : DS.colors.border}`, borderRadius: 14, cursor: "pointer", transition: "all .2s", borderTop: `3px solid ${s.color}` }}>
             <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.label}</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 26, fontWeight: 800, color: s.color }}>{s.value}</p>
-            {filterStatus === s.filter && <p style={{ fontSize: 10, color: s.color, marginTop: 4, fontWeight: 600 }}>Active filter ✓</p>}
+            {filterStatus === s.filter && <p style={{ fontSize: 10, color: s.color, marginTop: 4, fontWeight: 600 }}>Active filter â</p>}
           </div>
         ))}
       </div>
@@ -6971,7 +7064,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
       {/* Pending lenders alert */}
       {filtered.filter(l => l && l.status === "pending_review").length > 0 && (filterStatus === "all" || filterStatus === "pending_review") && (
         <div style={{ padding: "12px 18px", marginBottom: 20, background: DS.colors.goldDim, border: `1px solid ${DS.colors.gold}44`, borderRadius: 10, display: "flex", gap: 12, alignItems: "center" }}>
-          <span style={{ fontSize: 20 }}>⏳</span>
+          <span style={{ fontSize: 20 }}>â³</span>
           <div>
             <p style={{ fontWeight: 700, color: DS.colors.gold, fontSize: 14 }}>{filtered.filter(l => l && l.status === "pending_review").length} lender{filtered.filter(l=>l.status==="pending_review").length>1?"s":""} awaiting due diligence review</p>
             <p style={{ fontSize: 13, color: DS.colors.textSecondary, marginTop: 2 }}>Review each lender's registration and complete all 6 due diligence checks before approving access.</p>
@@ -7001,7 +7094,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                     <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 10px", borderRadius: 20, background: (statusColors[l.status] || DS.colors.textMuted) + "22", color: statusColors[l.status] || DS.colors.textMuted }}>{statusLabels[l.status] || l.status}</span>
                     <Badge label={l.plan === "subscription" ? "Subscription" : "Pay-As-You-Go"} color={l.plan === "subscription" ? DS.colors.gold : DS.colors.info} />
                   </div>
-                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8 }}>{l.email} · {l.contactPerson || "—"} · Registered {l.registeredAt}</p>
+                  <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8 }}>{l.email} Â· {l.contactPerson || "â"} Â· Registered {l.registeredAt}</p>
 
                   {/* Metrics row */}
                   <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
@@ -7011,7 +7104,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
                           ["Leads", l.leadsTotal],
                           ["Approved", l.leadsApproved],
                           ["Declined", l.leadsDeclined],
-                          ["Conversion", convRate ? convRate + "%" : "—"],
+                          ["Conversion", convRate ? convRate + "%" : "â"],
                           ["Revenue", `N${(l.revenue||0).toLocaleString()}`],
                         ].map(([label, value]) => (
                           <div key={label}>
@@ -7037,10 +7130,10 @@ const AdminLenders = ({ showToast, showConfirm }) => {
 
                 {/* CTA */}
                 <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
-                  <Btn small variant="outline" onClick={() => { setSelected(l); setActiveTab("overview"); }}>View →</Btn>
+                  <Btn small variant="outline" onClick={() => { setSelected(l); setActiveTab("overview"); }}>View â</Btn>
                   {l.status === "pending_review" && (
                     <Btn small variant={ddComplete(l.dueDiligence) ? "primary" : "ghost"} onClick={() => { setSelected(l); setActiveTab("duediligence"); }}>
-                      {ddComplete(l.dueDiligence) ? "✅ Approve" : "Checks →"}
+                      {ddComplete(l.dueDiligence) ? "â Approve" : "Checks â"}
                     </Btn>
                   )}
                 </div>
@@ -7063,7 +7156,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
       {/* Add Lender Modal */}
       <Modal open={addOpen} onClose={() => setAddOpen(false)} title="Add Lender Manually" width={600}>
         <div style={{ padding: "10px 14px", background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 8, marginBottom: 20 }}>
-          <p style={{ fontSize: 13, color: DS.colors.info, lineHeight: 1.6 }}>ℹ Lenders normally self-register via the platform. Use this form only when a lender is unable to register themselves. After adding, complete due diligence before approving.</p>
+          <p style={{ fontSize: 13, color: DS.colors.info, lineHeight: 1.6 }}>â¹ Lenders normally self-register via the platform. Use this form only when a lender is unable to register themselves. After adding, complete due diligence before approving.</p>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
           <Input label="Company Name" value={form.name} onChange={v => setForm({...form, name:v})} required placeholder="e.g. ABC Microfinance" />
@@ -7075,19 +7168,19 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <Input label="License Expiry Date" value={form.licenseExpiry} onChange={v => setForm({...form, licenseExpiry:v})} type="date" />
         </div>
         <Select label="Billing Plan" value={form.plan} onChange={v => setForm({...form, plan:v})}
-          options={[{value:"payasyougo",label:"Pay-As-You-Go — N$125 per approved lead"},{value:"subscription",label:"Monthly Subscription — N$2,500/month"}]} />
+          options={[{value:"payasyougo",label:"Pay-As-You-Go â N$125 per approved lead"},{value:"subscription",label:"Monthly Subscription â N$2,500/month"}]} />
         <div style={{ marginBottom: 20 }}>
           <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>Internal Notes (optional)</label>
           <textarea value={form.notes} onChange={e => setForm({...form, notes:e.target.value})} placeholder="Any relevant context about this lender..." style={{ width: "100%", minHeight: 80, background: DS.colors.surfaceAlt, border: `1px solid ${DS.colors.border}`, borderRadius: 8, padding: "10px 14px", color: DS.colors.textPrimary, fontSize: 13, resize: "vertical" }} />
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <Btn onClick={addLender} style={{ flex: 1 }}>Add Lender — Pending Review</Btn>
+          <Btn onClick={addLender} style={{ flex: 1 }}>Add Lender â Pending Review</Btn>
           <Btn variant="ghost" onClick={() => setAddOpen(false)}>Cancel</Btn>
         </div>
       </Modal>
 
       {/* Edit Lender Modal */}
-      <Modal open={!!editOpen} onClose={() => setEditOpen(null)} title={`Edit — ${editOpen?.name}`} width={600}>
+      <Modal open={!!editOpen} onClose={() => setEditOpen(null)} title={`Edit â ${editOpen?.name}`} width={600}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px" }}>
           <Input label="Company Name" value={editForm.name || ""} onChange={v => setEditForm({...editForm, name:v})} required />
           <Input label="Email Address" value={editForm.email || ""} onChange={v => setEditForm({...editForm, email:v})} type="email" required />
@@ -7098,7 +7191,7 @@ const AdminLenders = ({ showToast, showConfirm }) => {
           <Input label="License Expiry" value={editForm.licenseExpiry || ""} onChange={v => setEditForm({...editForm, licenseExpiry:v})} type="date" />
         </div>
         <Select label="Billing Plan" value={editForm.plan || "payasyougo"} onChange={v => setEditForm({...editForm, plan:v})}
-          options={[{value:"payasyougo",label:"Pay-As-You-Go — N$125/lead"},{value:"subscription",label:"Monthly Subscription — N$2,500/mo"}]} />
+          options={[{value:"payasyougo",label:"Pay-As-You-Go â N$125/lead"},{value:"subscription",label:"Monthly Subscription â N$2,500/mo"}]} />
         <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
           <Btn onClick={saveEdit} style={{ flex: 1 }}>Save Changes</Btn>
           <Btn variant="ghost" onClick={() => setEditOpen(null)}>Cancel</Btn>
@@ -7109,14 +7202,14 @@ const AdminLenders = ({ showToast, showConfirm }) => {
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ADMIN RISK ENGINE — Full platform configuration
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ADMIN RISK ENGINE â Full platform configuration
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// LENDER SETTINGS — Risk Preferences + Billing (tabbed)
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// LENDER SETTINGS â Risk Preferences + Billing (tabbed)
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const LenderSettings = ({ user, showToast }) => {
   const [activeTab, setActiveTab] = useState("profile");
@@ -7126,7 +7219,7 @@ const LenderSettings = ({ user, showToast }) => {
   const [plan, setPlan] = useState("payasyougo");
   const rules = DB.riskRules;
 
-  // ── Lender profile state ──────────────────────────────────────────────────
+  // ââ Lender profile state ââââââââââââââââââââââââââââââââââââââââââââââââââ
   const [lpProfile, setLpProfile] = useState(null);
   const [lpLoading, setLpLoading] = useState(true);
   const [lpSaving,  setLpSaving]  = useState(false);
@@ -7172,7 +7265,7 @@ const LenderSettings = ({ user, showToast }) => {
   const saveProfile = async function() {
     setLpSaving(true);
     try {
-      // Store extra fields in notes as JSON — only use real Supabase columns
+      // Store extra fields in notes as JSON â only use real Supabase columns
       var extraMeta = JSON.stringify({
         regNumber: lpForm.regNumber,
         namfisaLicense: lpForm.namfisaLicense,
@@ -7193,7 +7286,7 @@ const LenderSettings = ({ user, showToast }) => {
       };
       await SB.upsert("lender_profiles", data);
       setPlan(lpForm.plan);
-      showToast("Profile saved ✓");
+      showToast("Profile saved â");
     } catch(e) { showToast("Save failed: " + e.message, "error"); }
     setLpSaving(false);
   };
@@ -7215,10 +7308,10 @@ const LenderSettings = ({ user, showToast }) => {
         await SB.uploadFile("kyc-documents", path, file); // retry once
       }
       setDocUploads(function(p) { return Object.assign({}, p, { [key]: { name: file.name, path, size: Math.round(file.size/1024) + " KB" } }); });
-      showToast(file.name + " uploaded ✓");
+      showToast(file.name + " uploaded â");
     } catch(err) {
       setDocUploads(function(p) { return Object.assign({}, p, { [key]: { name: file.name, local: true, size: Math.round(file.size/1024) + " KB" } }); });
-      showToast("Saved locally — will sync when online", "info");
+      showToast("Saved locally â will sync when online", "info");
     }
     setUploadingDoc(null);
     e.target.value = "";
@@ -7230,17 +7323,17 @@ const LenderSettings = ({ user, showToast }) => {
   const savePrefs = () => {
     LENDER_DB.lenderPrefs[user.id] = { ...prefs };
     setChanged(false);
-    showToast("Settings saved — your preferences are now active");
+    showToast("Settings saved â your preferences are now active");
   };
 
   const tierColors = { A: DS.colors.tierA, B: DS.colors.tierB, C: DS.colors.tierC, D: DS.colors.tierD };
   const qualifyingBorrowers = [];
 
   const tabs = [
-    { key: "profile",  label: "🏢 Company Profile" },
-    { key: "risk",     label: "⚙️ Risk Preferences" },
-    { key: "loan",     label: "💰 Loan Parameters" },
-    { key: "billing",  label: "💳 Billing & Plan" },
+    { key: "profile",  label: "ð¢ Company Profile" },
+    { key: "risk",     label: "âï¸ Risk Preferences" },
+    { key: "loan",     label: "ð° Loan Parameters" },
+    { key: "billing",  label: "ð³ Billing & Plan" },
   ];
 
   const LENDER_DOCS = [
@@ -7256,7 +7349,7 @@ const LenderSettings = ({ user, showToast }) => {
       <PageHeader
         title="Settings"
         subtitle="Configure your lending preferences and manage your subscription"
-        actions={changed && <Btn onClick={savePrefs} icon="💾">Save Settings</Btn>}
+        actions={changed && <Btn onClick={savePrefs} icon="ð¾">Save Settings</Btn>}
       />
 
       {/* Tab bar */}
@@ -7270,18 +7363,18 @@ const LenderSettings = ({ user, showToast }) => {
         ))}
       </div>
 
-      {/* ── COMPANY PROFILE TAB ── */}
+      {/* ââ COMPANY PROFILE TAB ââ */}
       {activeTab === "profile" && (
         <div className="fade-in">
           {lpProfile?.status === "pending_review" && (
             <div style={{ padding:"12px 16px", background:DS.colors.warningDim, border:"1px solid "+DS.colors.warning+"44", borderRadius:10, marginBottom:20, display:"flex", gap:10, alignItems:"center" }}>
-              <span style={{ fontSize:18 }}>⏳</span>
+              <span style={{ fontSize:18 }}>â³</span>
               <p style={{ fontSize:13, color:DS.colors.warning }}>Your account is pending admin review. Complete your profile below to speed up approval.</p>
             </div>
           )}
           {lpProfile?.status === "active" && (
             <div style={{ padding:"12px 16px", background:DS.colors.accentDim, border:"1px solid "+DS.colors.accent+"44", borderRadius:10, marginBottom:20, display:"flex", gap:10, alignItems:"center" }}>
-              <span style={{ fontSize:18 }}>✅</span>
+              <span style={{ fontSize:18 }}>â</span>
               <p style={{ fontSize:13, color:DS.colors.accent }}>Account approved and active. Keep your profile up to date for compliance.</p>
             </div>
           )}
@@ -7295,7 +7388,7 @@ const LenderSettings = ({ user, showToast }) => {
               <Input label="NAMFISA Licence Number" value={lpForm.namfisaLicense} onChange={function(v){setF("namfisaLicense",v);}} placeholder="e.g. ML-2019-0045" hint="Microlending licence from NAMFISA" />
               <Input label="Licence Expiry Date" value={lpForm.licenseExpiry} onChange={function(v){setF("licenseExpiry",v);}} type="date" />
               <Select label="Billing Plan" value={lpForm.plan} onChange={function(v){setF("plan",v);}}
-                options={[{ value:"payasyougo", label:"Pay-As-You-Go — N$125 per approved lead" },{ value:"subscription", label:"Monthly Subscription — N$2,500/month" }]} />
+                options={[{ value:"payasyougo", label:"Pay-As-You-Go â N$125 per approved lead" },{ value:"subscription", label:"Monthly Subscription â N$2,500/month" }]} />
             </Card>
 
             {/* Contact person */}
@@ -7315,7 +7408,7 @@ const LenderSettings = ({ user, showToast }) => {
           {/* Document uploads */}
           <Card style={{ marginBottom:20 }}>
             <h3 style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, marginBottom:8, fontSize:15 }}>Compliance Documents</h3>
-            <p style={{ fontSize:13, color:DS.colors.textMuted, marginBottom:16 }}>Upload for admin due diligence. PDF, JPG, or PNG — max 10MB each.</p>
+            <p style={{ fontSize:13, color:DS.colors.textMuted, marginBottom:16 }}>Upload for admin due diligence. PDF, JPG, or PNG â max 10MB each.</p>
             {LENDER_DOCS.map(function(doc) {
               var uploaded = docUploads[doc.key];
               var isLoading = uploadingDoc === doc.key;
@@ -7325,12 +7418,12 @@ const LenderSettings = ({ user, showToast }) => {
                   background: uploaded ? DS.colors.accentDim : DS.colors.surfaceAlt,
                   border:"1px solid " + (uploaded ? DS.colors.accent+"44" : DS.colors.border) }}>
                   <input id={inputId} type="file" accept=".pdf,.jpg,.jpeg,.png" style={{ display:"none" }} onChange={function(e){ handleDocUpload(doc.key, e); }} />
-                  <span style={{ fontSize:22, flexShrink:0 }}>{uploaded ? "✅" : "📎"}</span>
+                  <span style={{ fontSize:22, flexShrink:0 }}>{uploaded ? "â" : "ð"}</span>
                   <div style={{ flex:1 }}>
                     <p style={{ fontSize:13, fontWeight:600, marginBottom:2 }}>
                       {doc.label} {doc.required && <span style={{ color:DS.colors.danger }}>*</span>}
                     </p>
-                    <p style={{ fontSize:11, color:DS.colors.textMuted }}>{uploaded ? uploaded.name+" · "+uploaded.size : doc.desc}</p>
+                    <p style={{ fontSize:11, color:DS.colors.textMuted }}>{uploaded ? uploaded.name+" Â· "+uploaded.size : doc.desc}</p>
                   </div>
                   {isLoading
                     ? <div style={{ width:18, height:18, border:"2px solid "+DS.colors.accent, borderTopColor:"transparent", borderRadius:"50%" }} className="spin" />
@@ -7344,13 +7437,13 @@ const LenderSettings = ({ user, showToast }) => {
             })}
           </Card>
 
-          <Btn onClick={saveProfile} disabled={lpSaving} icon="💾" style={{ minWidth:180 }}>
+          <Btn onClick={saveProfile} disabled={lpSaving} icon="ð¾" style={{ minWidth:180 }}>
             {lpSaving ? "Saving..." : "Save Profile"}
           </Btn>
         </div>
       )}
 
-      {/* ── RISK PREFERENCES TAB ── */}
+      {/* ââ RISK PREFERENCES TAB ââ */}
       {activeTab === "risk" && (
         <div className="fade-in">
           {/* Live impact banner */}
@@ -7376,10 +7469,10 @@ const LenderSettings = ({ user, showToast }) => {
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 16, lineHeight: 1.5 }}>Choose which borrower risk tiers your institution will accept. Applications outside your selected tiers will not be routed to you.</p>
               <div style={{ display: "grid", gap: 10 }}>
                 {[
-                  { tier: "A", label: "Tier A — Low Risk", desc: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}%, salary ≥ N${(rules.minSalary*2).toLocaleString()}. Best borrowers, lowest default risk.` },
-                  { tier: "B", label: "Tier B — Moderate Risk", desc: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}%, salary ≥ N${rules.minSalary.toLocaleString()}. Good borrowers, manageable risk.` },
-                  { tier: "C", label: "Tier C — Elevated Risk", desc: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}%, salary ≥ N${rules.minSalary.toLocaleString()}. Higher risk, reduced loan limits.` },
-                  { tier: "D", label: "Tier D — Decline", desc: "Does not meet minimum criteria. Accepting D-tier is only recommended for specialised high-risk lenders." },
+                  { tier: "A", label: "Tier A â Low Risk", desc: `DTI â¤ ${(rules.tierAMaxDTI*100).toFixed(0)}%, salary â¥ N${(rules.minSalary*2).toLocaleString()}. Best borrowers, lowest default risk.` },
+                  { tier: "B", label: "Tier B â Moderate Risk", desc: `DTI â¤ ${(rules.tierBMaxDTI*100).toFixed(0)}%, salary â¥ N${rules.minSalary.toLocaleString()}. Good borrowers, manageable risk.` },
+                  { tier: "C", label: "Tier C â Elevated Risk", desc: `DTI â¤ ${(rules.tierCMaxDTI*100).toFixed(0)}%, salary â¥ N${rules.minSalary.toLocaleString()}. Higher risk, reduced loan limits.` },
+                  { tier: "D", label: "Tier D â Decline", desc: "Does not meet minimum criteria. Accepting D-tier is only recommended for specialised high-risk lenders." },
                 ].map(item => {
                   const active = (prefs.acceptedTiers || []).includes(item.tier);
                   return (
@@ -7397,7 +7490,7 @@ const LenderSettings = ({ user, showToast }) => {
                       }}
                     >
                       <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${active ? tierColors[item.tier] : DS.colors.border}`, background: active ? tierColors[item.tier] : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all .2s" }}>
-                        {active && <span style={{ color: "#0A0F1E", fontSize: 13, fontWeight: 800 }}>✓</span>}
+                        {active && <span style={{ color: "#0A0F1E", fontSize: 13, fontWeight: 800 }}>â</span>}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 3 }}>
@@ -7412,7 +7505,7 @@ const LenderSettings = ({ user, showToast }) => {
               </div>
               {(prefs.acceptedTiers || []).length === 0 && (
                 <div style={{ marginTop: 12, padding: 10, background: DS.colors.dangerDim, borderRadius: 8 }}>
-                  <p style={{ fontSize: 12, color: DS.colors.danger }}>⚠ No tiers selected — you will receive no leads until at least one tier is selected.</p>
+                  <p style={{ fontSize: 12, color: DS.colors.danger }}>â  No tiers selected â you will receive no leads until at least one tier is selected.</p>
                 </div>
               )}
             </Card>
@@ -7430,7 +7523,7 @@ const LenderSettings = ({ user, showToast }) => {
                   <input type="range" min="1000" max="20000" step="500" value={prefs.minSalary || 3000}
                     onChange={e => update("minSalary", +e.target.value)}
                     style={{ width: "100%", accentColor: DS.colors.gold }} />
-                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 3 }}>Platform minimum: N${rules.minSalary.toLocaleString()} · Your setting overrides for leads routed to you</p>
+                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 3 }}>Platform minimum: N${rules.minSalary.toLocaleString()} Â· Your setting overrides for leads routed to you</p>
                 </div>
 
                 <div style={{ marginBottom: 18 }}>
@@ -7446,8 +7539,8 @@ const LenderSettings = ({ user, showToast }) => {
 
                 <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                   {[
-                    { key: "firstBorrowerAllowed", label: "Accept first-time borrowers", desc: "Higher risk — 15% DTI penalty applied by platform", warnOff: false },
-                    { key: "requireKYC", label: "Require KYC verification", desc: "Recommended — only receive identity-verified borrowers", warnOff: true },
+                    { key: "firstBorrowerAllowed", label: "Accept first-time borrowers", desc: "Higher risk â 15% DTI penalty applied by platform", warnOff: false },
+                    { key: "requireKYC", label: "Require KYC verification", desc: "Recommended â only receive identity-verified borrowers", warnOff: true },
                     { key: "requireBankVerification", label: "Require bank account verification", desc: "Only accept borrowers with confirmed bank accounts (penny test passed)", warnOff: true },
                   ].map(item => (
                     <div key={item.key} style={{ display: "flex", gap: 12, alignItems: "flex-start", padding: "10px 12px", background: DS.colors.surfaceAlt, borderRadius: 10 }}>
@@ -7475,8 +7568,8 @@ const LenderSettings = ({ user, showToast }) => {
                   onChange={e => update("autoApproveThreshold", +e.target.value)}
                   style={{ width: "100%", accentColor: DS.colors.accent }} />
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-                  <span style={{ fontSize: 11, color: DS.colors.textMuted }}>60 — more auto-approvals</span>
-                  <span style={{ fontSize: 11, color: DS.colors.textMuted }}>100 — always manual</span>
+                  <span style={{ fontSize: 11, color: DS.colors.textMuted }}>60 â more auto-approvals</span>
+                  <span style={{ fontSize: 11, color: DS.colors.textMuted }}>100 â always manual</span>
                 </div>
               </Card>
             </div>
@@ -7499,7 +7592,7 @@ const LenderSettings = ({ user, showToast }) => {
                     color: active ? DS.colors.accent : DS.colors.textSecondary,
                     fontSize: 13, fontWeight: active ? 600 : 400, cursor: "pointer", transition: "all .2s",
                   }}>
-                    {active ? "✓ " : ""}{purpose}
+                    {active ? "â " : ""}{purpose}
                   </button>
                 );
               })}
@@ -7509,13 +7602,13 @@ const LenderSettings = ({ user, showToast }) => {
           {changed && (
             <div style={{ marginTop: 20, display: "flex", justifyContent: "flex-end", gap: 10 }}>
               <Btn variant="ghost" onClick={() => { setPrefs({ ...defaultPrefs }); setChanged(false); }}>Reset to Default</Btn>
-              <Btn onClick={savePrefs} icon="💾">Save Risk Preferences</Btn>
+              <Btn onClick={savePrefs} icon="ð¾">Save Risk Preferences</Btn>
             </div>
           )}
         </div>
       )}
 
-      {/* ── LOAN PARAMETERS TAB ── */}
+      {/* ââ LOAN PARAMETERS TAB ââ */}
       {activeTab === "loan" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -7548,13 +7641,13 @@ const LenderSettings = ({ user, showToast }) => {
               <div style={{ marginTop: 16, padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>Your loan range</p>
                 <p style={{ fontFamily: "'DM Mono',monospace", fontSize: 16, fontWeight: 700, color: DS.colors.accent }}>
-                  N${(prefs.minLoanAmount || 500).toLocaleString()} → N${(prefs.maxLoanAmount || 25000).toLocaleString()}
+                  N${(prefs.minLoanAmount || 500).toLocaleString()} â N${(prefs.maxLoanAmount || 25000).toLocaleString()}
                 </p>
               </div>
 
               {(prefs.minLoanAmount || 0) >= (prefs.maxLoanAmount || 0) && (
                 <div style={{ marginTop: 10, padding: 10, background: DS.colors.dangerDim, borderRadius: 8 }}>
-                  <p style={{ fontSize: 12, color: DS.colors.danger }}>⚠ Min must be less than max loan amount</p>
+                  <p style={{ fontSize: 12, color: DS.colors.danger }}>â  Min must be less than max loan amount</p>
                 </div>
               )}
             </Card>
@@ -7574,7 +7667,7 @@ const LenderSettings = ({ user, showToast }) => {
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 3 }}>Applies only when "Accept first-time borrowers" is enabled</p>
               </div>
               <div style={{ padding: 12, background: DS.colors.warningDim, border: `1px solid ${DS.colors.warning}33`, borderRadius: 8 }}>
-                <p style={{ fontSize: 12, color: DS.colors.warning, lineHeight: 1.5 }}>⚠ Per NAMFISA guidelines, first-time borrowers are considered higher risk. The platform already applies a 15% DTI penalty — your cap provides an additional control.</p>
+                <p style={{ fontSize: 12, color: DS.colors.warning, lineHeight: 1.5 }}>â  Per NAMFISA guidelines, first-time borrowers are considered higher risk. The platform already applies a 15% DTI penalty â your cap provides an additional control.</p>
               </div>
             </Card>
           </div>
@@ -7608,7 +7701,7 @@ const LenderSettings = ({ user, showToast }) => {
                       <span style={{ fontSize: 10, color: DS.colors.textMuted }}>{adminMin}%</span>
                       <span style={{ fontSize: 10, color: DS.colors.textMuted }}>{adminMax}%</span>
                     </div>
-                    <p style={{ fontSize: 10, color: DS.colors.textMuted, marginTop: 6, textAlign: "center" }}>Platform range: {adminMin}–{adminMax}%</p>
+                    <p style={{ fontSize: 10, color: DS.colors.textMuted, marginTop: 6, textAlign: "center" }}>Platform range: {adminMin}â{adminMax}%</p>
                   </div>
                 );
               })}
@@ -7639,7 +7732,7 @@ const LenderSettings = ({ user, showToast }) => {
             </div>
             {(prefs.loanTermsMonths || []).length === 0 && (
               <div style={{ marginTop: 12, padding: 10, background: DS.colors.dangerDim, borderRadius: 8 }}>
-                <p style={{ fontSize: 12, color: DS.colors.danger }}>⚠ No terms selected — select at least one loan term</p>
+                <p style={{ fontSize: 12, color: DS.colors.danger }}>â  No terms selected â select at least one loan term</p>
               </div>
             )}
           </Card>
@@ -7647,20 +7740,20 @@ const LenderSettings = ({ user, showToast }) => {
           {changed && (
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 10 }}>
               <Btn variant="ghost" onClick={() => { setPrefs({ ...defaultPrefs }); setChanged(false); }}>Reset</Btn>
-              <Btn onClick={savePrefs} icon="💾">Save Loan Parameters</Btn>
+              <Btn onClick={savePrefs} icon="ð¾">Save Loan Parameters</Btn>
             </div>
           )}
         </div>
       )}
 
-      {/* ── BILLING TAB ── */}
+      {/* ââ BILLING TAB ââ */}
       {activeTab === "billing" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 24 }}>
             {[
-              { name: "Pay-As-You-Go", price: "N$125", per: "per approved lead", color: DS.colors.info, icon: "🪙", key: "payasyougo",
+              { name: "Pay-As-You-Go", price: "N$125", per: "per approved lead", color: DS.colors.info, icon: "ðª", key: "payasyougo",
                 features: ["No monthly commitment", "Full borrower profiles", "Document access", "Risk tier reports", "KYC/AML pre-screened"] },
-              { name: "Monthly Subscription", price: "N$2,500", per: "per month excl. VAT", color: DS.colors.gold, icon: "⭐", key: "subscription", badge: "Best Value",
+              { name: "Monthly Subscription", price: "N$2,500", per: "per month excl. VAT", color: DS.colors.gold, icon: "â­", key: "subscription", badge: "Best Value",
                 features: ["Unlimited leads", "Priority routing", "Advanced analytics", "REST API access", "Dedicated account manager", "Compliance reports"] },
             ].map((p, i) => (
               <div key={i} onClick={() => setPlan(p.key)} style={{
@@ -7678,11 +7771,11 @@ const LenderSettings = ({ user, showToast }) => {
                 <ul style={{ listStyle: "none", marginBottom: 20 }}>
                   {(p.features||[]).map((f, j) => (
                     <li key={j} style={{ display: "flex", gap: 8, alignItems: "center", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 8 }}>
-                      <span style={{ color: p.color, fontWeight: 700 }}>✓</span>{f}
+                      <span style={{ color: p.color, fontWeight: 700 }}>â</span>{f}
                     </li>
                   ))}
                 </ul>
-                {plan === p.key ? <Badge label="Current Plan ✓" color={p.color} /> : <span style={{ fontSize: 13, color: DS.colors.textMuted }}>Click to switch</span>}
+                {plan === p.key ? <Badge label="Current Plan â" color={p.color} /> : <span style={{ fontSize: 13, color: DS.colors.textMuted }}>Click to switch</span>}
               </div>
             ))}
           </div>
@@ -7690,7 +7783,7 @@ const LenderSettings = ({ user, showToast }) => {
           {plan !== (lender?.plan || "payasyougo") && (
             <div style={{ padding: 16, background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 10, marginBottom: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <p style={{ color: DS.colors.accent, fontSize: 14 }}>Switch to <strong>{plan === "subscription" ? "Monthly Subscription" : "Pay-As-You-Go"}</strong>?</p>
-              <Btn onClick={() => { setPlan(plan); showToast("Plan change requested — admin will activate shortly."); }}>Confirm Change</Btn>
+              <Btn onClick={() => { setPlan(plan); showToast("Plan change requested â admin will activate shortly."); }}>Confirm Change</Btn>
             </div>
           )}
 
@@ -7716,7 +7809,7 @@ const LenderSettings = ({ user, showToast }) => {
                       <td style={{ padding: "12px 14px", fontFamily: "'DM Mono',monospace", fontWeight: 600, color: DS.colors.accent }}>{row.amount}</td>
                       <td style={{ padding: "12px 14px" }}><StatusBadge status={row.status} /></td>
                       <td style={{ padding: "12px 14px" }}>
-                        <Btn small variant="ghost" onClick={() => showToast("Invoice downloaded")}>⬇ PDF</Btn>
+                        <Btn small variant="ghost" onClick={() => showToast("Invoice downloaded")}>â¬ PDF</Btn>
                       </td>
                     </tr>
                   ))}
@@ -7782,7 +7875,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
     RISK_SCORECARD.categories.affordability.weight = scoreWeights.affordability / 100;
     RISK_SCORECARD.categories.fraud.weight = scoreWeights.fraud / 100;
     setChanged(false);
-    showToast("Risk engine configuration saved — active immediately");
+    showToast("Risk engine configuration saved â active immediately");
   };
 
   const catColors = { employment: DS.colors.accent, banking: DS.colors.info, conduct: DS.colors.tierB, affordability: DS.colors.gold, fraud: DS.colors.warning };
@@ -7794,18 +7887,18 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
     { key: "loans", label: "Loan Limits" },
     { key: "fraud", label: "Fraud Flags" },
     { key: "aml", label: "AML Rules" },
-    { key: "simulator", label: "🧪 Simulator" },
+    { key: "simulator", label: "ð§ª Simulator" },
   ];
 
   return (
     <div className="fade-in">
       <PageHeader
         title="Risk Engine"
-        subtitle="Platform-wide risk configuration — changes apply to all lenders immediately"
+        subtitle="Platform-wide risk configuration â changes apply to all lenders immediately"
         actions={
           <div style={{ display: "flex", gap: 10 }}>
             {changed && <Btn variant="ghost" onClick={() => { setRules({ ...DB.riskRules }); setChanged(false); }}>Discard</Btn>}
-            <Btn onClick={saveAll} icon="⚙️" disabled={!weightOk}>
+            <Btn onClick={saveAll} icon="âï¸" disabled={!weightOk}>
               {changed ? "Save Changes" : "Saved"}
             </Btn>
           </div>
@@ -7814,8 +7907,8 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
       {changed && (
         <div style={{ padding: "10px 16px", background: DS.colors.warningDim, border: `1px solid ${DS.colors.warning}33`, borderRadius: 10, marginBottom: 20, display: "flex", gap: 10, alignItems: "center" }}>
-          <span style={{ color: DS.colors.warning, fontSize: 16 }}>⚠</span>
-          <p style={{ fontSize: 13, color: DS.colors.warning }}>Unsaved changes — these will apply platform-wide to all active lenders and borrowers when saved.</p>
+          <span style={{ color: DS.colors.warning, fontSize: 16 }}>â </span>
+          <p style={{ fontSize: 13, color: DS.colors.warning }}>Unsaved changes â these will apply platform-wide to all active lenders and borrowers when saved.</p>
         </div>
       )}
 
@@ -7830,7 +7923,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         ))}
       </div>
 
-      {/* ── DTI & TIERS TAB ── */}
+      {/* ââ DTI & TIERS TAB ââ */}
       {activeTab === "dti" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -7839,9 +7932,9 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
               <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>DTI Tier Thresholds</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Borrowers are assigned tiers based on their Debt-to-Income ratio. Lower DTI = better tier.</p>
               {[
-                { key: "tierAMaxDTI", label: "Tier A — Maximum DTI", color: DS.colors.tierA, hint: "Low risk. Salary must also be ≥ 2× minimum." },
-                { key: "tierBMaxDTI", label: "Tier B — Maximum DTI", color: DS.colors.tierB, hint: "Moderate risk. Standard approvals." },
-                { key: "tierCMaxDTI", label: "Tier C — Maximum DTI", color: DS.colors.tierC, hint: "Elevated risk. Reduced loan limits apply." },
+                { key: "tierAMaxDTI", label: "Tier A â Maximum DTI", color: DS.colors.tierA, hint: "Low risk. Salary must also be â¥ 2Ã minimum." },
+                { key: "tierBMaxDTI", label: "Tier B â Maximum DTI", color: DS.colors.tierB, hint: "Moderate risk. Standard approvals." },
+                { key: "tierCMaxDTI", label: "Tier C â Maximum DTI", color: DS.colors.tierC, hint: "Elevated risk. Reduced loan limits apply." },
               ].map(item => (
                 <div key={item.key} style={{ marginBottom: 20 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
@@ -7853,13 +7946,13 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                     style={{ width: "100%", accentColor: item.color }} />
                   <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
                     <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{item.hint}</p>
-                    <p style={{ fontSize: 11, color: DS.colors.textMuted }}>5% — 75%</p>
+                    <p style={{ fontSize: 11, color: DS.colors.textMuted }}>5% â 75%</p>
                   </div>
                 </div>
               ))}
 
               <div style={{ marginTop: 4, padding: 12, background: DS.colors.surfaceAlt, borderRadius: 8 }}>
-                <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8 }}>Tier D (Decline) — automatically assigned when DTI exceeds Tier C maximum or salary is below minimum.</p>
+                <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 8 }}>Tier D (Decline) â automatically assigned when DTI exceeds Tier C maximum or salary is below minimum.</p>
                 <div style={{ display: "flex", gap: 8 }}>
                   <TierBadge tier="D" />
                   <span style={{ fontSize: 13, color: DS.colors.textMuted }}>DTI &gt; {(rules.tierCMaxDTI * 100).toFixed(0)}% or salary &lt; N${rules.minSalary.toLocaleString()}</span>
@@ -7880,7 +7973,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                   <input type="range" min="1000" max="15000" step="500" value={rules.minSalary}
                     onChange={e => updateRule("minSalary", e.target.value)}
                     style={{ width: "100%", accentColor: DS.colors.accent }} />
-                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 3 }}>Lenders can set higher thresholds — not lower</p>
+                  <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 3 }}>Lenders can set higher thresholds â not lower</p>
                 </div>
 
                 <div>
@@ -7897,7 +7990,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
 
               <Card>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Loan Multipliers (Platform Default)</h3>
-                <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 14 }}>Max loan = Disposable income × multiplier. Lenders may apply lower caps.</p>
+                <p style={{ fontSize: 12, color: DS.colors.textMuted, marginBottom: 14 }}>Max loan = Disposable income Ã multiplier. Lenders may apply lower caps.</p>
                 {["A","B","C"].map(tier => (
                   <div key={tier} style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14, padding: "10px 12px", background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                     <TierBadge tier={tier} />
@@ -7905,7 +7998,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                       <input type="number" step="0.5" min="0" max="8" value={rules.maxLoanMultiplier[tier]}
                         onChange={e => { const m = { ...rules.maxLoanMultiplier, [tier]: +e.target.value }; setRules(r => ({ ...r, maxLoanMultiplier: m })); setChanged(true); }}
                         style={{ width: 80, textAlign: "center" }} />
-                      <span style={{ fontSize: 12, color: DS.colors.textMuted, marginLeft: 8 }}>× disposable income</span>
+                      <span style={{ fontSize: 12, color: DS.colors.textMuted, marginLeft: 8 }}>Ã disposable income</span>
                     </div>
                     <div style={{ textAlign: "right" }}>
                       <p style={{ fontSize: 11, color: DS.colors.textMuted }}>Default rate</p>
@@ -7922,10 +8015,10 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>Current Tier Assignment Rules</h3>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14 }}>
               {[
-                { tier: "A", color: DS.colors.tierA, cond: `DTI ≤ ${(rules.tierAMaxDTI*100).toFixed(0)}% AND Salary ≥ N${(rules.minSalary*2).toLocaleString()}`, mult: `${rules.maxLoanMultiplier.A}×`, rate: `${rules.interestRate.A}%`, label: "Low Risk" },
-                { tier: "B", color: DS.colors.tierB, cond: `DTI ≤ ${(rules.tierBMaxDTI*100).toFixed(0)}% AND Salary ≥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.B}×`, rate: `${rules.interestRate.B}%`, label: "Moderate" },
-                { tier: "C", color: DS.colors.tierC, cond: `DTI ≤ ${(rules.tierCMaxDTI*100).toFixed(0)}% AND Salary ≥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.C}×`, rate: `${rules.interestRate.C}%`, label: "Elevated" },
-                { tier: "D", color: DS.colors.tierD, cond: "Does not meet A, B, or C criteria — automatic decline", mult: "0×", rate: "N/A", label: "Decline" },
+                { tier: "A", color: DS.colors.tierA, cond: `DTI â¤ ${(rules.tierAMaxDTI*100).toFixed(0)}% AND Salary â¥ N${(rules.minSalary*2).toLocaleString()}`, mult: `${rules.maxLoanMultiplier.A}Ã`, rate: `${rules.interestRate.A}%`, label: "Low Risk" },
+                { tier: "B", color: DS.colors.tierB, cond: `DTI â¤ ${(rules.tierBMaxDTI*100).toFixed(0)}% AND Salary â¥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.B}Ã`, rate: `${rules.interestRate.B}%`, label: "Moderate" },
+                { tier: "C", color: DS.colors.tierC, cond: `DTI â¤ ${(rules.tierCMaxDTI*100).toFixed(0)}% AND Salary â¥ N${rules.minSalary.toLocaleString()}`, mult: `${rules.maxLoanMultiplier.C}Ã`, rate: `${rules.interestRate.C}%`, label: "Elevated" },
+                { tier: "D", color: DS.colors.tierD, cond: "Does not meet A, B, or C criteria â automatic decline", mult: "0Ã", rate: "N/A", label: "Decline" },
               ].map(item => (
                 <div key={item.tier} style={{ padding: 16, background: item.color + "0D", border: `1px solid ${item.color}33`, borderRadius: 14 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
@@ -7944,7 +8037,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         </div>
       )}
 
-      {/* ── SCORING WEIGHTS TAB ── */}
+      {/* ââ SCORING WEIGHTS TAB ââ */}
       {activeTab === "scoring" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
@@ -7970,7 +8063,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
               <div style={{ padding: 14, background: !weightOk ? DS.colors.dangerDim : DS.colors.accentDim, border: `1px solid ${!weightOk ? DS.colors.danger : DS.colors.accent}33`, borderRadius: 10 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <p style={{ fontSize: 14, fontWeight: 700, color: !weightOk ? DS.colors.danger : DS.colors.accent }}>
-                    {!weightOk ? `⚠ Total: ${totalWeight}% — must equal 100%` : `✓ Total: ${totalWeight}% — balanced`}
+                    {!weightOk ? `â  Total: ${totalWeight}% â must equal 100%` : `â Total: ${totalWeight}% â balanced`}
                   </p>
                   <div style={{ display: "flex", gap: 6 }}>
                     {Object.entries(scoreWeights||{}).map(([key, val]) => (
@@ -8010,7 +8103,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         </div>
       )}
 
-      {/* ── LOAN LIMITS TAB ── */}
+      {/* ââ LOAN LIMITS TAB ââ */}
       {activeTab === "loans" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -8044,7 +8137,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                   <div key={tier} style={{ marginBottom: 16, padding: "12px 14px", background: color + "0D", border: `1px solid ${color}33`, borderRadius: 12 }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
                       <TierBadge tier={tier} />
-                      <span style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, color, fontSize: 15 }}>{floor}% – {ceiling}%</span>
+                      <span style={{ fontFamily: "'DM Mono',monospace", fontWeight: 700, color, fontSize: 15 }}>{floor}% â {ceiling}%</span>
                     </div>
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                       <div>
@@ -8068,7 +8161,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         </div>
       )}
 
-      {/* ── FRAUD FLAGS TAB ── */}
+      {/* ââ FRAUD FLAGS TAB ââ */}
       {activeTab === "fraud" && (
         <div className="fade-in">
           <Card style={{ marginBottom: 20 }}>
@@ -8116,7 +8209,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         </div>
       )}
 
-      {/* ── AML RULES TAB ── */}
+      {/* ââ AML RULES TAB ââ */}
       {activeTab === "aml" && (
         <div className="fade-in">
           <Card style={{ marginBottom: 20 }}>
@@ -8129,7 +8222,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
             </div>
 
             <div style={{ padding: "10px 14px", background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 8, marginBottom: 16 }}>
-              <p style={{ fontSize: 12, color: DS.colors.info, lineHeight: 1.6 }}>ℹ Some AML rules are mandated by NAMFISA regulation and cannot be disabled. These are marked as locked.</p>
+              <p style={{ fontSize: 12, color: DS.colors.info, lineHeight: 1.6 }}>â¹ Some AML rules are mandated by NAMFISA regulation and cannot be disabled. These are marked as locked.</p>
             </div>
 
             <div style={{ display: "grid", gap: 10 }}>
@@ -8159,7 +8252,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                         onChange={e => setAmlRules(r => r.map(x => x.id === rule.id ? { ...x, threshold: +e.target.value } : x))}
                         style={{ width: 100, textAlign: "right" }} />
                     )}
-                    {locked && <span style={{ fontSize: 12, color: DS.colors.danger, fontWeight: 600 }}>🔒 Locked</span>}
+                    {locked && <span style={{ fontSize: 12, color: DS.colors.danger, fontWeight: 600 }}>ð Locked</span>}
                   </div>
                 );
               })}
@@ -8188,12 +8281,12 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
         </div>
       )}
 
-      {/* ── SIMULATOR TAB ── */}
+      {/* ââ SIMULATOR TAB ââ */}
       {activeTab === "simulator" && (
         <div className="fade-in">
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
             <Card>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>🧪 Borrower Profile Simulator</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, marginBottom: 16 }}>ð§ª Borrower Profile Simulator</h3>
               <p style={{ fontSize: 13, color: DS.colors.textMuted, marginBottom: 20, lineHeight: 1.5 }}>Test how a hypothetical borrower would be scored under the current engine settings. Adjust inputs and see the result instantly.</p>
 
               <div style={{ marginBottom: 18 }}>
@@ -8243,7 +8336,7 @@ const AdminRiskEngine = ({ showToast, showConfirm }) => {
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 12 }}>Simulation Result</p>
                 <div style={{ textAlign: "center", marginBottom: 20 }}>
                   <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 72, fontWeight: 800, color: tierColor, lineHeight: 1 }}>{simResult.tier}</p>
-                  <p style={{ fontSize: 16, color: DS.colors.textSecondary, marginTop: 4 }}>{{ A: "Low Risk — Approve", B: "Moderate Risk — Approve", C: "Elevated Risk — Approve with caution", D: "High Risk — Decline" }[simResult.tier]}</p>
+                  <p style={{ fontSize: 16, color: DS.colors.textSecondary, marginTop: 4 }}>{{ A: "Low Risk â Approve", B: "Moderate Risk â Approve", C: "Elevated Risk â Approve with caution", D: "High Risk â Decline" }[simResult.tier]}</p>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
                   {[
@@ -8343,13 +8436,13 @@ const AdminReports = () => {
 
   return (
   <div className="fade-in">
-    <PageHeader title="Platform Reports" subtitle="Compliance, performance, and revenue analytics — live data" />
+    <PageHeader title="Platform Reports" subtitle="Compliance, performance, and revenue analytics â live data" />
 
     <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 28 }}>
-      <Stat label="Total Platform Revenue" value={`N${totalRevenue.toLocaleString()}`} icon="📈" color={DS.colors.gold} sub={`${activeLenders.length} active lenders`} />
-      <Stat label="AML Flags (30d)" value={amlFlagged} icon="🚨" color={DS.colors.danger} sub="Require FIC review" />
-      <Stat label="KYC Verified" value={kycVerified} icon="✅" color={DS.colors.accent} sub={`of ${allBorrowers.length} platform borrowers`} />
-      <Stat label="Avg. Loan Size" value={`N${Math.round(avgLoan).toLocaleString()}`} icon="💰" color={DS.colors.info} sub="Approved loans" />
+      <Stat label="Total Platform Revenue" value={`N${totalRevenue.toLocaleString()}`} icon="ð" color={DS.colors.gold} sub={`${activeLenders.length} active lenders`} />
+      <Stat label="AML Flags (30d)" value={amlFlagged} icon="ð¨" color={DS.colors.danger} sub="Require FIC review" />
+      <Stat label="KYC Verified" value={kycVerified} icon="â" color={DS.colors.accent} sub={`of ${allBorrowers.length} platform borrowers`} />
+      <Stat label="Avg. Loan Size" value={`N${Math.round(avgLoan).toLocaleString()}`} icon="ð°" color={DS.colors.info} sub="Approved loans" />
     </div>
 
     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
@@ -8371,7 +8464,7 @@ const AdminReports = () => {
           </div>
         ))}
         <div style={{ marginTop: 12, padding: "8px 12px", background: DS.colors.infoDim, borderRadius: 8 }}>
-          <p style={{ fontSize: 12, color: DS.colors.info }}>ℹ All flagged cases are automatically reported to FIC per FIA 2012 §29</p>
+          <p style={{ fontSize: 12, color: DS.colors.info }}>â¹ All flagged cases are automatically reported to FIC per FIA 2012 Â§29</p>
         </div>
       </Card>
 
@@ -8383,7 +8476,7 @@ const AdminReports = () => {
             <span style={{ fontWeight: 700, color: DS.colors.gold }}>N${subRevenue.toLocaleString()}</span>
           </div>
           <ProgressBar value={subRevenue} max={totalRevenue || 1} color={DS.colors.gold} />
-          <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>{subLenders.length} subscription lender{subLenders.length !== 1 ? "s" : ""} · N$2,500/mo each</p>
+          <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>{subLenders.length} subscription lender{subLenders.length !== 1 ? "s" : ""} Â· N$2,500/mo each</p>
         </div>
         <div style={{ marginBottom: 20 }}>
           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
@@ -8391,7 +8484,7 @@ const AdminReports = () => {
             <span style={{ fontWeight: 700, color: DS.colors.accent }}>N${paygRevenue.toLocaleString()}</span>
           </div>
           <ProgressBar value={paygRevenue} max={totalRevenue || 1} color={DS.colors.accent} />
-          <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>{paygLeads} approved leads × N$125</p>
+          <p style={{ fontSize: 11, color: DS.colors.textMuted, marginTop: 4 }}>{paygLeads} approved leads Ã N$125</p>
         </div>
 
         <div style={{ marginTop: 16, padding: 14, background: DS.colors.accentDim, borderRadius: 8 }}>
@@ -8458,9 +8551,9 @@ const AdminReports = () => {
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// AGENT PORTAL — Field officer assisted intake
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// AGENT PORTAL â Field officer assisted intake
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const AgentHome = ({ user, setView }) => {
   const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
@@ -8473,17 +8566,17 @@ const AgentHome = ({ user, setView }) => {
   return (
     <div className="fade-in">
       <PageHeader
-        title={`Welcome, ${(user.name||"—").split(" ")[0]} 👋`}
-        subtitle={`${agent.region || "Field Agent"} · Capital Micro Finance · Your assisted intake portal`}
-        actions={<Btn onClick={() => setView("agent-add")} icon="➕">Add New Borrower</Btn>}
+        title={`Welcome, ${(user.name||"â").split(" ")[0]} ð`}
+        subtitle={`${agent.region || "Field Agent"} Â· Capital Micro Finance Â· Your assisted intake portal`}
+        actions={<Btn onClick={() => setView("agent-add")} icon="â">Add New Borrower</Btn>}
       />
 
       {/* Stats */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 14, marginBottom: 28 }}>
-        <Stat label="Total Captured" value={myBorrowers.length} icon="👥" onClick={() => setView("agent-borrowers")} />
-        <Stat label="Approved" value={approved.length} color={DS.colors.accent} icon="✅" onClick={() => setView("agent-borrowers")} />
-        <Stat label="Pending" value={pending.length} color={DS.colors.gold} icon="⏳" sub="Awaiting decision" onClick={() => setView("agent-borrowers")} />
-        <Stat label="Commission" value={`N${(agent.commission || 0).toLocaleString()}`} color="#A78BFA" icon="💜" sub="This month" onClick={() => setView("agent-performance")} />
+        <Stat label="Total Captured" value={myBorrowers.length} icon="ð¥" onClick={() => setView("agent-borrowers")} />
+        <Stat label="Approved" value={approved.length} color={DS.colors.accent} icon="â" onClick={() => setView("agent-borrowers")} />
+        <Stat label="Pending" value={pending.length} color={DS.colors.gold} icon="â³" sub="Awaiting decision" onClick={() => setView("agent-borrowers")} />
+        <Stat label="Commission" value={`N${(agent.commission || 0).toLocaleString()}`} color="#A78BFA" icon="ð" sub="This month" onClick={() => setView("agent-performance")} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, marginBottom: 20 }}>
@@ -8491,7 +8584,7 @@ const AgentHome = ({ user, setView }) => {
         <Card>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15 }}>Recent Captures</h3>
-            <Btn small variant="ghost" onClick={() => setView("agent-borrowers")}>View All →</Btn>
+            <Btn small variant="ghost" onClick={() => setView("agent-borrowers")}>View All â</Btn>
           </div>
           {myBorrowers.slice(0, 4).map((b, i) => {
             const statusColor = { approved: DS.colors.accent, pending: DS.colors.gold, declined: DS.colors.danger }[b.status] || DS.colors.textMuted;
@@ -8500,7 +8593,7 @@ const AgentHome = ({ user, setView }) => {
                 <div style={{ width: 36, height: 36, background: DS.colors[`tier${b.tier}`] + "22", border: `1px solid ${DS.colors[`tier${b.tier}`]}44`, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, color: DS.colors[`tier${b.tier}`], flexShrink: 0 }}>{(b.name||"?")[0]}</div>
                 <div style={{ flex: 1 }}>
                   <p style={{ fontSize: 13, fontWeight: 600 }}>{b.name}</p>
-                  <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{b.employer} · N${b.amount?.toLocaleString()}</p>
+                  <p style={{ fontSize: 11, color: DS.colors.textMuted }}>{b.employer} Â· N${b.amount?.toLocaleString()}</p>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 20, background: statusColor + "22", color: statusColor, textTransform: "capitalize" }}>{b.status}</span>
@@ -8518,7 +8611,7 @@ const AgentHome = ({ user, setView }) => {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
             {[
               { l: "Conversion Rate", v: conv + "%", c: +conv > 60 ? DS.colors.accent : DS.colors.warning },
-              { l: "Avg Loan Size", v: myBorrowers.length ? `N${Math.round(myBorrowers.reduce((s,b)=>s+(b.amount||0),0)/myBorrowers.length).toLocaleString()}` : "—", c: DS.colors.info },
+              { l: "Avg Loan Size", v: myBorrowers.length ? `N${Math.round(myBorrowers.reduce((s,b)=>s+(b.amount||0),0)/myBorrowers.length).toLocaleString()}` : "â", c: DS.colors.info },
             ].map((s,i) => (
               <div key={i} style={{ padding: 14, background: DS.colors.surfaceAlt, borderRadius: 10 }}>
                 <p style={{ fontSize: 11, color: DS.colors.textMuted, marginBottom: 4 }}>{s.l}</p>
@@ -8556,15 +8649,15 @@ const AgentHome = ({ user, setView }) => {
       <div style={{ padding: 20, background: "linear-gradient(135deg, #A78BFA18, #00C89614)", border: "1px solid #A78BFA33", borderRadius: 16, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
           <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Ready to capture a new borrower?</p>
-          <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>Fill in their details, run an instant risk assessment, and submit — they don't need a smartphone.</p>
+          <p style={{ fontSize: 13, color: DS.colors.textSecondary }}>Fill in their details, run an instant risk assessment, and submit â they don't need a smartphone.</p>
         </div>
-        <Btn onClick={() => setView("agent-add")} icon="➕" style={{ flexShrink: 0 }}>Add Borrower</Btn>
+        <Btn onClick={() => setView("agent-add")} icon="â" style={{ flexShrink: 0 }}>Add Borrower</Btn>
       </div>
     </div>
   );
 };
 
-// ── AGENT ADD BORROWER (Assisted Intake) ──────────────────────────────────────
+// ââ AGENT ADD BORROWER (Assisted Intake) ââââââââââââââââââââââââââââââââââââââ
 const AgentAddBorrower = ({ user, showToast, setView }) => {
   const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
   const [step, setStep] = useState(1);
@@ -8585,7 +8678,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
       salaryInAccount: "Yes consistently", accountUsage: "Active & stable",
       negativeDays: "0 days", lowBalanceDays: "< 5 days", unpaidOrders: "0",
       incomeVolatility: "Stable (< 20% variation)", overdraftUsage: "None / minimal",
-      dtiRatio: r.dti < 0.3 ? "< 30%" : r.dti < 0.5 ? "30 – 50%" : "> 50%",
+      dtiRatio: r.dti < 0.3 ? "< 30%" : r.dti < 0.5 ? "30 â 50%" : "> 50%",
       disposableIncome: r.disposable > +form.salary * 0.4 ? "Strong surplus" : "Moderate",
       loanBurden: form.firstBorrower ? "Medium" : "Low",
       incomeMismatch: "None", docAuthenticity: "Verified",
@@ -8599,7 +8692,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
       name: form.name, idNumber: form.idNumber, phone: form.phone,
       employer: form.employer, salary: +form.salary, expenses: +form.expenses,
       tier: riskResult?.tier || "C", riskScore: riskResult?.finalScore || 50,
-      dti: riskResult ? (riskResult.dti * 100).toFixed(1) + "%" : "—",
+      dti: riskResult ? (riskResult.dti * 100).toFixed(1) + "%" : "â",
       kycStatus: "pending", amlStatus: "clear", bankVerified: false,
       status: "pending", capturedAt: new Date().toISOString().slice(0, 10),
       purpose: form.purpose, amount: +form.amount, term: +form.term,
@@ -8607,9 +8700,9 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
     };
     AGENT_DB.borrowers.push(newBorrower);
     agent.totalCaptured = (agent.totalCaptured || 0) + 1;
-    DB.notifications.push({ id: "n" + Date.now(), userId: "u2", msg: `📋 New agent capture: ${form.name} — Tier ${riskResult?.tier || "?"} by ${user.name}`, read: false, time: "just now" });
+    DB.notifications.push({ id: "n" + Date.now(), userId: "u2", msg: `ð New agent capture: ${form.name} â Tier ${riskResult?.tier || "?"} by ${user.name}`, read: false, time: "just now" });
     setSubmitted(true);
-    showToast(`${form.name} submitted successfully — routed to Capital Micro Finance`);
+    showToast(`${form.name} submitted successfully â routed to Capital Micro Finance`);
   };
 
   const tcol = riskResult ? DS.colors[`tier${riskResult.tier}`] || DS.colors.textMuted : DS.colors.textMuted;
@@ -8617,7 +8710,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
 
   if (submitted) return (
     <div className="fade-in" style={{ maxWidth: 520, margin: "0 auto", textAlign: "center", paddingTop: 48 }}>
-      <div style={{ fontSize: 64, marginBottom: 20 }}>🎉</div>
+      <div style={{ fontSize: 64, marginBottom: 20 }}>ð</div>
       <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 28, marginBottom: 12 }}>Application Submitted!</h2>
       <p style={{ color: DS.colors.textSecondary, fontSize: 15, lineHeight: 1.7, marginBottom: 32 }}><strong>{form.name}</strong>'s application has been submitted to Capital Micro Finance and will be reviewed within 24 hours.</p>
       <div style={{ padding: "16px 20px", background: DS.colors.accentDim, border: `1px solid ${DS.colors.accent}33`, borderRadius: 12, marginBottom: 24 }}>
@@ -8629,7 +8722,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
       </div>
       <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
         <Btn onClick={() => { setSubmitted(false); setStep(1); setForm({ name:"",idNumber:"",phone:"",employer:"",salary:"",expenses:"",purpose:"Medical",amount:"",term:"6",firstBorrower:true,kycConsent:false,amlConsent:false }); setRiskResult(null); }}>Add Another Borrower</Btn>
-        <Btn variant="ghost" onClick={() => setView("agent-borrowers")}>View My Borrowers →</Btn>
+        <Btn variant="ghost" onClick={() => setView("agent-borrowers")}>View My Borrowers â</Btn>
       </div>
     </div>
   );
@@ -8639,8 +8732,8 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
   return (
     <div className="fade-in">
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 24 }}>
-        <Btn variant="ghost" small onClick={() => step > 1 ? setStep(s => s - 1) : setView("agent-home")}>←</Btn>
-        <PageHeader title="Add Borrower" subtitle="Capture a borrower's application on their behalf — they don't need a smartphone" />
+        <Btn variant="ghost" small onClick={() => step > 1 ? setStep(s => s - 1) : setView("agent-home")}>â</Btn>
+        <PageHeader title="Add Borrower" subtitle="Capture a borrower's application on their behalf â they don't need a smartphone" />
       </div>
 
       {/* Step indicator */}
@@ -8648,7 +8741,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
         {steps.map((s, i) => (
           <div key={i} style={{ display: "flex", alignItems: "center", flex: i < steps.length - 1 ? 1 : "none" }}>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 90 }}>
-              <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, background: i < step ? DS.colors.accent : i === step - 1 ? DS.colors.accent : DS.colors.surfaceAlt, color: i < step ? "#0A0F1E" : i === step - 1 ? "#0A0F1E" : DS.colors.textMuted, border: `2px solid ${i < step || i === step - 1 ? DS.colors.accent : DS.colors.border}` }}>{i < step - 1 ? "✓" : i + 1}</div>
+              <div style={{ width: 30, height: 30, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 13, background: i < step ? DS.colors.accent : i === step - 1 ? DS.colors.accent : DS.colors.surfaceAlt, color: i < step ? "#0A0F1E" : i === step - 1 ? "#0A0F1E" : DS.colors.textMuted, border: `2px solid ${i < step || i === step - 1 ? DS.colors.accent : DS.colors.border}` }}>{i < step - 1 ? "â" : i + 1}</div>
               <p style={{ fontSize: 10, color: i === step - 1 ? DS.colors.accent : DS.colors.textMuted, fontWeight: i === step - 1 ? 700 : 400, textAlign: "center", lineHeight: 1.3 }}>{s}</p>
             </div>
             {i < steps.length - 1 && <div style={{ flex: 1, height: 2, background: i < step - 1 ? DS.colors.accent : DS.colors.border, margin: "-14px 4px 0" }} />}
@@ -8657,7 +8750,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
       </div>
 
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
-        {/* Step 1 — Personal */}
+        {/* Step 1 â Personal */}
         {step === 1 && (
           <Card className="fade-in">
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Personal Details</h3>
@@ -8665,13 +8758,13 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
             <Input label="Namibian ID Number" value={form.idNumber} onChange={v => setForm({...form, idNumber: v})} placeholder="11-digit ID number" required />
             <Input label="Mobile Number" value={form.phone} onChange={v => setForm({...form, phone: v})} placeholder="+264 81 000 0000" required />
             <div style={{ padding: "10px 14px", background: DS.colors.infoDim, border: `1px solid ${DS.colors.info}33`, borderRadius: 8, marginBottom: 16 }}>
-              <p style={{ fontSize: 12, color: DS.colors.info, lineHeight: 1.5 }}>ℹ Confirm that the borrower has provided verbal consent for you to capture their information and submit an application on their behalf.</p>
+              <p style={{ fontSize: 12, color: DS.colors.info, lineHeight: 1.5 }}>â¹ Confirm that the borrower has provided verbal consent for you to capture their information and submit an application on their behalf.</p>
             </div>
-            <Btn onClick={() => { if (!form.name || !form.idNumber || !form.phone) { showToast("Please fill in all fields", "error"); return; } setStep(2); }} style={{ width: "100%" }}>Continue →</Btn>
+            <Btn onClick={() => { if (!form.name || !form.idNumber || !form.phone) { showToast("Please fill in all fields", "error"); return; } setStep(2); }} style={{ width: "100%" }}>Continue â</Btn>
           </Card>
         )}
 
-        {/* Step 2 — Financial */}
+        {/* Step 2 â Financial */}
         {step === 2 && (
           <Card className="fade-in">
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Financial Information</h3>
@@ -8688,13 +8781,13 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
               </label>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="ghost" onClick={() => setStep(1)}>← Back</Btn>
-              <Btn onClick={() => { if (!form.employer || !form.salary || !form.expenses) { showToast("Please fill in all fields", "error"); return; } runAssessment(); setStep(3); }} style={{ flex: 1 }}>Run Assessment →</Btn>
+              <Btn variant="ghost" onClick={() => setStep(1)}>â Back</Btn>
+              <Btn onClick={() => { if (!form.employer || !form.salary || !form.expenses) { showToast("Please fill in all fields", "error"); return; } runAssessment(); setStep(3); }} style={{ flex: 1 }}>Run Assessment â</Btn>
             </div>
           </Card>
         )}
 
-        {/* Step 3 — Risk Assessment */}
+        {/* Step 3 â Risk Assessment */}
         {step === 3 && riskResult && (
           <Card className="fade-in" style={{ background: tcol + "0D", border: `1px solid ${tcol}44` }}>
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Risk Assessment Result</h3>
@@ -8721,21 +8814,21 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
             </div>
             {riskResult.tier === "D" ? (
               <div style={{ padding: "12px 16px", background: DS.colors.dangerDim, borderRadius: 10, marginBottom: 20 }}>
-                <p style={{ color: DS.colors.danger, fontSize: 13, fontWeight: 600 }}>❌ This borrower does not currently qualify. Their DTI ratio is too high. Advise them to reduce monthly obligations before re-applying.</p>
+                <p style={{ color: DS.colors.danger, fontSize: 13, fontWeight: 600 }}>â This borrower does not currently qualify. Their DTI ratio is too high. Advise them to reduce monthly obligations before re-applying.</p>
               </div>
             ) : (
               <div style={{ padding: "12px 16px", background: DS.colors.accentDim, borderRadius: 10, marginBottom: 20 }}>
-                <p style={{ color: DS.colors.accent, fontSize: 13, fontWeight: 600 }}>✅ {form.name} qualifies for a loan up to N${Math.round(riskResult.maxLoan).toLocaleString()} at {riskResult.rate}% p.a. Proceed to application details.</p>
+                <p style={{ color: DS.colors.accent, fontSize: 13, fontWeight: 600 }}>â {form.name} qualifies for a loan up to N${Math.round(riskResult.maxLoan).toLocaleString()} at {riskResult.rate}% p.a. Proceed to application details.</p>
               </div>
             )}
             <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="ghost" onClick={() => setStep(2)}>← Adjust Info</Btn>
-              {riskResult.tier !== "D" && <Btn onClick={() => setStep(4)} style={{ flex: 1 }}>Continue to Application →</Btn>}
+              <Btn variant="ghost" onClick={() => setStep(2)}>â Adjust Info</Btn>
+              {riskResult.tier !== "D" && <Btn onClick={() => setStep(4)} style={{ flex: 1 }}>Continue to Application â</Btn>}
             </div>
           </Card>
         )}
 
-        {/* Step 4 — Loan Details */}
+        {/* Step 4 â Loan Details */}
         {step === 4 && (
           <Card className="fade-in">
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Loan Application Details</h3>
@@ -8770,13 +8863,13 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
               </div>
             )}
             <div style={{ display: "flex", gap: 10 }}>
-              <Btn variant="ghost" onClick={() => setStep(3)}>← Back</Btn>
-              <Btn onClick={() => { if (!form.amount || !form.purpose) { showToast("Please fill in loan details", "error"); return; } if (riskResult && +form.amount > riskResult.maxLoan) { showToast(`Exceeds maximum of N${Math.round(riskResult.maxLoan).toLocaleString()}`, "error"); return; } setStep(5); }} style={{ flex: 1 }}>Review & Submit →</Btn>
+              <Btn variant="ghost" onClick={() => setStep(3)}>â Back</Btn>
+              <Btn onClick={() => { if (!form.amount || !form.purpose) { showToast("Please fill in loan details", "error"); return; } if (riskResult && +form.amount > riskResult.maxLoan) { showToast(`Exceeds maximum of N${Math.round(riskResult.maxLoan).toLocaleString()}`, "error"); return; } setStep(5); }} style={{ flex: 1 }}>Review & Submit â</Btn>
             </div>
           </Card>
         )}
 
-        {/* Step 5 — Consent & Submit */}
+        {/* Step 5 â Consent & Submit */}
         {step === 5 && (
           <Card className="fade-in">
             <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, marginBottom: 20 }}>Review & Consent</h3>
@@ -8808,7 +8901,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
             ].map(item => (
               <div key={item.key} style={{ display: "flex", gap: 12, padding: "12px 14px", background: form[item.key] ? DS.colors.accentDim : DS.colors.surfaceAlt, border: `1px solid ${form[item.key] ? DS.colors.accent + "44" : DS.colors.border}`, borderRadius: 10, marginBottom: 10, cursor: "pointer", transition: "all .2s" }} onClick={() => setForm({...form, [item.key]: !form[item.key]})}>
                 <div style={{ width: 20, height: 20, borderRadius: 6, border: `2px solid ${form[item.key] ? DS.colors.accent : DS.colors.border}`, background: form[item.key] ? DS.colors.accent : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  {form[item.key] && <span style={{ color: "#0A0F1E", fontSize: 12, fontWeight: 800 }}>✓</span>}
+                  {form[item.key] && <span style={{ color: "#0A0F1E", fontSize: 12, fontWeight: 800 }}>â</span>}
                 </div>
                 <div>
                   <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>{item.label}</p>
@@ -8818,8 +8911,8 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
             ))}
 
             <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-              <Btn variant="ghost" onClick={() => setStep(4)}>← Back</Btn>
-              <Btn onClick={() => { if (!form.kycConsent || !form.amlConsent) { showToast("Both consent checkboxes are required", "error"); return; } handleSubmit(); }} disabled={!form.kycConsent || !form.amlConsent} style={{ flex: 1 }}>✅ Submit Application</Btn>
+              <Btn variant="ghost" onClick={() => setStep(4)}>â Back</Btn>
+              <Btn onClick={() => { if (!form.kycConsent || !form.amlConsent) { showToast("Both consent checkboxes are required", "error"); return; } handleSubmit(); }} disabled={!form.kycConsent || !form.amlConsent} style={{ flex: 1 }}>â Submit Application</Btn>
             </div>
           </Card>
         )}
@@ -8828,7 +8921,7 @@ const AgentAddBorrower = ({ user, showToast, setView }) => {
   );
 };
 
-// ── AGENT BORROWERS LIST ──────────────────────────────────────────────────────
+// ââ AGENT BORROWERS LIST ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AgentBorrowers = ({ user, showToast, setView }) => {
   const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
   const myBorrowers = (AGENT_DB.borrowers||[]).filter(b => b.agentId === agent.id);
@@ -8837,7 +8930,7 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
 
   return (
     <div className="fade-in">
-      <PageHeader title="My Borrowers" subtitle={`${myBorrowers.length} borrowers captured by you across all visits`} actions={<Btn onClick={() => setView("agent-add")} icon="➕" small>Add New</Btn>} />
+      <PageHeader title="My Borrowers" subtitle={`${myBorrowers.length} borrowers captured by you across all visits`} actions={<Btn onClick={() => setView("agent-add")} icon="â" small>Add New</Btn>} />
 
       <div style={{ display: "flex", gap: 4, marginBottom: 20, background: DS.colors.surface, border: `1px solid ${DS.colors.border}`, borderRadius: 10, padding: 4, width: "fit-content" }}>
         {[["all","All",myBorrowers.length],["pending","Pending",myBorrowers.filter(b=>b.status==="pending").length],["approved","Approved",myBorrowers.filter(b=>b.status==="approved").length],["declined","Declined",myBorrowers.filter(b=>b.status==="declined").length]].map(([val,label,count])=>(
@@ -8876,7 +8969,7 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
         </table>
         {filtered.length === 0 && (
           <div style={{ padding:"40px",textAlign:"center" }}>
-            <p style={{ fontSize:32,marginBottom:10 }}>📋</p>
+            <p style={{ fontSize:32,marginBottom:10 }}>ð</p>
             <p style={{ color:DS.colors.textMuted,fontSize:13 }}>No {filter === "all" ? "" : filter} borrowers yet.</p>
           </div>
         )}
@@ -8885,7 +8978,7 @@ const AgentBorrowers = ({ user, showToast, setView }) => {
   );
 };
 
-// ── AGENT PERFORMANCE ─────────────────────────────────────────────────────────
+// ââ AGENT PERFORMANCE âââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AgentPerformance = ({ user }) => {
   const agent = (AGENT_DB.agents||[]).find(a => a.userId === user.id) || {};
   const myBorrowers = (AGENT_DB.borrowers||[]).filter(b => b.agentId === agent.id);
@@ -8924,7 +9017,7 @@ const AgentPerformance = ({ user }) => {
           <div style={{ padding: "16px 20px", background: "#A78BFA18", border: "1px solid #A78BFA33", borderRadius: 12, marginBottom: 16 }}>
             <p style={{ fontSize: 12, color: "#A78BFA", marginBottom: 4 }}>Total Commission Earned</p>
             <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 36, fontWeight: 800, color: "#A78BFA" }}>N${(approved.length * 50).toLocaleString()}</p>
-            <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{approved.length} approved × N$50 per approval</p>
+            <p style={{ fontSize: 12, color: DS.colors.textMuted, marginTop: 4 }}>{approved.length} approved Ã N$50 per approval</p>
           </div>
           {[
             ["Captured (all)", myBorrowers.length, "N$0"],
@@ -8963,9 +9056,9 @@ const AgentPerformance = ({ user }) => {
 
 
 
-// ══════════════════════════════════════════════════════════════════════════════
-// WHATSAPP LEADS — Admin view + conversation viewer
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// WHATSAPP LEADS â Admin view + conversation viewer
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const AdminWhatsApp = ({ showToast }) => {
   const [selected, setSelected] = useState(null);
@@ -8975,7 +9068,7 @@ const AdminWhatsApp = ({ showToast }) => {
   const filtered = filter === "all" ? leads : leads.filter(l => l && l.status === filter);
   const new_leads = leads.filter(l => l && l.status === "new_lead").length;
   const stageColor = { new: DS.colors.textMuted, screening: DS.colors.info, documents: DS.colors.gold, qualified: DS.colors.accent };
-  const stageLabel = { new: "Started", screening: "Screening", documents: "Docs Sent", qualified: "Qualified ✓" };
+  const stageLabel = { new: "Started", screening: "Screening", documents: "Docs Sent", qualified: "Qualified â" };
 
   if (selected) {
     const lead = leads.find(l => l.id === selected);
@@ -8985,17 +9078,17 @@ const AdminWhatsApp = ({ showToast }) => {
     return (
       <div className="fade-in">
         <div style={{ display:"flex",alignItems:"center",gap:12,marginBottom:24 }}>
-          <Btn variant="ghost" small onClick={() => setSelected(null)}>← All Leads</Btn>
+          <Btn variant="ghost" small onClick={() => setSelected(null)}>â All Leads</Btn>
           <div style={{ flex:1 }}>
             <div style={{ display:"flex",alignItems:"center",gap:10 }}>
               <h1 style={{ fontFamily:"'Space Grotesk',sans-serif",fontSize:22,fontWeight:700 }}>{lead.name}</h1>
-              <span style={{ background:"#25D366",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20 }}>📱 WhatsApp</span>
+              <span style={{ background:"#25D366",color:"#fff",fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20 }}>ð± WhatsApp</span>
               {lead.tier && <TierBadge tier={lead.tier} />}
             </div>
-            <p style={{ fontSize:13,color:DS.colors.textMuted,marginTop:2 }}>{lead.phone} · {lead.timestamp}</p>
+            <p style={{ fontSize:13,color:DS.colors.textMuted,marginTop:2 }}>{lead.phone} Â· {lead.timestamp}</p>
           </div>
           <div style={{ display:"flex",gap:8 }}>
-            {lead.stage === "qualified" && <Btn small onClick={() => { showToast(`${lead.name} routed to ${lender?.name || "lender"}`); setSelected(null); }}>Route to Lender →</Btn>}
+            {lead.stage === "qualified" && <Btn small onClick={() => { showToast(`${lead.name} routed to ${lender?.name || "lender"}`); setSelected(null); }}>Route to Lender â</Btn>}
           </div>
         </div>
 
@@ -9010,13 +9103,13 @@ const AdminWhatsApp = ({ showToast }) => {
                   <p style={{ fontWeight:700,fontSize:14 }}>{lead.name}</p>
                   <p style={{ fontSize:11,color:"#25D366" }}>{lead.phone}</p>
                 </div>
-                <span style={{ marginLeft:"auto",fontSize:20 }}>💬</span>
+                <span style={{ marginLeft:"auto",fontSize:20 }}>ð¬</span>
               </div>
 
               {/* Chat messages */}
               <div style={{ padding:16,maxHeight:480,overflowY:"auto",display:"flex",flexDirection:"column",gap:10, background:"url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjMEExNjI4Ii8+PC9zdmc+')" }}>
                 {convo.length === 0 && (
-                  <p style={{ color:DS.colors.textMuted,fontSize:13,textAlign:"center",padding:20 }}>No messages yet — lead just started</p>
+                  <p style={{ color:DS.colors.textMuted,fontSize:13,textAlign:"center",padding:20 }}>No messages yet â lead just started</p>
                 )}
                 {convo.map((msg, i) => (
                   <div key={i} style={{ display:"flex",justifyContent:msg.from==="bot"?"flex-start":"flex-end" }}>
@@ -9042,7 +9135,7 @@ const AdminWhatsApp = ({ showToast }) => {
               <h3 style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:15,marginBottom:16 }}>Lead Profile</h3>
               <div style={{ display:"flex",gap:8,marginBottom:14,flexWrap:"wrap" }}>
                 <span style={{ background:(stageColor[lead.stage]||DS.colors.textMuted)+"22",color:stageColor[lead.stage]||DS.colors.textMuted,border:`1px solid ${(stageColor[lead.stage]||DS.colors.textMuted)}44`,borderRadius:20,padding:"4px 12px",fontSize:12,fontWeight:700 }}>
-                  📍 Stage: {stageLabel[lead.stage]||lead.stage}
+                  ð Stage: {stageLabel[lead.stage]||lead.stage}
                 </span>
               </div>
               <div style={{ display:"grid",gap:8 }}>
@@ -9075,9 +9168,9 @@ const AdminWhatsApp = ({ showToast }) => {
 
             <div style={{ display:"flex",gap:8 }}>
               {lead.stage === "qualified" && (
-                <Btn onClick={() => { showToast(`${lead.name} routed to ${lender?.name || "Capital Micro Finance"}`); lead.status = "under_review"; }} style={{ flex:1 }}>✅ Route to Lender</Btn>
+                <Btn onClick={() => { showToast(`${lead.name} routed to ${lender?.name || "Capital Micro Finance"}`); lead.status = "under_review"; }} style={{ flex:1 }}>â Route to Lender</Btn>
               )}
-              <Btn variant="ghost" small onClick={() => showToast("Follow-up WhatsApp sent to " + lead.phone)}>📱 Send Follow-up</Btn>
+              <Btn variant="ghost" small onClick={() => showToast("Follow-up WhatsApp sent to " + lead.phone)}>ð± Send Follow-up</Btn>
             </div>
           </div>
         </div>
@@ -9089,7 +9182,7 @@ const AdminWhatsApp = ({ showToast }) => {
     <div className="fade-in">
       <PageHeader
         title="WhatsApp Leads"
-        subtitle="Borrowers who initiated via the WhatsApp bot — track and route to lenders"
+        subtitle="Borrowers who initiated via the WhatsApp bot â track and route to lenders"
         actions={
           <div style={{ display:"flex",gap:8,alignItems:"center" }}>
             {new_leads > 0 && (
@@ -9119,10 +9212,10 @@ const AdminWhatsApp = ({ showToast }) => {
 
       {/* How it works */}
       <div style={{ padding:"14px 18px",background:"#25D36618",border:"1px solid #25D36633",borderRadius:12,marginBottom:20,display:"flex",gap:16,alignItems:"center" }}>
-        <span style={{ fontSize:28,flexShrink:0 }}>💬</span>
+        <span style={{ fontSize:28,flexShrink:0 }}>ð¬</span>
         <div>
           <p style={{ fontWeight:700,color:"#25D366",fontSize:14,marginBottom:3 }}>How WhatsApp Intake Works</p>
-          <p style={{ fontSize:13,color:DS.colors.textSecondary,lineHeight:1.5 }}>Borrowers message the MicroLendNA WhatsApp number. The bot guides them through salary, expenses, and loan details in plain language — no app needed. Qualified leads are auto-scored and routed here for admin review and assignment to a lender.</p>
+          <p style={{ fontSize:13,color:DS.colors.textSecondary,lineHeight:1.5 }}>Borrowers message the MicroLendNA WhatsApp number. The bot guides them through salary, expenses, and loan details in plain language â no app needed. Qualified leads are auto-scored and routed here for admin review and assignment to a lender.</p>
         </div>
       </div>
 
@@ -9145,7 +9238,7 @@ const AdminWhatsApp = ({ showToast }) => {
                 <div style={{ flex:1,minWidth:0 }}>
                   <div style={{ display:"flex",gap:8,alignItems:"center",marginBottom:4,flexWrap:"wrap" }}>
                     <p style={{ fontWeight:700,fontSize:14 }}>{lead.name}</p>
-                    <span style={{ background:"#25D36622",color:"#25D366",border:"1px solid #25D36644",borderRadius:12,padding:"1px 8px",fontSize:11,fontWeight:700 }}>📱 WhatsApp</span>
+                    <span style={{ background:"#25D36622",color:"#25D366",border:"1px solid #25D36644",borderRadius:12,padding:"1px 8px",fontSize:11,fontWeight:700 }}>ð± WhatsApp</span>
                     <span style={{ background:stage_c+"22",color:stage_c,border:`1px solid ${stage_c}44`,borderRadius:12,padding:"1px 8px",fontSize:11,fontWeight:700 }}>{stageLabel[lead.stage]||lead.stage}</span>
                     {lead.tier && <TierBadge tier={lead.tier} />}
                   </div>
@@ -9161,8 +9254,8 @@ const AdminWhatsApp = ({ showToast }) => {
                 <div style={{ textAlign:"right",flexShrink:0 }}>
                   {lead.amount && <p style={{ fontFamily:"'DM Mono',monospace",fontWeight:700,color:DS.colors.accent,fontSize:16 }}>N${lead.amount.toLocaleString()}</p>}
                   {lead.purpose && <p style={{ fontSize:12,color:DS.colors.textMuted,marginTop:2 }}>{lead.purpose}</p>}
-                  {lender && <p style={{ fontSize:11,color:DS.colors.info,marginTop:4 }}>→ {lender.name}</p>}
-                  <Btn small variant="outline" onClick={e => { e.stopPropagation(); setSelected(lead.id); }} style={{ marginTop:8 }}>View Chat →</Btn>
+                  {lender && <p style={{ fontSize:11,color:DS.colors.info,marginTop:4 }}>â {lender.name}</p>}
+                  <Btn small variant="outline" onClick={e => { e.stopPropagation(); setSelected(lead.id); }} style={{ marginTop:8 }}>View Chat â</Btn>
                 </div>
               </div>
             </div>
@@ -9173,9 +9266,9 @@ const AdminWhatsApp = ({ showToast }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
-// ADMIN AGENTS — Field agent management
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+// ADMIN AGENTS â Field agent management
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const AdminAgents = ({ showToast }) => {
   const allBorrowers = AGENT_DB.borrowers;
 
@@ -9183,8 +9276,8 @@ const AdminAgents = ({ showToast }) => {
     <div className="fade-in">
       <PageHeader
         title="Field Agents"
-        subtitle="Manage the assisted intake agent network — track performance and captured borrowers"
-        actions={<Btn small onClick={() => showToast("Invite sent to new agent")} icon="➕">Invite Agent</Btn>}
+        subtitle="Manage the assisted intake agent network â track performance and captured borrowers"
+        actions={<Btn small onClick={() => showToast("Invite sent to new agent")} icon="â">Invite Agent</Btn>}
       />
 
       {/* Platform stats */}
@@ -9221,7 +9314,7 @@ const AdminAgents = ({ showToast }) => {
                       <p style={{ fontWeight:700,fontSize:16 }}>{agent.name}</p>
                       <Badge label="Active" color={DS.colors.accent} />
                     </div>
-                    <p style={{ fontSize:12,color:DS.colors.textMuted }}>{agent.region} · {agent.phone} · Joined {agent.joined}</p>
+                    <p style={{ fontSize:12,color:DS.colors.textMuted }}>{agent.region} Â· {agent.phone} Â· Joined {agent.joined}</p>
                   </div>
                   <div style={{ textAlign:"right" }}>
                     <p style={{ fontSize:11,color:DS.colors.textMuted }}>Commission this month</p>
@@ -9255,8 +9348,8 @@ const AdminAgents = ({ showToast }) => {
                 )}
 
                 <div style={{ marginTop:14,display:"flex",gap:8 }}>
-                  <Btn small variant="ghost" onClick={() => showToast("Reset link sent to " + agent.name)}>🔑 Reset Password</Btn>
-                  <Btn small variant="ghost" onClick={() => showToast("Region updated")}>✏️ Edit Region</Btn>
+                  <Btn small variant="ghost" onClick={() => showToast("Reset link sent to " + agent.name)}>ð Reset Password</Btn>
+                  <Btn small variant="ghost" onClick={() => showToast("Region updated")}>âï¸ Edit Region</Btn>
                   <Btn small variant="danger" onClick={() => showToast(agent.name + " deactivated","error")}>Deactivate</Btn>
                 </div>
               </div>
@@ -9283,12 +9376,12 @@ const AdminAgents = ({ showToast }) => {
               return(
                 <tr key={b.id} style={{borderTop:`1px solid ${DS.colors.border}`,background:i%2===1?DS.colors.surfaceAlt:"transparent"}}>
                   <td style={{padding:"12px 14px",fontWeight:600}}>{b.name}</td>
-                  <td style={{padding:"12px 14px",fontSize:12,color:"#A78BFA"}}>{ag?.name||"—"}</td>
+                  <td style={{padding:"12px 14px",fontSize:12,color:"#A78BFA"}}>{ag?.name||"â"}</td>
                   <td style={{padding:"12px 14px",fontSize:12,color:DS.colors.textMuted}}>{b.employer}</td>
                   <td style={{padding:"12px 14px"}}><TierBadge tier={b.tier}/></td>
                   <td style={{padding:"12px 14px",fontFamily:"'DM Mono',monospace",color:DS.colors.accent}}>N${b.amount.toLocaleString()}</td>
                   <td style={{padding:"12px 14px"}}><span style={{fontSize:11,fontWeight:700,padding:"2px 10px",borderRadius:20,background:sCol+"22",color:sCol,textTransform:"capitalize"}}>{b.status}</span></td>
-                  <td style={{padding:"12px 14px"}}><span style={{background:"#A78BFA22",color:"#A78BFA",border:"1px solid #A78BFA44",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700}}>🧑‍💼 Agent</span></td>
+                  <td style={{padding:"12px 14px"}}><span style={{background:"#A78BFA22",color:"#A78BFA",border:"1px solid #A78BFA44",borderRadius:10,padding:"2px 8px",fontSize:11,fontWeight:700}}>ð§âð¼ Agent</span></td>
                   <td style={{padding:"12px 14px",fontSize:12,color:DS.colors.textMuted}}>{b.capturedAt}</td>
                 </tr>
               );
@@ -9301,7 +9394,7 @@ const AdminAgents = ({ showToast }) => {
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // AUTH VIEWS
 const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, role, setRole, loading, onSubmit, lenderExtra, setLenderExtra }) => {
   // Lender extra fields kept for compatibility but moved to profile edit after login
@@ -9322,8 +9415,8 @@ const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, r
     <>
       <Select label="Account Type" value={role} onChange={setRole}
         options={[
-          { value: "borrower", label: "Borrower — Apply for a loan" },
-          { value: "lender",   label: "Lender — Partner institution" },
+          { value: "borrower", label: "Borrower â Apply for a loan" },
+          { value: "lender",   label: "Lender â Partner institution" },
         ]} />
 
       <Input label="Full Name" value={name} onChange={setName}
@@ -9333,7 +9426,7 @@ const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, r
 
       {role === "lender" && (
         <div style={{ padding: "10px 14px", background: DS.colors.goldDim, border: "1px solid " + DS.colors.gold + "44", borderRadius: 10, marginBottom: 14, fontSize: 13, color: DS.colors.gold, lineHeight: 1.5 }}>
-          ⚠ After registering, complete your company profile (NAMFISA licence, BIPA registration, director details & documents) from <strong>Settings & Billing</strong> in your portal. Your account is pending admin approval.
+          â  After registering, complete your company profile (NAMFISA licence, BIPA registration, director details & documents) from <strong>Settings & Billing</strong> in your portal. Your account is pending admin approval.
         </div>
       )}
 
@@ -9354,7 +9447,7 @@ const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, r
               <div style={{ width: 18, height: 18, borderRadius: 5, flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center",
                 background: regConsent[item.key] ? DS.colors.accent : "transparent",
                 border: "2px solid " + (regConsent[item.key] ? DS.colors.accent : DS.colors.border) }}>
-                {regConsent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 11, fontWeight: 900 }}>✓</span>}
+                {regConsent[item.key] && <span style={{ color: "#0A0F1E", fontSize: 11, fontWeight: 900 }}>â</span>}
               </div>
               <div>
                 <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 2 }}>{item.label}</p>
@@ -9374,7 +9467,7 @@ const RegisterForm = ({ name, setName, email, setEmail, password, setPassword, r
 };
 
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
   const [tab, setTab] = useState(prefilledRole ? "register" : "login");
@@ -9433,7 +9526,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
       var uid = data.user && data.user.id;
 
       if (uid) {
-        // ── Insert into profiles table (required for role-based login) ──
+        // ââ Insert into profiles table (required for role-based login) ââ
         try {
           await SB.upsert("profiles", {
             id: uid,
@@ -9443,7 +9536,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
           });
         } catch(pe) { console.log("profiles insert:", pe.message); }
 
-        // ── If lender, also insert into lender_profiles (pending_review) ──
+        // ââ If lender, also insert into lender_profiles (pending_review) ââ
         if (role === "lender") {
           try {
             await SB.upsert("lender_profiles", {
@@ -9475,7 +9568,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
           } catch(lpe) { console.log("lender_profiles insert:", lpe.message); }
         }
 
-        // ── If borrower and auto-logged in, proceed to portal ──
+        // ââ If borrower and auto-logged in, proceed to portal ââ
         if (data.access_token) {
           var userObj = { id: uid, email: email, name: name, role: role, twoFAEnabled: false };
           if (role === "borrower") {
@@ -9483,7 +9576,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
             onLogin(userObj);
             return;
           } else {
-            // Lender registered — send to login with success message
+            // Lender registered â send to login with success message
             setLoading(false);
             setTab("login"); setEmail(""); setPassword(""); setName("");
             setError("Account created! Your account is pending admin approval. You will be notified once approved.");
@@ -9517,11 +9610,11 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
       <div style={{ width: "100%", maxWidth: 420 }} className="fade-in">
         {onBack && (
           <button onClick={onBack} style={{ background: "none", border: "none", color: DS.colors.textMuted, fontSize: 13, cursor: "pointer", marginBottom: 20, display: "flex", alignItems: "center", gap: 6 }}>
-            ← Back to Home
+            â Back to Home
           </button>
         )}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>₦</div>
+          <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>â¦</div>
           <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 32, fontWeight: 800, letterSpacing: "-0.03em" }}>
             MicroLend<span style={{ color: DS.colors.accent }}>NA</span>
           </h1>
@@ -9550,10 +9643,10 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
               </div>
               <div style={{ marginBottom: 16 }}>
                 <label style={{ display: "block", fontSize: 13, color: DS.colors.textSecondary, marginBottom: 6, fontWeight: 500 }}>Password</label>
-                <input id="pw-input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === "Enter" && handleLogin()} autoComplete="current-password" />
+                <input id="pw-input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" onKeyDown={e => e.key === "Enter" && handleLogin()} autoComplete="current-password" />
               </div>
               <div style={{ padding: 12, background: DS.colors.infoDim, borderRadius: 8, marginBottom: 16, fontSize: 12, color: DS.colors.info }}>
-                ℹ Use your registered email and password to sign in. Contact admin if you need access.
+                â¹ Use your registered email and password to sign in. Contact admin if you need access.
               </div>
               <Btn style={{ width: "100%" }} onClick={handleLogin} disabled={loading}>
                 {loading ? "Signing in..." : "Sign In"}
@@ -9564,7 +9657,7 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
           {tab === "login" && step === 2 && (
             <>
               <div style={{ textAlign: "center", marginBottom: 20 }}>
-                <span style={{ fontSize: 40 }}>📱</span>
+                <span style={{ fontSize: 40 }}>ð±</span>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, marginTop: 8 }}>Two-Factor Authentication</h3>
                 <p style={{ color: DS.colors.textSecondary, fontSize: 13, marginTop: 4 }}>Enter the 6-digit code sent to your phone/email</p>
               </div>
@@ -9590,16 +9683,16 @@ const LoginPage = ({ onLogin, prefilledRole, onBack }) => {
         </Card>
 
         <p style={{ textAlign: "center", fontSize: 12, color: DS.colors.textMuted, marginTop: 20 }}>
-          🇳🇦 Regulated by NAMFISA · FIA 2012 Compliant · AES-256 Secured
+          ð³ð¦ Regulated by NAMFISA Â· FIA 2012 Compliant Â· AES-256 Secured
         </p>
       </div>
     </div>
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // HOMEPAGE
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
 const Homepage = ({ onGetStarted, onLogin }) => {
   const [activeTab, setActiveTab] = useState("borrower");
@@ -9633,48 +9726,48 @@ const Homepage = ({ onGetStarted, onLogin }) => {
   ];
 
   const borrowerSteps = [
-    { icon: "👤", step: "01", title: "Create Your Profile", desc: "Register in minutes. Enter your personal and financial details — salary, expenses, employer info. Our system immediately calculates your debt-to-income ratio." },
-    { icon: "📁", step: "02", title: "Upload Documents", desc: "Securely upload your Namibian ID, latest payslip, and 3-month bank statement. All files are encrypted with AES-256 and stored per FIA 2012 compliance." },
-    { icon: "⚙️", step: "03", title: "Get Risk-Scored Instantly", desc: "Our automated risk engine evaluates your profile against DTI thresholds and assigns you a credit tier (A–D). First-time borrowers are handled with transparent, fair criteria." },
-    { icon: "🏦", step: "04", title: "Matched to a Lender", desc: "Approved applications are automatically routed to the best-fit partner microlender based on your tier, loan amount, and purpose. No searching, no cold calls." },
-    { icon: "💸", step: "05", title: "Receive Your Funds", desc: "Your matched lender reviews your profile, contacts you within 24 hours, and disburses directly to your bank account." },
+    { icon: "ð¤", step: "01", title: "Create Your Profile", desc: "Register in minutes. Enter your personal and financial details â salary, expenses, employer info. Our system immediately calculates your debt-to-income ratio." },
+    { icon: "ð", step: "02", title: "Upload Documents", desc: "Securely upload your Namibian ID, latest payslip, and 3-month bank statement. All files are encrypted with AES-256 and stored per FIA 2012 compliance." },
+    { icon: "âï¸", step: "03", title: "Get Risk-Scored Instantly", desc: "Our automated risk engine evaluates your profile against DTI thresholds and assigns you a credit tier (AâD). First-time borrowers are handled with transparent, fair criteria." },
+    { icon: "ð¦", step: "04", title: "Matched to a Lender", desc: "Approved applications are automatically routed to the best-fit partner microlender based on your tier, loan amount, and purpose. No searching, no cold calls." },
+    { icon: "ð¸", step: "05", title: "Receive Your Funds", desc: "Your matched lender reviews your profile, contacts you within 24 hours, and disburses directly to your bank account." },
   ];
 
   const lenderSteps = [
-    { icon: "🔑", step: "01", title: "Choose Your Plan", desc: "Pick between Pay-As-You-Go (N$125 per approved lead) or Monthly Subscription (N$2,500/month for unlimited leads). No lock-in on PAYG." },
-    { icon: "📊", step: "02", title: "Access Pre-Screened Leads", desc: "Every borrower routed to you has already passed KYC verification, AML screening, and risk tiering. You receive only qualified, document-complete applications." },
-    { icon: "🗂️", step: "03", title: "Review Full Profiles", desc: "Your dashboard shows DTI ratios, employer details, salary data, tier classification, and all uploaded documents — everything needed to make a lending decision." },
-    { icon: "✅", step: "04", title: "Approve & Disburse", desc: "Approve or decline with one click. Contact borrowers directly. All decisions and communications are logged for compliance and audit purposes." },
+    { icon: "ð", step: "01", title: "Choose Your Plan", desc: "Pick between Pay-As-You-Go (N$125 per approved lead) or Monthly Subscription (N$2,500/month for unlimited leads). No lock-in on PAYG." },
+    { icon: "ð", step: "02", title: "Access Pre-Screened Leads", desc: "Every borrower routed to you has already passed KYC verification, AML screening, and risk tiering. You receive only qualified, document-complete applications." },
+    { icon: "ðï¸", step: "03", title: "Review Full Profiles", desc: "Your dashboard shows DTI ratios, employer details, salary data, tier classification, and all uploaded documents â everything needed to make a lending decision." },
+    { icon: "â", step: "04", title: "Approve & Disburse", desc: "Approve or decline with one click. Contact borrowers directly. All decisions and communications are logged for compliance and audit purposes." },
   ];
 
   const borrowerBenefits = [
-    { icon: "⚡", title: "Instant Pre-Assessment", desc: "See your credit tier and maximum loan amount before even submitting — no surprises, no guesswork." },
-    { icon: "🔐", title: "Bank-Grade Security", desc: "AES-256 encryption on all documents. NAMFISA-compliant identity verification. Your data never sold." },
-    { icon: "🤝", title: "Multiple Lender Options", desc: "One application reaches multiple partner lenders. You get the best match, not just whoever picks up the phone." },
-    { icon: "📱", title: "Fully Mobile-Friendly", desc: "Apply from your phone in under 10 minutes. Upload documents from your camera roll. Check status anytime." },
-    { icon: "🧮", title: "Transparent Pricing", desc: "See your interest rate, monthly repayment, and total cost before you accept. No hidden fees." },
-    { icon: "🇳🇦", title: "Built for Namibia", desc: "Designed around NAMFISA regulations, local salary ranges, and Namibian employment realities — not a foreign product." },
+    { icon: "â¡", title: "Instant Pre-Assessment", desc: "See your credit tier and maximum loan amount before even submitting â no surprises, no guesswork." },
+    { icon: "ð", title: "Bank-Grade Security", desc: "AES-256 encryption on all documents. NAMFISA-compliant identity verification. Your data never sold." },
+    { icon: "ð¤", title: "Multiple Lender Options", desc: "One application reaches multiple partner lenders. You get the best match, not just whoever picks up the phone." },
+    { icon: "ð±", title: "Fully Mobile-Friendly", desc: "Apply from your phone in under 10 minutes. Upload documents from your camera roll. Check status anytime." },
+    { icon: "ð§®", title: "Transparent Pricing", desc: "See your interest rate, monthly repayment, and total cost before you accept. No hidden fees." },
+    { icon: "ð³ð¦", title: "Built for Namibia", desc: "Designed around NAMFISA regulations, local salary ranges, and Namibian employment realities â not a foreign product." },
   ];
 
   const lenderBenefits = [
-    { icon: "🎯", title: "Pre-Qualified Leads Only", desc: "Stop sifting through bad applications. Every lead has passed KYC, AML, and automated credit scoring before reaching you." },
-    { icon: "📉", title: "Lower Default Risk", desc: "DTI-based tier scoring means you see risk before committing. Tier A borrowers historically show < 4% default rates." },
-    { icon: "⚙️", title: "Compliance Built-In", desc: "FIA 2012 AML checks, NAMFISA KYC verification, and document storage are all handled for you by the platform." },
-    { icon: "📈", title: "Scale Your Portfolio", desc: "Subscription plan removes per-lead costs entirely. The more you lend, the better your unit economics." },
-    { icon: "🔌", title: "API Integration Ready", desc: "Connect MicroLendNA to your existing loan management system via REST API. Automate approvals, sync data." },
-    { icon: "📋", title: "Full Audit Trail", desc: "Every application, document upload, and decision is timestamped and logged. Regulator-ready reporting at any time." },
+    { icon: "ð¯", title: "Pre-Qualified Leads Only", desc: "Stop sifting through bad applications. Every lead has passed KYC, AML, and automated credit scoring before reaching you." },
+    { icon: "ð", title: "Lower Default Risk", desc: "DTI-based tier scoring means you see risk before committing. Tier A borrowers historically show < 4% default rates." },
+    { icon: "âï¸", title: "Compliance Built-In", desc: "FIA 2012 AML checks, NAMFISA KYC verification, and document storage are all handled for you by the platform." },
+    { icon: "ð", title: "Scale Your Portfolio", desc: "Subscription plan removes per-lead costs entirely. The more you lend, the better your unit economics." },
+    { icon: "ð", title: "API Integration Ready", desc: "Connect MicroLendNA to your existing loan management system via REST API. Automate approvals, sync data." },
+    { icon: "ð", title: "Full Audit Trail", desc: "Every application, document upload, and decision is timestamped and logged. Regulator-ready reporting at any time." },
   ];
 
   const plans = [
     {
       name: "Pay-As-You-Go", price: "N$125", per: "per approved lead",
-      color: DS.colors.info, icon: "🪙",
+      color: DS.colors.info, icon: "ðª",
       features: ["No monthly commitment","Full borrower profiles","Document access","Risk tier reports","KYC/AML pre-screened","Email support"],
       cta: "Start Free",
     },
     {
       name: "Monthly Subscription", price: "N$2,500", per: "per month excl. VAT",
-      color: DS.colors.gold, icon: "⭐", badge: "Most Popular",
+      color: DS.colors.gold, icon: "â­", badge: "Most Popular",
       features: ["Unlimited leads","Priority lead routing","Advanced analytics","REST API access","Dedicated account manager","Compliance reports","Custom risk filters","24/7 support"],
       cta: "Get Started",
     },
@@ -9682,7 +9775,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
 
   const faqs = [
     { q: "Is MicroLendNA regulated?", a: "Yes. We operate in compliance with the Namibia Financial Institutions Supervisory Authority (NAMFISA) guidelines and the Financial Intelligence Act (FIA) 2012 for AML/KYC." },
-    { q: "How is my credit tier calculated?", a: "Your tier (A–D) is based on your Debt-to-Income ratio, monthly salary, existing obligations, and whether you're a first-time borrower. First-time applicants have a 15% DTI buffer applied as a conservative measure — this is reduced on repeat applications." },
+    { q: "How is my credit tier calculated?", a: "Your tier (AâD) is based on your Debt-to-Income ratio, monthly salary, existing obligations, and whether you're a first-time borrower. First-time applicants have a 15% DTI buffer applied as a conservative measure â this is reduced on repeat applications." },
     { q: "Can I apply if I'm self-employed?", a: "Yes. Self-employed applicants can upload 3 months of bank statements and a business registration certificate in lieu of a payslip. Your income will be averaged over the period." },
     { q: "As a lender, how quickly do I receive applications?", a: "Leads are routed in real-time as soon as borrowers are approved by the risk engine. Subscription plan lenders receive priority routing within seconds of application completion." },
     { q: "What documents are required?", a: "Borrowers must provide a valid Namibian ID or passport, most recent payslip (within 3 months), and 3-month official bank statement. Proof of address and an employment letter are recommended but not mandatory for initial assessment." },
@@ -9700,7 +9793,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
   return (
     <div style={{ background: "#f7f9fc", minHeight: "100vh", overflowX: "hidden" }}>
 
-      {/* ── NAV ── */}
+      {/* ââ NAV ââ */}
       <nav ref={navRef} style={{
         position: "fixed", top: 0, left: 0, right: 0, zIndex: 200,
         background: scrolled ? "rgba(255,255,255,.97)" : "transparent",
@@ -9712,7 +9805,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         <div style={{ maxWidth: 1160, margin: "0 auto", padding: "0 24px", height: 68, display: "flex", alignItems: "center", gap: 32 }}>
           {/* Logo */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0, cursor: "pointer" }} onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>₦</div>
+            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>â¦</div>
             <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 19, letterSpacing: "-0.02em" }}>
               MicroLend<span style={{ color: C.accent }}>NA</span>
             </span>
@@ -9755,7 +9848,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </nav>
 
-      {/* ── HERO ── */}
+      {/* ââ HERO ââ */}
       <section id="hero" style={{ minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "120px 5% 80px", position: "relative", overflow: "hidden" }}>
         {/* Background glow */}
         <div style={{ position: "absolute", top: "20%", left: "50%", transform: "translateX(-50%)", width: 800, height: 800, background: `radial-gradient(ellipse, ${C.accent}10 0%, transparent 70%)`, pointerEvents: "none" }}/>
@@ -9765,7 +9858,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
           {/* Eyebrow badge */}
           <div className="fade-up" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: C.accentDim, border: `1px solid ${C.accent}33`, borderRadius: 100, padding: "6px 18px", marginBottom: 32 }}>
             <span style={{ width: 7, height: 7, background: C.accent, borderRadius: "50%", display: "inline-block", animation: "pulse 2s ease-in-out infinite" }} />
-            <span style={{ fontSize: 13, color: C.accent, fontWeight: 600, letterSpacing: "0.04em" }}>🇳🇦 Built for Namibia · NAMFISA Compliant</span>
+            <span style={{ fontSize: 13, color: C.accent, fontWeight: 600, letterSpacing: "0.04em" }}>ð³ð¦ Built for Namibia Â· NAMFISA Compliant</span>
           </div>
 
           {/* Headline */}
@@ -9779,7 +9872,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
 
           {/* Sub */}
           <p className="fade-up delay-2" style={{ fontSize: "clamp(16px,2vw,20px)", color: C.textSecondary, lineHeight: 1.65, maxWidth: 620, margin: "0 auto 44px", fontWeight: 300 }}>
-            Connecting creditworthy borrowers with verified partner lenders — powered by automated KYC, AML screening, and a transparent DTI-based risk engine.
+            Connecting creditworthy borrowers with verified partner lenders â powered by automated KYC, AML screening, and a transparent DTI-based risk engine.
           </p>
 
           {/* CTAs */}
@@ -9791,14 +9884,14 @@ const Homepage = ({ onGetStarted, onLogin }) => {
             }}
               onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 48px ${C.accent}66`; }}
               onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; e.currentTarget.style.boxShadow = `0 0 48px ${C.accent}44`; }}
-            >Apply for a Loan →</button>
+            >Apply for a Loan â</button>
             <button onClick={() => onGetStarted("lender")} style={{
               background: "transparent", color: C.textPrimary, padding: "15px 36px", borderRadius: 12,
               fontSize: 15, fontWeight: 600, border: `1px solid ${C.borderLight}`, cursor: "pointer", transition: "all .22s",
             }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = C.accent; e.currentTarget.style.background = C.accentDim; e.currentTarget.style.color = C.accent; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = C.borderLight; e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = C.textPrimary; }}
-            >I'm a Lender →</button>
+            >I'm a Lender â</button>
           </div>
 
           {/* Stats bar */}
@@ -9813,18 +9906,18 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── COMPLIANCE TICKER ── */}
+      {/* ââ COMPLIANCE TICKER ââ */}
       <div style={{ background: C.accentDim, borderTop: `1px solid ${C.accent}22`, borderBottom: `1px solid ${C.accent}22`, padding: "11px 0", overflow: "hidden" }}>
         <div className="ticker-inner" style={{ gap: 64 }}>
           {[...Array(2)].map((_, r) =>
-            ["🔐 AES-256 Encryption", "🇳🇦 NAMFISA Regulated", "📋 FIA 2012 AML Compliant", "✅ KYC Verified Borrowers", "⚡ 24h Decision Time", "🏦 PAYG & Subscription Plans", "🔒 TLS 1.3 Data Transit", "📱 Mobile-First Design", "🤝 Trusted by Lenders"].map((item, i) => (
+            ["ð AES-256 Encryption", "ð³ð¦ NAMFISA Regulated", "ð FIA 2012 AML Compliant", "â KYC Verified Borrowers", "â¡ 24h Decision Time", "ð¦ PAYG & Subscription Plans", "ð TLS 1.3 Data Transit", "ð± Mobile-First Design", "ð¤ Trusted by Lenders"].map((item, i) => (
               <span key={`${r}-${i}`} style={{ fontSize: 13, color: C.accent, fontWeight: 600, marginRight: 64, whiteSpace: "nowrap" }}>{item}</span>
             ))
           )}
         </div>
       </div>
 
-      {/* ── HOW IT WORKS ── */}
+      {/* ââ HOW IT WORKS ââ */}
       <section id="how-it-works" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
@@ -9836,7 +9929,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
           {/* Tab switcher */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 52 }}>
             <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, padding: 5, display: "flex", gap: 4 }}>
-              {[{ key: "borrower", label: "👤 For Borrowers" }, { key: "lender", label: "🏦 For Lenders" }].map(t => (
+              {[{ key: "borrower", label: "ð¤ For Borrowers" }, { key: "lender", label: "ð¦ For Lenders" }].map(t => (
                 <button key={t.key} onClick={() => setActiveTab(t.key)} style={{
                   padding: "10px 28px", borderRadius: 10, border: "none", fontSize: 14, fontWeight: 600, cursor: "pointer",
                   background: activeTab === t.key ? C.accent : "transparent",
@@ -9876,12 +9969,12 @@ const Homepage = ({ onGetStarted, onLogin }) => {
             }}
               onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; }}
               onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; }}
-            >{activeTab === "borrower" ? "Start My Application →" : "Join as a Lender →"}</button>
+            >{activeTab === "borrower" ? "Start My Application â" : "Join as a Lender â"}</button>
           </div>
         </div>
       </section>
 
-      {/* ── BENEFITS ── */}
+      {/* ââ BENEFITS ââ */}
       <section id="benefits" style={{ padding: "100px 5%", background: `linear-gradient(180deg, transparent, ${C.surface} 15%, ${C.surface} 85%, transparent)` }}>
         <div style={{ maxWidth: 1100, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 60 }}>
@@ -9893,7 +9986,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
             {/* Borrower benefits */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 16px", background: C.accentDim, border: `1px solid ${C.accent}33`, borderRadius: 12 }}>
-                <span style={{ fontSize: 20 }}>👤</span>
+                <span style={{ fontSize: 20 }}>ð¤</span>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: C.accent }}>For Borrowers</h3>
               </div>
               <div style={{ display: "grid", gap: 10 }}>
@@ -9917,14 +10010,14 @@ const Homepage = ({ onGetStarted, onLogin }) => {
                 }}
                   onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; }}
                   onMouseLeave={e => { e.currentTarget.style.background = C.accent; }}
-                >Apply Now — Free</button>
+                >Apply Now â Free</button>
               </div>
             </div>
 
             {/* Lender benefits */}
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20, padding: "10px 16px", background: `${C.gold}18`, border: `1px solid ${C.gold}33`, borderRadius: 12 }}>
-                <span style={{ fontSize: 20 }}>🏦</span>
+                <span style={{ fontSize: 20 }}>ð¦</span>
                 <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: C.gold }}>For Lenders</h3>
               </div>
               <div style={{ display: "grid", gap: 10 }}>
@@ -9948,7 +10041,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
                 }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = ".88"; }}
                   onMouseLeave={e => { e.currentTarget.style.opacity = "1"; }}
-                >Become a Partner Lender →</button>
+                >Become a Partner Lender â</button>
               </div>
             </div>
           </div>
@@ -9957,14 +10050,14 @@ const Homepage = ({ onGetStarted, onLogin }) => {
           <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 20, padding: "36px 40px" }}>
             <div style={{ textAlign: "center", marginBottom: 32 }}>
               <p style={{ fontSize: 12, color: C.accent, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Risk Engine</p>
-              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 10 }}>Transparent Credit Tiering — No Black Boxes</h3>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: 24, fontWeight: 800, marginBottom: 10 }}>Transparent Credit Tiering â No Black Boxes</h3>
               <p style={{ color: C.textSecondary, fontSize: 14, maxWidth: 540, margin: "0 auto" }}>Our DTI-based engine scores every applicant the same way, regardless of background. Here's exactly how tiers are assigned.</p>
             </div>
             <div className="hp-tiers-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 16 }}>
               {[
-                { tier: "A", color: C.tierA, dtl: "DTI ≤ 25%", max: "3× disposable", rate: "18% p.a.", desc: "Excellent profile. Low risk. Largest loan available.", label: "Low Risk" },
-                { tier: "B", color: C.tierB, dtl: "DTI ≤ 40%", max: "2× disposable", rate: "24% p.a.", desc: "Good profile. Standard terms. Widely approved.", label: "Moderate Risk" },
-                { tier: "C", color: C.tierC, dtl: "DTI ≤ 55%", max: "1× disposable", rate: "30% p.a.", desc: "Higher obligations. Conservative loan sizing.", label: "Elevated Risk" },
+                { tier: "A", color: C.tierA, dtl: "DTI â¤ 25%", max: "3Ã disposable", rate: "18% p.a.", desc: "Excellent profile. Low risk. Largest loan available.", label: "Low Risk" },
+                { tier: "B", color: C.tierB, dtl: "DTI â¤ 40%", max: "2Ã disposable", rate: "24% p.a.", desc: "Good profile. Standard terms. Widely approved.", label: "Moderate Risk" },
+                { tier: "C", color: C.tierC, dtl: "DTI â¤ 55%", max: "1Ã disposable", rate: "30% p.a.", desc: "Higher obligations. Conservative loan sizing.", label: "Elevated Risk" },
                 { tier: "D", color: C.tierD, dtl: "DTI > 55%", max: "Not eligible", rate: "N/A", desc: "Advised to reduce obligations before re-applying.", label: "Decline" },
               ].map(item => (
                 <div key={item.tier} style={{ padding: 20, background: item.color + "0D", border: `1px solid ${item.color}33`, borderRadius: 14, textAlign: "center", transition: "transform .2s, box-shadow .2s" }}
@@ -9986,7 +10079,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── PRICING ── */}
+      {/* ââ PRICING ââ */}
       <section id="pricing" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 820, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 56 }}>
@@ -10017,7 +10110,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
                 <ul style={{ listStyle: "none", marginBottom: 28 }}>
                   {(plan.features||[]).map((f, j) => (
                     <li key={j} style={{ display: "flex", gap: 9, alignItems: "center", fontSize: 14, color: C.textSecondary, marginBottom: 10 }}>
-                      <span style={{ color: plan.color, fontWeight: 700, flexShrink: 0 }}>✓</span>{f}
+                      <span style={{ color: plan.color, fontWeight: 700, flexShrink: 0 }}>â</span>{f}
                     </li>
                   ))}
                 </ul>
@@ -10031,7 +10124,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
                 }}
                   onMouseEnter={e => { e.currentTarget.style.opacity = ".85"; e.currentTarget.style.transform = "translateY(-1px)"; }}
                   onMouseLeave={e => { e.currentTarget.style.opacity = "1"; e.currentTarget.style.transform = "none"; }}
-                >{plan.cta} →</button>
+                >{plan.cta} â</button>
               </div>
             ))}
           </div>
@@ -10041,15 +10134,15 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── COMPLIANCE BANNER ── */}
+      {/* ââ COMPLIANCE BANNER ââ */}
       <section style={{ padding: "60px 5%", background: C.surface, borderTop: `1px solid ${C.border}`, borderBottom: `1px solid ${C.border}` }}>
         <div style={{ maxWidth: 1000, margin: "0 auto" }}>
           <div className="hp-compliance-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 32 }}>
             {[
-              { icon: "🏛️", title: "NAMFISA Compliant", desc: "Fully aligned with the Namibia Financial Institutions Supervisory Authority requirements." },
-              { icon: "🛡️", title: "FIA 2012 AML", desc: "Anti-money laundering screening on every borrower per the Financial Intelligence Act." },
-              { icon: "🔐", title: "KYC Verified", desc: "Identity verification on every application. Documents checked for authenticity." },
-              { icon: "🔒", title: "Bank-Grade Security", desc: "AES-256 encryption, TLS 1.3 transit, zero third-party data sharing without consent." },
+              { icon: "ðï¸", title: "NAMFISA Compliant", desc: "Fully aligned with the Namibia Financial Institutions Supervisory Authority requirements." },
+              { icon: "ð¡ï¸", title: "FIA 2012 AML", desc: "Anti-money laundering screening on every borrower per the Financial Intelligence Act." },
+              { icon: "ð", title: "KYC Verified", desc: "Identity verification on every application. Documents checked for authenticity." },
+              { icon: "ð", title: "Bank-Grade Security", desc: "AES-256 encryption, TLS 1.3 transit, zero third-party data sharing without consent." },
             ].map((item, i) => (
               <div key={i} style={{ textAlign: "center" }}>
                 <div style={{ width: 52, height: 52, background: C.accentDim, border: `1px solid ${C.accent}22`, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, margin: "0 auto 14px" }}>{item.icon}</div>
@@ -10061,7 +10154,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── FAQ ── */}
+      {/* ââ FAQ ââ */}
       <section id="faq" style={{ padding: "100px 5%" }}>
         <div style={{ maxWidth: 720, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 52 }}>
@@ -10090,7 +10183,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── CTA FOOTER ── */}
+      {/* ââ CTA FOOTER ââ */}
       <section style={{ padding: "80px 5%", textAlign: "center", borderTop: `1px solid ${C.border}`, background: `radial-gradient(ellipse 80% 60% at 50% 50%, ${C.accent}12 0%, transparent 70%)` }}>
         <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontSize: "clamp(28px,4vw,52px)", fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 16 }}>
           Ready to get started?
@@ -10106,7 +10199,7 @@ const Homepage = ({ onGetStarted, onLogin }) => {
           }}
             onMouseEnter={e => { e.currentTarget.style.background = "#00E5AD"; e.currentTarget.style.transform = "translateY(-2px)"; }}
             onMouseLeave={e => { e.currentTarget.style.background = C.accent; e.currentTarget.style.transform = "none"; }}
-          >Apply for a Loan — Free</button>
+          >Apply for a Loan â Free</button>
           <button onClick={() => onGetStarted("lender")} style={{
             background: C.gold, color: "#0A0F1E", padding: "15px 44px", borderRadius: 12,
             fontSize: 16, fontWeight: 700, border: "none", cursor: "pointer",
@@ -10118,15 +10211,15 @@ const Homepage = ({ onGetStarted, onLogin }) => {
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
+      {/* ââ FOOTER ââ */}
       <footer style={{ background: C.surface, borderTop: `1px solid ${C.border}`, padding: "40px 5%" }}>
         <div className="hp-footer-row" style={{ maxWidth: 1100, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>₦</div>
+            <div style={{ width: 34, height: 34, background: C.accent, borderRadius: 9, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18, color: "#0A0F1E" }}>â¦</div>
             <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 800, fontSize: 18 }}>MicroLend<span style={{ color: C.accent }}>NA</span></span>
           </div>
           <p style={{ fontSize: 12, color: C.textMuted, textAlign: "center" }}>
-            © 2025 MicroLendNA · Regulated by NAMFISA · FIA 2012 Compliant · Windhoek, Namibia
+            Â© 2025 MicroLendNA Â· Regulated by NAMFISA Â· FIA 2012 Compliant Â· Windhoek, Namibia
           </p>
           <div style={{ display: "flex", gap: 20 }}>
             {["Privacy Policy", "Terms of Service", "Contact"].map(l => (
@@ -10142,11 +10235,11 @@ const Homepage = ({ onGetStarted, onLogin }) => {
   );
 };
 
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 // MAIN APP
-// ══════════════════════════════════════════════════════════════════════════════
+// ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 
-// ── CONFIRM DIALOG ────────────────────────────────────────────────────────────
+// ââ CONFIRM DIALOG ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, danger = false }) => {
   if (!open) return null;
   return (
@@ -10163,7 +10256,7 @@ const ConfirmDialog = ({ open, title, message, onConfirm, onCancel, danger = fal
   );
 };
 
-// ── PAGE HEADER COMPONENT ──────────────────────────────────────────────────────
+// ââ PAGE HEADER COMPONENT ââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const PageHeader = ({ title, subtitle, actions, badge }) => (
   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28 }}>
     <div>
@@ -10177,7 +10270,7 @@ const PageHeader = ({ title, subtitle, actions, badge }) => (
   </div>
 );
 
-// ── EMPTY STATE ────────────────────────────────────────────────────────────────
+// ââ EMPTY STATE ââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const EmptyState = ({ icon, title, message, action, actionLabel }) => (
   <Card style={{ textAlign: "center", padding: "48px 32px" }}>
     <div style={{ fontSize: 52, marginBottom: 16, opacity: .7 }}>{icon}</div>
@@ -10187,7 +10280,7 @@ const EmptyState = ({ icon, title, message, action, actionLabel }) => (
   </Card>
 );
 
-// ── TIME AGO HELPER ───────────────────────────────────────────────────────────
+// ââ TIME AGO HELPER âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 function timeAgo(dateStr) {
   try {
     var now = Date.now();
@@ -10198,10 +10291,10 @@ function timeAgo(dateStr) {
     if (diff < 86400) return Math.floor(diff / 3600) + "h ago";
     if (diff < 604800) return Math.floor(diff / 86400) + "d ago";
     return new Date(dateStr).toLocaleDateString();
-  } catch(e) { return "—"; }
+  } catch(e) { return "â"; }
 }
 
-// ── LOADING SKELETON ───────────────────────────────────────────────────────────
+// ââ LOADING SKELETON âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const Skeleton = ({ height = 40, width = "100%", radius = 8, style = {} }) => (
   <div className="shimmer" style={{ height, width, borderRadius: radius, ...style }} />
 );
@@ -10224,7 +10317,7 @@ export default function App() {
     var token = null;
     try { token = window.sessionStorage.getItem("mlna_token"); } catch(e) {}
     if (!token) { setSessionRestored(true); return; }
-    // We have a token — try to fetch the user profile
+    // We have a token â try to fetch the user profile
     (async function() {
       try {
         var savedProfile = null;
@@ -10294,7 +10387,7 @@ export default function App() {
           setBorrower(saved);
           StorageService.syncToLenderDB(u.id, saved);
         } else {
-          // New borrower — no profile yet
+          // New borrower â no profile yet
           var newProfile = { id: "b" + Date.now(), userId: u.id, name: u.name, email: u.email, documents: [], status: "pending" };
           setBorrower(newProfile);
         }
@@ -10355,7 +10448,7 @@ export default function App() {
       <GlobalStyles />
       <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#f7f9fc" }}>
         <div style={{ textAlign: "center" }}>
-          <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>₦</div>
+          <div style={{ width: 52, height: 52, background: DS.colors.accent, borderRadius: 14, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26, margin: "0 auto 16px" }}>â¦</div>
           <p style={{ color: DS.colors.textSecondary, fontSize: 14 }}>Loading...</p>
         </div>
       </div>
@@ -10401,7 +10494,7 @@ export default function App() {
       case "admin-agents": return <AdminAgents {...props} />;
       case "admin-risk": return <AdminRiskEngine {...props} />;
       case "admin-reports": return <AdminReports {...props} />;
-      default: return <EmptyState icon="🗂️" title="Select a section" message="Choose an option from the sidebar to get started." />;
+      default: return <EmptyState icon="ðï¸" title="Select a section" message="Choose an option from the sidebar to get started." />;
     }
   };
 
